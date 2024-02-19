@@ -55,12 +55,12 @@ if (!isset($_SESSION['PAGE_LOADCOUNTS'])) {
     if (strpos(strtolower($_SERVER['SERVER_NAME']), 'localhost') === false):
     ?>
     <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Q5ZQ6ZE62S"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-K2LEKFKTGT"></script>
     <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'G-Q5ZQ6ZE62S');
+    gtag('config', 'G-K2LEKFKTGT');
     </script>
     <!-- END GOOGLE -->
     <?php
