@@ -38,8 +38,8 @@ class User extends Model {
     public static function loginCheck($redirectOnFail = true) : bool {
         $config = Config::get();
 
-        // $login_check_redirect_on_fail allows pages to redirect unauthenticated users to custom URLs (e.g. / -> /dp/intro)
-        // $login_check_soft_fail allows pages to refresh tokens if needed, but not redirect to login on fail (e.g. /dp/intro page, which is valid for unauthenticated users)
+        // $login_check_redirect_on_fail allows pages to redirect unauthenticated users to custom URLs (e.g. / -> /nw/intro)
+        // $login_check_soft_fail allows pages to refresh tokens if needed, but not redirect to login on fail (e.g. /nw/intro page, which is valid for unauthenticated users)
         if(session_status() !== PHP_SESSION_ACTIVE) { session_start(); }
 
         $currentUrl = (empty($_SERVER['HTTPS']) ? 'http' : 'https') . "://{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}";

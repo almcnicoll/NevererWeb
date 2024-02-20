@@ -1,7 +1,7 @@
 <nav class="navbar navbar-dark navbar-expand-lg bg-dark mb-2">
   <div class="container-fluid">
     <!-- Branding -->
-    <a class="navbar-brand" alt="logo" class="d-inline-block align-text-top" href="<?= $config['root_path']; ?>"><img src="<?= $config['root_path'] ?>/img/dp-logo.png" height="24"><span class="d-none d-md-inline p-2">Neverer</span></a>
+    <a class="navbar-brand" alt="logo" class="d-inline-block align-text-top" href="<?= $config['root_path']; ?>"><img src="<?= $config['root_path'] ?>/img/nw-logo.png" height="24"><span class="d-none d-md-inline p-2">Neverer</span></a>
     <!-- Toggler -->
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarUserMenu" aria-controls="navbarUserMenu" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -13,7 +13,7 @@
             <div class="collapse navbar-collapse justify-content-end" id="navbarUserMenu">
                 <ul class="navbar-nav ml-auto mb-2 mb-lg-0" text-right pull-right>
                     <li class="nav-item dropdown">
-                      <a class="nav-link" href="<?= $config['root_path'] ?>/dp/faq">FAQ</a>
+                      <a class="nav-link" href="<?= $config['root_path'] ?>/nw/faq">FAQ</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link" href="<?= $config['root_path'] ?>/login.php" role="button">Login</a>
@@ -35,7 +35,7 @@
         <div class="justify-content-end" id="navbarUserMenu2">
             <ul class="navbar-nav ml-auto mb-2 mb-lg-0">
               <li class="nav-item dropdown">
-                <a class="nav-link" href="<?= $config['root_path'] ?>/dp/faq">FAQ</a>
+                <a class="nav-link" href="<?= $config['root_path'] ?>/nw/faq">FAQ</a>
               </li>
               <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
