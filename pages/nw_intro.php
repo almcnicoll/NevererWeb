@@ -15,8 +15,8 @@ if (count($error_messages)>0) {
 ?>
 <div class='card text-bg-dark'>
     <div class='card-body bg-primary'>
-        <h1 class='card-title'>Destination Playlist</h1>
-        <h2 class='card-title'>Music for the journey</h2>
+        <h1 class='card-title'>The Neverer Crossword Maker</h1>
+        <h2 class='card-title'>Web Edition</h2>
     </div>
 </div>
 <br />
@@ -25,7 +25,7 @@ if (count($error_messages)>0) {
         <h3 class='card-title'>How it works</h3>
         <ol class='fs-4'>
 <?php if (isset($_SESSION['USER'])): ?>
-            <li class='step-done'>Sign in / register using Spotify</li>
+            <li class='step-done'>Sign in / register using Google</li>
 <?php else: ?>
             <li><a href="<?= $config['root_path'] ?>/login.php">Sign in / register</a> using Spotify</li>
             <div class="fs-6 step-explain">You'll need a Spotify account to use Destination Playlist</div>
