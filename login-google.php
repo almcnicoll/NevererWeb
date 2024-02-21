@@ -1,3 +1,7 @@
+<?php
+require_once('vendor/autoload.php');
+require_once('autoload.php');
+?>
 <pre>
 <?php
 print_r($_REQUEST);
