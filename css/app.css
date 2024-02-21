@@ -155,3 +155,9 @@ div.accordion-collapse.show {
     border-style: solid;
     padding: 1em;
 }
+
+
+/* Google signin bits */
+.g-signin2>div {
+    margin:auto;
+}

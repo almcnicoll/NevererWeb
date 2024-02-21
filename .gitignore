@@ -1,2 +1,4 @@
 *.local.php
 inc/secret.php
+
+/vendor/

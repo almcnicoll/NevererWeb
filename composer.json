@@ -1,0 +1,19 @@
+{
+    "name": "almcn/neverer-web",
+    "description": "Neverer Web Edition",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "Almcn\\NevererWeb\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Al McNicoll",
+            "email": "github@almcnicoll.co.uk"
+        }
+    ],
+    "require": {
+        "firebase/php-jwt": "^6.10"
+    }
+}

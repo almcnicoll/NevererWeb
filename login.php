@@ -11,7 +11,8 @@ if (isset($_REQUEST['redirect_url'])) {
     <title><?= (substr($config['root_path'],0,strlen('http://localhost'))=='http://localhost' ? 'LOCAL ':'') ?>Login to Neverer Web</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
     <link href="css/app.css" rel="stylesheet">
-    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="js/login-google.js" async defer></script>
     <meta name="google-signin-client_id" content="<?= $config['GOOGLE_CLIENTID'] ?>">
 </head>
 <body>    
@@ -33,9 +34,17 @@ if(isset($_REQUEST['error'])):
 endif;
     $auth_methods = AuthMethod::getAll();
     foreach ($auth_methods as $auth_method) {
-        echo "<div class='row text-center'>\n";
-        echo "<div class='col-12'><a class='btn btn-lg' href='{$auth_method->handler}'><img src='{$auth_method->image}' height='60' /></a></div>\n";
-        echo "</div>\n";
+        if ($auth_method->handler == '') {
+            // Special case - HTML render only
+            echo "<div class='row text-center'>\n";
+            echo $auth_method->image;
+            echo "</div>\n";
+        } else {
+            // Render picture and link
+            echo "<div class='row text-center'>\n";
+            echo "<div class='col-12'><a class='btn btn-lg' href='{$auth_method->handler}'><img src='{$auth_method->image}' height='60' /></a></div>\n";
+            echo "</div>\n";
+        }
     }
     ?>
 </body>
