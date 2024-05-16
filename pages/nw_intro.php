@@ -27,16 +27,12 @@ if (count($error_messages)>0) {
 <?php if (isset($_SESSION['USER'])): ?>
             <li class='step-done'>Sign in / register using Google</li>
 <?php else: ?>
-            <li><a href="<?= $config['root_path'] ?>/login.php">Sign in / register</a> using Spotify</li>
-            <div class="fs-6 step-explain">You'll need a Spotify account to use Destination Playlist</div>
+            <li><a href="<?= $config['root_path'] ?>/login.php">Sign in / register</a> using Google</li>
+            <div class="fs-6 step-explain">You'll need a Google account to use the software</div>
 <?php endif; ?>
-            <li>Enter the place you're going</li>
-            <div class="fs-6 step-explain">Each letter of the destination becomes the start of a track</div>
-            <li>Share the code with your travel buddies</li>
-            <div class="fs-6 step-explain">Your unique code keeps the playlist between you and your friends</div>
-            <li>Everyone picks tracks based on the destination</li>
-            <div class="fs-6 step-explain">Which means that everyone discovers new music</div>
-            <li>Listen and discover together!</li>
+            <li>Enter the basic details for your new crossword</li>
+            <div class="fs-6 step-explain">A title for the crossword, its size, and the number of axes of symmetry</div>
+            <li>Get creating!</li>
         </ol>
         <a href="<?= $config['root_path'] ?>/" class="btn btn-md btn-success" id='btn-assign-letters'>Let's go! &gt;&gt;</a>
     </div>
