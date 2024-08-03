@@ -25,10 +25,10 @@ if (count($error_messages)>0) {
         <h3 class='card-title'>How it works</h3>
         <ol class='fs-4'>
 <?php if (isset($_SESSION['USER'])): ?>
-            <li class='step-done'>Sign in / register using Google</li>
+            <li class='step-done'>Sign in / register</li>
 <?php else: ?>
-            <li><a href="<?= $config['root_path'] ?>/login.php">Sign in / register</a> using Google</li>
-            <div class="fs-6 step-explain">You'll need a Google account to use the software</div>
+            <li><a href="<?= $config['root_path'] ?>/login.php">Sign in / register</a></li>
+            <div class="fs-6 step-explain">You'll need to create an account to use the software</div>
 <?php endif; ?>
             <li>Enter the basic details for your new crossword</li>
             <div class="fs-6 step-explain">A title for the crossword, its size, and the number of axes of symmetry</div>
