@@ -1,8 +1,0 @@
-[19-Feb-2024 18:17:44 UTC] PHP Fatal error:  Uncaught Error: Class "PageInfo" not found in C:\BitNami\wampstack8\apache2\htdocs\NevererWeb\class\Config.php:44
-Stack trace:
-#0 C:\BitNami\wampstack8\apache2\htdocs\NevererWeb\class\Config.php(57): Config::init()
-#1 C:\BitNami\wampstack8\apache2\htdocs\NevererWeb\autoload.php(11): require('...')
-#2 C:\BitNami\wampstack8\apache2\htdocs\NevererWeb\autoload.php(42): Autoloader::{closure}()
-#3 C:\BitNami\wampstack8\apache2\htdocs\NevererWeb\index.php(2): require_once('...')
-#4 {main}
-  thrown in C:\BitNami\wampstack8\apache2\htdocs\NevererWeb\class\Config.php on line 44
