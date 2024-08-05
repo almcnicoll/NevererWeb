@@ -70,3 +70,6 @@ PRIMARY KEY (`id`),
 UNIQUE KEY `user_id` (`user_id`),
 UNIQUE KEY `user_password` (`user_id`,`hash`)
 ) COMMENT 'Uses PHP password hashing' ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/* UPDATE */
+/* VERSION 5 */
+DELETE FROM authmethods WHERE methodName='google';
