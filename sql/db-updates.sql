@@ -59,3 +59,14 @@ UPDATE `authmethods` SET `handler`='', `image`='<div style="width:400px; margin:
 /* VERSION 3 */
 INSERT INTO `authmethods` (`methodName`,`handler`,`image`,`created`,`modified`)
 VALUES ('neverer','login-neverer.php','img/logins/neverer.png',NOW(),NOW());
+/* UPDATE */
+/* VERSION 4 */
+CREATE TABLE `passwords`
+(
+id INT(10) NOT NULL AUTO_INCREMENT,
+user_id INT(10) NOT NULL,
+`hash` VARCHAR(255) NOT NULL,
+PRIMARY KEY (`id`),
+UNIQUE KEY `user_id` (`user_id`),
+UNIQUE KEY `user_password` (`user_id`,`hash`)
+) COMMENT 'Uses PHP password hashing' ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
