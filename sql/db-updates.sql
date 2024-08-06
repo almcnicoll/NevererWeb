@@ -73,3 +73,7 @@ UNIQUE KEY `user_password` (`user_id`,`hash`)
 /* UPDATE */
 /* VERSION 5 */
 DELETE FROM authmethods WHERE methodName='google';
+/* UPDATE */
+/* VERSION 6 */
+ALTER TABLE passwords ADD COLUMN `created` DATETIME DEFAULT NULL,
+ADD COLUMN `modified` DATETIME DEFAULT NULL;

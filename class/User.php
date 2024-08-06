@@ -24,6 +24,20 @@ class User extends Model {
         return AuthMethod::getById($this->authmethod_id);
     }
 
+    public function getPassword() : ?Password {
+        return Password::findFirst(
+            ['user_id' => $this->id],
+        );
+    }
+
+    public function getPasswordHash() : ?string {
+        $password = Password::findFirst(
+            ['user_id' => $this->id],
+        );
+        if ($password === null) { return null; }
+        return $password->hash;
+    }
+
     public function getThumbnail() : string {
         if (empty($this->image_url)) {
             // return initial
@@ -33,6 +47,43 @@ class User extends Model {
             $html = "<div class='initial-display'><img src='{$this->image_url}' /></div>";
         }
         return $html;
+    }
+
+    public function createPassword($supplied_password) : void {
+        $authMethod = $this->getAuthmethod();
+        if ($authMethod===null) { throw new Exception("No authentication method specified for current user"); }
+        switch ($authMethod->methodName) {
+            case 'neverer':
+                $password = new Password();
+                $password->user_id = $this->id;
+                $password->hash = password_hash($supplied_password, PASSWORD_DEFAULT, []);
+                $password->save();
+            default:
+                throw new Exception("Cannot create a password for user with authentication method of {$authMethod->methodName}");
+        }
+    }
+
+    public function checkPassword($supplied_password) : bool {
+        $authMethod = $this->getAuthmethod();
+        if ($authMethod===null) { throw new Exception("No authentication method specified for current user"); }
+        switch ($authMethod->methodName) {
+            case 'neverer':
+                $password = $this->getPassword();
+                if ($password === null) { throw new Exception("Could not find password for user."); }
+                if ($password->hash === null) { throw new Exception("Could not find password hash for user."); }
+                if (password_verify($supplied_password, $password->hash)) {
+                    // Password is valid - see if it needs to be rehashed to come up-to-speed with latest hashing method
+                    if (password_needs_rehash($password->hash, PASSWORD_DEFAULT, [])) {
+                        $password->hash = password_hash($supplied_password, PASSWORD_DEFAULT, []);
+                        $password->save();
+                    }
+                    return true;
+                } else {
+                    return false;
+                }
+            default:
+                throw new Exception("Cannot check password for user with authentication method of {$authMethod->methodName}");
+        }
     }
 
     public static function loginCheck($redirectOnFail = true) : bool {
