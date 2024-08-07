@@ -13,7 +13,12 @@
     <title><?= (substr($config['root_path'],0,strlen('http://localhost'))=='http://localhost' ? 'LOCAL ':'') ?>Login to Neverer Web</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
     <link href="css/app.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
     <script type='text/javascript'>
+        $(document).ready( function() {
+            $('#newusername').on('blur',function(){ if ($(this).val().includes('@') && $('#newemail').val()=='') { $('#newemail').val($(this).val()); } });
+        } );
     </script>
 </head>
 <body>
@@ -42,9 +47,11 @@
                         $display_errors[] = "Passwords do not match";
                     } else {
                         $user = new User();
-                        $user->authmethod_id = AuthMethod::findFirst(['methodName', '=', 'neverer'])->id;
+                        $user->setAuthmethod_id(AuthMethod::findFirst(['methodName', '=', 'neverer'])->id);
                         $user->identifier = $_POST['newusername'];
+                        $user->email = $_POST['newemail'];
                         $user->display_name = $user->identifier;
+                        //echo "<pre>".print_r($user,true)."</pre>";
                         $user->save();
                         $user->createPassword($_POST['newpassword']);
                     }
@@ -68,7 +75,7 @@
     if (count($display_errors)>0 && ($_POST['action']=='signin')) {
         foreach ($display_errors as $display_error) {
 echo <<<END_HTML
-<div class="alert alert-primary" role="alert">
+<div class="alert alert-danger" role="alert">
     {$display_error}
 </div>
 END_HTML;
@@ -95,7 +102,7 @@ END_HTML;
     if (count($display_errors)>0 && ($_POST['action']=='signup')) {
         foreach ($display_errors as $display_error) {
 echo <<<END_HTML
-<div class="alert alert-primary" role="alert">
+<div class="alert alert-danger" role="alert">
     {$display_error}
 </div>
 END_HTML;
@@ -108,17 +115,22 @@ END_HTML;
             <input type="text" class="form-control" id="newusername" name="newusername" aria-describedby="newusernameHelp" placeholder="Enter username">
             <small id="newusernameHelp" class="form-text text-muted">The username you would like to use. Your email address may be a good idea, as it's unique to you.</small>
         </div>
-    <div class="form-group">
-        <label for="newpassword">Password</label>
-        <input type="password" class="form-control" id="newpassword" name="newpassword" placeholder="Password">
-    </div>
-    <div class="form-group">
-        <label for="newpasswordrepeat">Re-enter password</label>
-        <input type="password" class="form-control" id="newpasswordrepeat" name="newwpasswordrepeat" placeholder="Password">
-    </div>
-    <br />
-    <input type="hidden" id="action" name="action" value="signup">
-    <button type="submit" class="btn btn-secondary">Register</button>
+        <div class='form-group'>
+            <label for="newemail">Email</label>
+            <input type="email" class="form-control" id="newemail" name="newemail" aria-describedby="newemailHelp" placeholder="Enter email address">
+            <small id="newemailHelp" class="form-text text-muted">Your email address will not be used for any purposes other than site administration.</small>
+        </div>
+        <div class="form-group">
+            <label for="newpassword">Password</label>
+            <input type="password" class="form-control" id="newpassword" name="newpassword" placeholder="Password">
+        </div>
+        <div class="form-group">
+            <label for="newpasswordrepeat">Re-enter password</label>
+            <input type="password" class="form-control" id="newpasswordrepeat" name="newpasswordrepeat" placeholder="Password">
+        </div>
+        <br />
+        <input type="hidden" id="action" name="action" value="signup">
+        <button type="submit" class="btn btn-secondary">Register</button>
     </form>
     <pre>
     <?php

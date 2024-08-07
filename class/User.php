@@ -5,11 +5,10 @@ class User extends Model {
     public string $identifier;
     public ?string $email;
     public ?string $display_name;
-    public ?string $market;
     public ?string $image_url = null;
 
     static string $tableName = "users";
-    static $fields = ['id','authmethod_id','identifier','email','display_name','market','image_url','created','modified'];
+    static $fields = ['id','authmethod_id','identifier','email','display_name','image_url','created','modified'];
 
     public static $defaultOrderBy = [
         ['created','DESC'],
@@ -26,13 +25,13 @@ class User extends Model {
 
     public function getPassword() : ?Password {
         return Password::findFirst(
-            ['user_id' => $this->id],
+            ['user_id', '=', $this->id],
         );
     }
 
     public function getPasswordHash() : ?string {
         $password = Password::findFirst(
-            ['user_id' => $this->id],
+            ['user_id', '=', $this->id],
         );
         if ($password === null) { return null; }
         return $password->hash;
@@ -52,14 +51,15 @@ class User extends Model {
     public function createPassword($supplied_password) : void {
         $authMethod = $this->getAuthmethod();
         if ($authMethod===null) { throw new Exception("No authentication method specified for current user"); }
-        switch ($authMethod->methodName) {
+        switch (strtolower($authMethod->methodName)) {
             case 'neverer':
                 $password = new Password();
                 $password->user_id = $this->id;
                 $password->hash = password_hash($supplied_password, PASSWORD_DEFAULT, []);
                 $password->save();
+                break;
             default:
-                throw new Exception("Cannot create a password for user with authentication method of {$authMethod->methodName}");
+                throw new Exception("Cannot create a password for user with authentication method of '{$authMethod->methodName}'");
         }
     }
 
