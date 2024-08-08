@@ -33,6 +33,23 @@
                 } else {
                     if ($user->checkPassword($_POST['password'])) {
                         // Log them in
+                    $_SESSION['USER_ID'] = $user->id;
+                    $_SESSION['USER'] = $user;
+                    $_SESSION['USER_AUTHMETHOD_ID'] = AuthMethod::findFirst(['methodName', '=', 'neverer'])->id;
+                    $_SESSION['USER_ACCESSTOKEN'] = null;
+                    $_SESSION['USER_REFRESHTOKEN'] = null;
+                    $_SESSION['USER_REFRESHNEEDED'] = strtotime('2100-01-01 00:00:00'); // Never expire
+                    error_log(print_r($user,true));
+                    echo "<pre>Session:\n".print_r($_SESSION,true)."</pre>";
+                    session_write_close();
+                    //die();
+                    if (isset($_SESSION['redirect_url_once'])) {
+                        header('Location: '.$_SESSION['redirect_url_once']);
+                        unset($_SESSION['redirect_url_once']);
+                    } else {
+                        header('Location: ./');
+                    }
+                    die();
                     } else {
                         $display_errors[] = "Login credentials are not valid";
                     }
@@ -54,6 +71,22 @@
                         //echo "<pre>".print_r($user,true)."</pre>";
                         $user->save();
                         $user->createPassword($_POST['newpassword']);
+                        // Log them in
+                        $_SESSION['USER_ID'] = $user->id;
+                        $_SESSION['USER'] = $user;
+                        $_SESSION['USER_AUTHMETHOD_ID'] = $user->authmethod_id;
+                        $_SESSION['USER_ACCESSTOKEN'] = null;
+                        $_SESSION['USER_REFRESHTOKEN'] = null;
+                        $_SESSION['USER_REFRESHNEEDED'] = strtotime('2100-01-01 00:00:00'); // Never expire
+                        //echo "<pre>Session:\n".print_r($_SESSION,true)."</pre>";
+                        session_write_close();
+                        if (isset($_SESSION['redirect_url_once'])) {
+                            header('Location: '.$_SESSION['redirect_url_once']);
+                            unset($_SESSION['redirect_url_once']);
+                        } else {
+                            header('Location: ./');
+                        }
+                        die();
                     }
                 }
                 break;
