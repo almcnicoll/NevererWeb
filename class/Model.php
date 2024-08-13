@@ -244,6 +244,8 @@ class Model {
             throw new Exception("Could not delete: no matching record in database");
         }
 
+        // TODO - pay attention to related tables
+
         $sql = "DELETE FROM `".static::$tableName."` WHERE id=:id";
         $params = [
             "id" => $this->id,
