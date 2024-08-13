@@ -64,21 +64,10 @@ if ($fatal_error) {
             if (empty($_REQUEST['deleteAccountAreYouSure'])) {
                 $error_messages[] = "You must confirm deletion.";
             } else {
-                // Delete letter assignments
-                $letters = Letter::find(['user_id','=',$_SESSION['user_id']]);
-                foreach($letters as $letter) {
-                    $letter->user_id = null;
-                    $letter->save();
-                }
-                // Delete participations
-                $participations = Participation::find(['user_id','=',$_SESSION['user_id']]);
-                foreach($participations as $participation) {
-                    $participation->delete();
-                }
-                // Delete playlists
-                $playlists = Playlist::find(['user_id','=',$_SESSION['user_id']]);
-                foreach($playlists as $playlist) {
-                    $playlist->delete;
+                // Delete crosswords
+                $crosswords = Crossword::find(['user_id','=',$_SESSION['user_id']]);
+                foreach($crosswords as $crossword) {
+                    $crossword->delete();
                 }
                 // Delete user
                 $user->delete();
