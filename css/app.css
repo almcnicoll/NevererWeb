@@ -52,10 +52,10 @@ td.letter-display {
     width: 3em;
 }
 
-table.playlist-table {
+table.crossword-table {
     table-layout: fixed;
 }
-.playlist-table th, .playlist-table td {
+.crossword-table th, .crossword-table td {
     max-width: 340px;
     text-overflow: ellipsis;
 }

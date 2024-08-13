@@ -77,3 +77,41 @@ DELETE FROM authmethods WHERE methodName='google';
 /* VERSION 6 */
 ALTER TABLE passwords ADD COLUMN `created` DATETIME DEFAULT NULL,
 ADD COLUMN `modified` DATETIME DEFAULT NULL;
+/* UPDATE */
+/* VERSION 7 */
+CREATE TABLE `crosswords` (
+  `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` INT(10) UNSIGNED NOT NULL,
+  `title` VARCHAR(200) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `cols` TINYINT(2) UNSIGNED NOT NULL,
+  `rows` TINYINT(2) UNSIGNED NOT NULL,
+  `rotational_symmetry_order` TINYINT(2) UNSIGNED NOT NULL,
+  `created` DATETIME DEFAULT NULL,
+  `modified` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `Listing` (`user_id`,`id`,`title`)
+) ENGINE=INNODB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `placedclues` (
+  `id` BIGINT(15) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `crossword_id` INT(10) UNSIGNED NOT NULL,
+  `x` TINYINT(2) UNSIGNED NOT NULL,
+  `y` TINYINT(2) UNSIGNED NOT NULL,
+  `orientation` VARCHAR(6) NOT NULL DEFAULT 'Unset',
+  `place_number` TINYINT(2) UNSIGNED NOT NULL,
+  `status` INT(10) UNSIGNED NOT NULL DEFAULT 0,
+  `created` DATETIME DEFAULT NULL,
+  `modified` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `OnGrid` (`crossword_id`,`id`,`y`,`x`)
+) ENGINE=INNODB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `clues` (
+  `id` BIGINT(15) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `placedclue_id` BIGINT(15) UNSIGNED DEFAULT NULL,
+  `question` VARCHAR(2000) DEFAULT NULL,
+  `answer` VARCHAR(2000) DEFAULT NULL,
+  `pattern` VARCHAR(200) DEFAULT NULL,
+  `created` DATETIME DEFAULT NULL,
+  `modified` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `Lookup` (`placedclue_id`,`id`)
+) ENGINE=INNODB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

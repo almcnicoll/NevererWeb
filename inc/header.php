@@ -28,7 +28,7 @@
         <!-- Create button -->
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li>
-                <a class="nav-link" aria-current="page" href="<?= $config['root_path'] ?>/playlist/create">+ New</a>      
+                <a class="nav-link" aria-current="page" href="<?= $config['root_path'] ?>/crossword/create">+ New</a>      
             </li>
         </ul>
         <!-- User menu (logged in) -->

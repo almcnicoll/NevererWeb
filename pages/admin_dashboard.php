@@ -15,7 +15,7 @@
     // Get stats
     $stats = [];
     $stats['Total users'] = User::count();
-    $stats['Total playlists'] = Playlist::count();
+    //$stats['Total playlists'] = Playlist::count();
     $recent_users = array_slice(User::getAll(),0,3);
     $usernames=[];
     foreach ($recent_users as $recent_user) {
