@@ -103,11 +103,11 @@ class User extends Model {
         $valid_session &= isset($_SESSION['USER']);
         $valid_session &= isset($_SESSION['USER_ID']);
         $valid_session &= isset($_SESSION['USER_AUTHMETHOD_ID']);
-        $valid_session &= (
+        /*$valid_session &= (
             isset($_SESSION['USER_ACCESSTOKEN'])
             ||
             (isset($_SESSION['USER_REFRESHTOKEN']) && isset($_SESSION['USER_REFRESHNEEDED']))
-        );
+        );*/
 
         if(!$valid_session) {
             //error_log(__FILE__.':'.__LINE__." At least one session variable not set:\n".print_r($_SESSION,true));
@@ -139,31 +139,11 @@ class User extends Model {
                 //file_put_contents('redirects.log',__LINE__." Location: {$config['root_path']}/{$method->handler}?refresh_needed=true&redirect_url=".urlencode($currentUrl)."\n",FILE_APPEND);
                 die();
             }
-            // Lastly - once per session - make sure the user can access the API - in dev mode, this is only possible if they've been added to the developer dashboard
-            if (!$userCheckedOnList) {
-                $checkUrl = "https://api.spotify.com/v1/me/tracks";
-                $sr = new SpotifyRequest(SpotifyRequest::TYPE_API_CALL, SpotifyRequest::ACTION_GET, $checkUrl);
-                $sr->send();
-                if ($sr->hasErrors()) {
-                    LoggedError::log(LoggedError::TYPE_CURL,$sr->http_code,__FILE__,__LINE__,$sr->getErrors());
-                    if ($sr->http_code == 403) {
-                        // Not in dev dashboard - legacy remnant code from Spotify authentication - may have value with other forms?
-                        $_SESSION['USER_CHECKEDONLIST'] = false;
-                        header('Location: '.$config['root_path'].'/account/request/403');
-                        //file_put_contents('redirects.log',__LINE__.' Location: '.$config['root_path'].'/account/request/403'."\n",FILE_APPEND);
-                        die();
-                    } else {
-                        // Some other error - ignore, but check again on next page load
-                        $_SESSION['USER_CHECKEDONLIST'] = false;
-                    }
-                } else {
-                    // All good - they're on the dashboard list
-                    $_SESSION['USER_CHECKEDONLIST'] = true;
-                }
-            }
+            
             // Otherwise, everything is OK! Just ensure that USER property is correctly populated as a User object
             $discard = new User(); // Ensure that User class is autoloaded
-            $_SESSION['USER'] = unserialize(serialize($_SESSION['USER']));
+            $user = unserialize($_SESSION['USER']);
+            $_SESSION['USER'] = serialize($user);
             return true;
         }
     }

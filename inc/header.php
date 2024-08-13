@@ -9,9 +9,6 @@
 <?php
     if (empty($_SESSION['USER'])) {
 ?>
-    <!-- 
-     <?= print_r($_SESSION,true); ?> 
-    -->
     <!-- User menu (not logged in) -->
             <div class="collapse navbar-collapse justify-content-end" id="navbarUserMenu">
                 <ul class="navbar-nav ml-auto mb-2 mb-lg-0" text-right pull-right>

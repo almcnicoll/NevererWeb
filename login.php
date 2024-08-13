@@ -3,6 +3,7 @@ require_once('autoload.php');
 if (isset($_REQUEST['redirect_url'])) {
     $_SESSION['redirect_url_once'] = $_REQUEST['redirect_url'];
 }
+//echo "<!--<pre>Session:\n".print_r($_SESSION,true)."</pre>-->\n\n";
 ?>
 <!DOCTYPE html>
 <html lang="en">

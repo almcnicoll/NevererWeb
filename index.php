@@ -1,8 +1,12 @@
 <?php
 require_once('autoload.php');
 $discard = new User(); // To force autoloading of User class
+// For clarity, $user contains the user object and $_SESSION['USER'] contains the serialized version
 if (session_status() === PHP_SESSION_ACTIVE) {
-    if (isset($_SESSION['USER'])) { $_SESSION['USER'] = unserialize(serialize($_SESSION['USER'])); }
+    if (isset($_SESSION['USER'])) {
+        $user = unserialize($_SESSION['USER']);
+        $_SESSION['USER'] = serialize($user);
+    }
 }
 
 if(isset($_GET['params'])) {
