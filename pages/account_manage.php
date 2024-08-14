@@ -100,9 +100,6 @@ if ($fatal_error) {
         <h3 class='card-title'>My Account</h3>
         <form method='POST'>
             <div class="row">
-                <div class="col-12 fs-5 fst-italic">None of these changes will affect your Spotify account</div>
-            </div>  
-            <div class="row">
                 <div class="col-12">
                     <label for="displayName" class="form-label">Your name</label>
                     <input type="text" class="form-control" id="displayName" name="displayName" aria-describedby="displayNameHelp" value="<?= str_replace('"','\\'.'"',$user->display_name) ?>">
