@@ -18,8 +18,8 @@ $params = [];
 
 // Parse URL into a page with optional params
 if (count($page_parts)==0 || (empty($page_parts[0]))) {
-    // If no params, treat as index
-    $stub = 'index';
+    // If no params, treat as crossword index
+    $stub = 'crossword_index';
 } elseif (count($page_parts)==1) {
     // If only one URL part, treat as /[url-part]/index
     $page_parts[] = 'index';
