@@ -1,6 +1,6 @@
 <?php
 
-class FAQ extends Model {
+class Clue extends Model {
     public int $placedclue_id;
     public ?string $question = null;
     public ?string $answer = null;

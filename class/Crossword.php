@@ -18,7 +18,49 @@ class Crossword extends Model {
         return $uTmp;
     }
 
+    public function getSortedClueList() : PlacedClue_List {
+        // Code here - NB PlacedClue_List not working currently
+    }
+
     public function getGridHtml($include_answers) : string {
+        foreach ($this->getSortedClueList() as $pc) {
+            $clues[$pc->orientation][] = new HtmlTag('td', $pc->placeNumber . ' ' . $pc->clueText);
+
+            switch ($style) {
+                case 'empty_grid':
+                    // White-out clue area
+                    switch ($pc->orientation) {
+                        case 'down':
+                            for ($yy = 0; $yy < $pc->clue->length; $yy++) {
+                                $cells[$pc->x + $firstPuzzleCol][$pc->y + $yy + $firstPuzzleRow] = new HtmlTag('td', '', $letterAttr, $letterStyle);
+                            }
+                            break;
+                        case 'across':
+                            for ($xx = 0; $xx < $pc->clue->length; $xx++) {
+                                $cells[$pc->x + $xx + $firstPuzzleCol][$pc->y + $firstPuzzleRow] = new HtmlTag('td', '', $letterAttr, $letterStyle);
+                            }
+                            break;
+                    }
+                    $cells[$pc->x + $firstPuzzleCol][$pc->y + $firstPuzzleRow] = new HtmlTag('td', $pc->placeNumber, $numberAttr, $numberStyle);
+                    break;
+                case 'grid_with_answers':
+                    // Enter answer into grid
+                    switch ($pc->orientation) {
+                        case 'down':
+                            for ($yy = 0; $yy < $pc->clue->length; $yy++) {
+                                $cells[$pc->x + $firstPuzzleCol][$pc->y + $yy + $firstPuzzleRow] = new HtmlTag('td', $pc->clue->letters[$yy], $letterAttr, $letterStyle);
+                            }
+                            break;
+                        case 'across':
+                            for ($xx = 0; $xx < $pc->clue->length; $xx++) {
+                                $cells[$pc->x + $xx + $firstPuzzleCol][$pc->y + $firstPuzzleRow] = new HtmlTag('td', $pc->clue->letters[$xx], $letterAttr, $letterStyle);
+                            }
+                            break;
+                    }
+                    break;
+            }
+        }
+        
         $html = "<table class='crossword-grid'></table>";
         return $html;
     }

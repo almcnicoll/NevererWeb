@@ -1,6 +1,6 @@
 <?php
 
-class FAQ extends Model {
+class PlacedClue extends Model {
     public int $crossword_id;
     public int $x;
     public int $y;
@@ -19,3 +19,16 @@ class FAQ extends Model {
 
     public static $defaultOrderBy = ['y','x','orientation'];
 }
+
+class PlacedClue_List extends Typed_List {
+
+    // called when accessed like echo $list[$offset];
+    public function offsetGet($offset) : PlacedClue {
+      return $this->list[$offset];
+    }
+  
+    // called when accessed like foreach($list as $item) { // $item is type User }
+    public function current() : PlacedClue {
+      return $this->list[$this->position];
+    }
+  }
