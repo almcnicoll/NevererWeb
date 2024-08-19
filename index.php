@@ -93,9 +93,9 @@ if (!@include_once('inc/header.php')) {
 
 if (!@include_once($page)) {
     http_response_code(404);
-    echo "<h1>You’ve Lost That Lovin’ Feelin’...</h1>\n";
-    echo "<h2>Or, more accurately, you've clicked a wrong link.</h2>\n";
-    echo "<p>Look, it's most likely our fault - sorry. Or you've mistyped something. Who knows?</p>\n";
+    echo "<h1>We're stuck on this one...</h1>\n";
+    echo "<h2>Or, more accurately, you seem to have clicked a wrong link.</h2>\n";
+    echo "<p>Look, it's may well be our fault - sorry. Or you've mistyped something. Who knows?</p>\n";
     echo "<p class='text-body-secondary'><small>{$page}</small></p>\n";
     ob_end_flush();
     die();
