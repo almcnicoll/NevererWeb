@@ -16,7 +16,7 @@
             $crossword->user_id = $user->id;
             $crossword->save();
 
-            header("Location: {$config['root_path']}/playlist/edit/{$crossword->id}");
+            header("Location: {$config['root_path']}/crossword/edit/{$crossword->id}");
         }
     }
 ?>

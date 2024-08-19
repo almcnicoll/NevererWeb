@@ -10,11 +10,16 @@ class Crossword extends Model {
     static string $tableName = "crosswords";
     static $fields = ['id','user_id','title','rows','cols','rotational_symmetry_order','created','modified'];
 
+    public static $defaultOrderBy = [['modified','DESC'],['id','DESC']];
+
     public function getUser() : User {
         $uTmp = User::findFirst(['id','=',$this->user_id]);
         if ($uTmp == null) { throw new Exception("No matching user for this crossword"); }
         return $uTmp;
     }
 
-    public static $defaultOrderBy = [['modified','DESC'],['id','DESC']];
+    public function getGridHtml($include_answers) : string {
+        $html = "<table class='crossword-grid'></table>";
+        return $html;
+    }
 }
