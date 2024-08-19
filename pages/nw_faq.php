@@ -19,8 +19,14 @@ $faqs = FAQ::getAll();
 ?>
 <div class='card text-bg-dark'>
     <div class='card-body bg-primary'>
-        <h1 class='card-title'>Destination Playlist</h1>
-        <h2 class='card-title'>Music for the journey</h2>
+        <h1 class='card-title'>Neverer Web</h1>
+<?php
+    $subtitles = [];
+    $subtitles[] = "<h3 class='card-title'>Even brewer resorts to creating online cryptics (9,3)</h3>\n";
+    $subtitles[] = "<h3 class='card-title'>Not enough vodka to start before mixing drink at best site on the internet (9,3)</h3>\n";
+    $rand = rand(0,count($subtitles)-1);
+    echo $subtitles[$rand];
+?>
     </div>
 </div>
 <br />
