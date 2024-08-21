@@ -24,7 +24,14 @@ class PlacedClue extends Model {
       return ($row) + $col;
     }
 
+    /**
+     * Gets a value that orders the clue within the crossword
+     */
     public function getOrder() : int {
       return $this->calculateOrder($this->y, $this->x);
+    }
+
+    public function getClue() : Clue {
+      return Clue::findFirst(['placedclue_id','=',$this->id]);
     }
 }

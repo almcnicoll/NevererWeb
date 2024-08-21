@@ -6,7 +6,7 @@ class PlacedClue_List extends Typed_List {
     return $this->protected_get($offset);
   }
 
-  // called when accessed like foreach($list as $item) { // $item is type User }
+  // called when accessed like foreach($list as $item) { // $item is type PlacedClue }
   public function current() : PlacedClue {
     return parent::current($this->_position);
   }
