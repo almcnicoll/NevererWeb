@@ -18,13 +18,49 @@ class Crossword extends Model {
         return $uTmp;
     }
 
+    public function getPlacedClues() : PlacedClue_List {
+        $criteria = ['crossword_id','=',$this->id];
+        $allClues = new PlacedClue_List(
+            PlacedClue::find($criteria)
+        );
+        return $allClues;
+    }
+
     public function getSortedClueList() : PlacedClue_List {
-        // Code here - NB PlacedClue_List not working currently
+        $lastOrder = -1;
+        $clueIncrement = 0;
+        $placedClues = $this->getPlacedClues();
+
+        for($i=0; $i<count($placedClues); $i++) {
+            $pc = $placedClues[$i];
+            $ord = $pc->getOrder();
+
+            if ($ord != $lastOrder) {
+                $clueIncrement++;
+            }
+
+            $sc = [];
+            if ($pc->orientation != 'Unset') {
+                $k = $pc->orientation.$clueIncrement;
+                while (array_key_exists($k, $sc)) {
+                    // This happens when we mirror clues that are on an axis of symmetry and we end up with two across/down clues starting in the same place - just ignore and increment as often as needed
+                    $clueIncrement++;
+                    $k = $pc->orientation.$clueIncrement;
+                }
+                $pc->placeNumber = $clueIncrement;
+                $sc[$k] = $pc;
+            }
+
+            $lastOrder = $ord;
+        }
+        $clues = new PlacedClue_List($sc);
+        return $clues;
     }
 
     public function getGridHtml($include_answers) : string {
-        foreach ($this->getSortedClueList() as $pc) {
-            $clues[$pc->orientation][] = new HtmlTag('td', $pc->placeNumber . ' ' . $pc->clueText);
+        $allClues = $this->getSortedClueList();
+        foreach ($allClues as $pc) {
+        /*    $clues[$pc->orientation][] = new HtmlTag('td', $pc->placeNumber . ' ' . $pc->clueText);
 
             switch ($style) {
                 case 'empty_grid':
@@ -59,6 +95,7 @@ class Crossword extends Model {
                     }
                     break;
             }
+        */
         }
         
         $html = "<table class='crossword-grid'></table>";

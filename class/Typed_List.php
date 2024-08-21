@@ -157,11 +157,12 @@ abstract class Typed_List implements \ArrayAccess, \Iterator, \Countable, \Seeka
             $this->_list[] = $value;
         } else {
             $this->_is_associated = true;
-            if ($index instanceof Hash_Code) {
+            $this->_list[$index] = $value;
+            /*if ($index instanceof Hash_Code) {
                 $this->_list[$index->hash_code()] = $value;
             } else {
                 $this->_list[$index] = $value;
-            }
+            }*/
         }
     }
 
@@ -232,10 +233,10 @@ abstract class Typed_List implements \ArrayAccess, \Iterator, \Countable, \Seeka
      * @return static
      */
     public function filter(callable $fn, bool $clone = false) {
-        assert(fn_takes_x_args($fn, 1), last_assert_err() . " in " . get_class($this) . "->map()"); 
-        assert(fn_arg_x_is_type($fn, 0, $this->_type), last_assert_err() . " in " . get_class($this) . "->map()");
+        //assert(fn_takes_x_args($fn, 1), last_assert_err() . " in " . get_class($this) . "->map()"); 
+        //assert(fn_arg_x_is_type($fn, 0, $this->_type), last_assert_err() . " in " . get_class($this) . "->map()");
         if ($clone) {
-            return new static(array_filter(array_clone($this->_list), $fn));
+            return new static(array_filter(Typed_List::array_clone($this->_list), $fn));
         }
         $this->_list = array_filter($this->_list, $fn);
         return $this;
