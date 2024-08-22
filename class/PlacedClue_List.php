@@ -12,6 +12,6 @@ class PlacedClue_List extends Typed_List {
   }
 
   public function get_type() : string {
-    return get_class($this);
+    return PlacedClue::class;
   }
 }

@@ -12,6 +12,6 @@ class GridRow extends Typed_List {
     }
 
     public function get_type() : string {
-        return get_class($this);
+        return GridSquare::class;
     }
 }

@@ -12,6 +12,7 @@ class Grid extends Typed_List {
     }
 
     public function get_type() : string {
-        return get_class($this);
+        error_log("get_type returning ".GridRow::class);
+        return GridRow::class;
     }
 }
