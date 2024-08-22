@@ -171,7 +171,7 @@ class Crossword extends Model {
             }
         }*/
         
-        $html = "<table class='crossword-grid'>\n";
+        $html = "<table id='crossword-edit' class='crossword-grid'>\n";
         for ($y=0; $y<$this->rows; $y++) {
             $html .= "\t<tr class='crossword-grid-row' id='row-{$y}'>\n";
             for ($x=0; $x<$this->cols; $x++) {

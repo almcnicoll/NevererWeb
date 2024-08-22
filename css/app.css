@@ -177,6 +177,7 @@ td.crossword-grid-square {
     padding: 4px;
     text-align: center;
     vertical-align: middle;
+    text-transform: capitalize;
 }
 
 /* Google signin bits */
