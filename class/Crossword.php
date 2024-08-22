@@ -39,6 +39,7 @@ class Crossword extends Model {
         $lastOrder = -1;
         $clueIncrement = 0;
         $placedClues = $this->getPlacedClues();
+        $sorted_clues = [];
 
         for($i=0; $i<count($placedClues); $i++) {
             $pc = $placedClues[$i];
@@ -48,28 +49,27 @@ class Crossword extends Model {
                 $clueIncrement++;
             }
 
-            $sc = [];
             if ($pc->orientation != 'Unset') {
                 $k = $pc->orientation.$clueIncrement;
-                while (array_key_exists($k, $sc)) {
+                while (array_key_exists($k, $sorted_clues)) {
                     // This happens when we mirror clues that are on an axis of symmetry and we end up with two across/down clues starting in the same place - just ignore and increment as often as needed
                     $clueIncrement++;
                     $k = $pc->orientation.$clueIncrement;
                 }
                 $pc->placeNumber = $clueIncrement;
-                $sc[$k] = $pc;
+                $sorted_clues[$k] = $pc;
             }
 
             $lastOrder = $ord;
         }
         if ($order == Crossword::SORT_ORDER_AD) {
             // Order by Across then Down
-            ksort($sc,SORT_STRING);
+            ksort($sorted_clues,SORT_STRING);
         } else {
             // Order by place number
-            uksort($sc,[Crossword::class,'sortCluePlaceByNumber']);
+            uksort($sorted_clues,[Crossword::class,'sortCluePlaceByNumber']);
         }
-        $clues = new PlacedClue_List($sc);
+        $clues = new PlacedClue_List($sorted_clues);
         return $clues;
     }
 
