@@ -112,7 +112,9 @@ class Crossword extends Model {
             for ($x=$xMin; $x<=$xMax; $x++) {
                 $squares[$y][$x] = new GridSquare($x, $y, true);
             }
+            //error_log('*row '.$y."\n".print_r($squares[$y],true));
         }
+        //error_log(print_r($squares,true));
 
         foreach ($allPClues as $placed_clue) {
             $clue = $placed_clue->getClue();
@@ -152,50 +154,13 @@ class Crossword extends Model {
     public function getGridHtml($include_answers) : string {
         // Consider sending blank grid, to be populated by AJAX call
         $allClues = $this->getSortedClueList();
-        /*foreach ($allClues as $pc) {
-            
-            $clues[$pc->orientation][] = new HtmlTag('td', $pc->placeNumber . ' ' . $pc->clueText);
-
-            switch ($style) {
-                case 'empty_grid':
-                    // White-out clue area
-                    switch ($pc->orientation) {
-                        case 'down':
-                            for ($yy = 0; $yy < $pc->clue->length; $yy++) {
-                                $cells[$pc->x + $firstPuzzleCol][$pc->y + $yy + $firstPuzzleRow] = new HtmlTag('td', '', $letterAttr, $letterStyle);
-                            }
-                            break;
-                        case 'across':
-                            for ($xx = 0; $xx < $pc->clue->length; $xx++) {
-                                $cells[$pc->x + $xx + $firstPuzzleCol][$pc->y + $firstPuzzleRow] = new HtmlTag('td', '', $letterAttr, $letterStyle);
-                            }
-                            break;
-                    }
-                    $cells[$pc->x + $firstPuzzleCol][$pc->y + $firstPuzzleRow] = new HtmlTag('td', $pc->placeNumber, $numberAttr, $numberStyle);
-                    break;
-                case 'grid_with_answers':
-                    // Enter answer into grid
-                    switch ($pc->orientation) {
-                        case 'down':
-                            for ($yy = 0; $yy < $pc->clue->length; $yy++) {
-                                $cells[$pc->x + $firstPuzzleCol][$pc->y + $yy + $firstPuzzleRow] = new HtmlTag('td', $pc->clue->letters[$yy], $letterAttr, $letterStyle);
-                            }
-                            break;
-                        case 'across':
-                            for ($xx = 0; $xx < $pc->clue->length; $xx++) {
-                                $cells[$pc->x + $xx + $firstPuzzleCol][$pc->y + $firstPuzzleRow] = new HtmlTag('td', $pc->clue->letters[$xx], $letterAttr, $letterStyle);
-                            }
-                            break;
-                    }
-                    break;
-            }
-        }*/
-        
         $html = "<table id='crossword-edit' class='crossword-grid'>\n";
         for ($y=0; $y<$this->rows; $y++) {
             $html .= "\t<tr class='crossword-grid-row' id='row-{$y}'>\n";
             for ($x=0; $x<$this->cols; $x++) {
                 $html .= "\t\t<td class='crossword-grid-square black-square' id='square-{$y}-{$x}'>\n";
+                $html .= "\t\t\t<div class='clue-number'></div>\n";
+                $html .= "\t\t\t<span class='letter-holder'></span>\n";
                 $html .= "\t\t</td>\n";
             }
             $html .= "\t</tr>\n";

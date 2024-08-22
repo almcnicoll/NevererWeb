@@ -179,6 +179,21 @@ td.crossword-grid-square {
     vertical-align: middle;
     text-transform: capitalize;
 }
+div.clue-number {
+    float: left;
+    font-size: 50%;
+    position: absolute;
+}
+td.few-matches {
+    background-color: rgba(255, 200, 0, 0.5);
+}
+td.no-matches {
+    background-color: rgba(255, 0, 0, 0.5);
+}
+td.conflict .letter-holder {
+    color: #ff0000;
+    font-style: italic;
+}
 
 /* Google signin bits */
 .g-signin2>div {
