@@ -63,8 +63,19 @@ if ($fatal_error) {
 }
 ?>
 
-<div class='crossword-container'>
-<?php
-echo $crossword->getGridHtml(true);
-?>
+<div class='row'>
+    <div class='col-md-6'>
+        <div class='crossword-container'>
+        <?php
+        echo $crossword->getGridHtml(true);
+        ?>
+        </div>
+    </div>
+    <div class='col-md-6'>
+        <div class='clue-container'>
+        <?php
+        echo $crossword->getCluesHtml(true);
+        ?>
+        </div>
+    </div>
 </div>
