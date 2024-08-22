@@ -55,7 +55,7 @@ $page = "{$domain}/{$stub}.php";
 
 // Ajax calls get all the class loading etc above, but don't get any template output 
 if ($domain == 'ajax') {
-    error_log("Serving ajax page {$page}");
+    //error_log("Serving ajax page {$page}");
     @include_once($page);
     die();
 }

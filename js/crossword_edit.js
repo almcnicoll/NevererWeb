@@ -21,7 +21,15 @@ function displayAjaxError(json) {
 
 function updateGridSquares(json) {
     // Loop through the list of grid squares, updating as we go
-
+    // NB - json comes in as a multidimensional array ([row][col])
+    obj = JSON.parse(json);
+    for (var y in obj) {
+        //alert('y='+y);
+        for (var x in obj[y]) {
+            //alert('y='+y+', x='+x);
+        }
+    }
+   alert('test');
 }
 
 /**

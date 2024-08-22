@@ -30,7 +30,7 @@
             $xMin = 0; $xMax = $crossword->cols-1; $yMin = 0; $yMax = $crossword->rows-1;
             populate_from_request(['xMin','xMax','yMin','yMax']);
             //error_log(print_r([$xMin,$xMax,$yMin,$yMax],true));
-            die(json_encode($crossword->getGridJson($xMin,$xMax,$yMin,$yMax)));
+            die($crossword->getGridJson($xMin,$xMax,$yMin,$yMax));
         default:
             $file = str_replace(__DIR__,'',__FILE__);
             throw_error("Invalid action {$action} passed to {$file}");
