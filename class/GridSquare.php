@@ -42,4 +42,11 @@ class GridSquare {
         $this->flags &= ~$val;
         return $this;
     }
+
+    /**
+     * Access the object in a JSON-encodable form
+     */
+    public function expose() : mixed {
+        return get_object_vars($this);
+    }
 }

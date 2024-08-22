@@ -12,7 +12,17 @@ class Grid extends Typed_List {
     }
 
     public function get_type() : string {
-        error_log("get_type returning ".GridRow::class);
         return GridRow::class;
+    }
+
+    /**
+     * Convert the class object to an array for JSON-encoding
+     */
+    public function toArray() : mixed {
+        $output = [];
+        foreach ($this->_list as $item) {
+            $output[] = $item->toArray();
+        }
+        return $output;
     }
 }

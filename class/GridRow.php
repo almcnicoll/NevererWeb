@@ -14,4 +14,15 @@ class GridRow extends Typed_List {
     public function get_type() : string {
         return GridSquare::class;
     }
+
+    /**
+     * Convert the class object to an array for JSON-encoding
+     */
+    public function toArray() : mixed {
+        $output = [];
+        foreach ($this->_list as $item) {
+            $output[] = $item->expose();
+        }
+        return $output;
+    }
 }
