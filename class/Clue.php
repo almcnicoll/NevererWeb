@@ -8,9 +8,10 @@ class Clue extends Model {
     public ?string $question = null;
     public ?string $answer = null;
     public ?string $pattern = null;
+    public ?string $explanation = null;
 
     static string $tableName = "clues";
-    static $fields = ['id','placedclue_id','question','answer','pattern','created','modified'];
+    static $fields = ['id','placedclue_id','question','answer','pattern','explanation','created','modified'];
 
     public static $defaultOrderBy = ['id'];
 
