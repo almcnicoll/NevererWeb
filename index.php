@@ -29,7 +29,12 @@ if (count($page_parts)==0 || (empty($page_parts[0]))) {
     while (count($page_parts)>2) {
         array_unshift($params, (array_pop($page_parts)) );
     }
-    $stub = "{$page_parts[0]}_{$page_parts[1]}";
+    // Asterisk means 'no subpage'
+    if ($page_parts[1] == '*') {
+        $stub = $page_parts[0];
+    } else {
+        $stub = "{$page_parts[0]}_{$page_parts[1]}";
+    }
 }
 
 // Get information about the page we're serving
@@ -41,12 +46,19 @@ if ($pageinfo->authSetting === PageInfo::AUTH_EARLY) {
     User::loginCheck($pageinfo->redirectOnFail);
 }
 
-$allowed_domains = ['pages'];
+$allowed_domains = ['pages','ajax'];
 $domain = 'pages';
 if (isset($_REQUEST['domain'])) {
     if (in_array($_REQUEST['domain'], $allowed_domains, true)) { $domain = $_REQUEST['domain']; }
 }
 $page = "{$domain}/{$stub}.php";
+
+// Ajax calls get all the class loading etc above, but don't get any template output 
+if ($domain == 'ajax') {
+    error_log("Serving ajax page {$page}");
+    @include_once($page);
+    die();
+}
 
 ob_start(); // Required, as we're including login-check further down
 
@@ -54,6 +66,7 @@ if (!isset($_SESSION['PAGE_LOADCOUNTS'])) {
     // This keeps track of how many times the user has seen each page that wants to know
     $_SESSION['PAGE_LOADCOUNTS'] = [];
 }
+
 ?>
 
 <!DOCTYPE html>

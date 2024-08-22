@@ -18,6 +18,21 @@ class Crossword extends Model {
         return $uTmp;
     }
 
+    /**
+     * Checks if the crossword is owned by the specified user
+     * @param mixed $user the id of the user or a User object
+     */
+    public function isOwnedBy($user) : bool {
+        if ($user instanceof User) {
+            $user_id = $user->id;
+        } elseif (is_numeric($user)) {
+            $user_id = $user;
+        } else {
+            throw new Exception("Invalid input passed to isOwnedBy()");
+        }
+        return ($user_id == $this->user_id);
+    }
+
     public function getPlacedClues() : PlacedClue_List {
         $criteria = ['crossword_id','=',$this->id];
         $allClues = new PlacedClue_List(
@@ -28,9 +43,14 @@ class Crossword extends Model {
 
     public const SORT_ORDER_PLACE_NUMBER = 0;
     public const SORT_ORDER_AD = 1;
+    /**
+     * Function to sort compound CluePlace strings (Across3, Down7, etc) by number instead of alpha
+     * @return int -1 or 1 as required by the sort
+     */
     public static function sortCluePlaceByNumber($a,$b) {
         return ((int)preg_replace('/[^0-9]+/','',$a) < (int)preg_replace('/[^0-9]+/','',$b)) ? -1 : 1;
     }
+
     /**
      * Retrieves the PlacedClues from the crossword. Their place numbers are (re-)calculated in the process.
      * @param int $order specifies whether to return the clues in the form 1A,2D,3A,3D,4D,7A or 1A,3A,7A,2D,3D,4D
@@ -126,7 +146,7 @@ class Crossword extends Model {
             }
         }
 
-        return json_encode($squares);
+        return json_encode($squares->toArray());
     }
 
     public function getGridHtml($include_answers) : string {
