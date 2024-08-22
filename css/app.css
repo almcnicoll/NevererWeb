@@ -156,6 +156,28 @@ div.accordion-collapse.show {
     padding: 1em;
 }
 
+/* Crossword styling */
+div.crossword-container {
+    text-align: center;
+}
+table.crossword-grid {
+    margin: auto;
+    border: #333 2px solid;
+}
+tr.crossword-grid-row {
+    height: 2em;
+    vertical-align: middle;
+}
+td.black-square {
+    background-color: #000;
+}
+td.crossword-grid-square {
+    width: 2em;
+    border: #333 1px solid;
+    padding: 4px;
+    text-align: center;
+    vertical-align: middle;
+}
 
 /* Google signin bits */
 .g-signin2>div {

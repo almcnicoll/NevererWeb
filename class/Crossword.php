@@ -132,9 +132,9 @@ class Crossword extends Model {
     public function getGridHtml($include_answers) : string {
         // Consider sending blank grid, to be populated by AJAX call
         $allClues = $this->getSortedClueList();
-        foreach ($allClues as $pc) {
+        /*foreach ($allClues as $pc) {
             
-        /*    $clues[$pc->orientation][] = new HtmlTag('td', $pc->placeNumber . ' ' . $pc->clueText);
+            $clues[$pc->orientation][] = new HtmlTag('td', $pc->placeNumber . ' ' . $pc->clueText);
 
             switch ($style) {
                 case 'empty_grid':
@@ -169,10 +169,18 @@ class Crossword extends Model {
                     }
                     break;
             }
-        */
-        }
+        }*/
         
-        $html = "<table class='crossword-grid'></table>";
+        $html = "<table class='crossword-grid'>\n";
+        for ($y=0; $y<$this->rows; $y++) {
+            $html .= "\t<tr class='crossword-grid-row' id='row-{$y}'>\n";
+            for ($x=0; $x<$this->cols; $x++) {
+                $html .= "\t\t<td class='crossword-grid-square black-square' id='square-{$y}-{$x}'>\n";
+                $html .= "\t\t</td>\n";
+            }
+            $html .= "\t</tr>\n";
+        }
+        $html .= "</table>\n";
         return $html;
     }
 }

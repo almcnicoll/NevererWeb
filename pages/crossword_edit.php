@@ -63,5 +63,8 @@ if ($fatal_error) {
 }
 ?>
 
+<div class='crossword-container'>
 <?php
 echo $crossword->getGridHtml(true);
+?>
+</div>
