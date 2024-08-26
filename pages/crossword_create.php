@@ -51,6 +51,8 @@
         }
     );
 </script>
+
+<!-- MAIN PAGE -->
 <h2>Create a crossword</h2>
 <?php
 if (count($error_messages)>0) {

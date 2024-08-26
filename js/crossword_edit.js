@@ -6,11 +6,13 @@ const FLAG_FEWMATCHES = 2;
 const FLAG_NOMATCHES = 4;
 
 $(document).ready(
+    /** On-load actions here */
     function() {
-        // On-load actions here
+        // Set variables
         rows = $('#crossword-edit tr').length;
         cols = $('#crossword-edit tr').first().children('td').length;
 
+        // Refresh data
         refreshGrid();
         refreshClueList();
     }

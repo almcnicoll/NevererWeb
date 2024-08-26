@@ -63,6 +63,22 @@ if ($fatal_error) {
 }
 ?>
 
+<!-- MODALS -->
+<?php
+    $form_new_clue = new BootstrapForm('new-clue');
+    $form_new_clue->addField('row')->setLabel('Starting row')->setHelp("The row in which the clue starts")->setType("number")->setAdditionalAttributes(['min'=>1,'max'=>$crossword->rows]);
+    $form_new_clue->addField('col')->setLabel('Starting column')->setHelp("The column in which the clue starts")->setType("number")->setAdditionalAttributes(['min'=>1,'max'=>$crossword->cols]);
+    $form_new_clue->addField('answer')->setLabel('Answer')->setHelp("The answer to the cryptic clue, including spaces, punctuation, etc.")->setStyle("text-transform:uppercase");
+    $form_new_clue->addField('clue')->setLabel('Clue')->setHelp("The clue text");
+    $form_new_clue->addField('explanation')->setLabel('Explanation')->setHelp("An explanation of the working of the clue (optional, will not show on crossword output)");
+    $modal_new_clue = new BootstrapModal('new-clue');
+    $modal_new_clue->setTitle('Add clue')
+    ->setBody($form_new_clue->getHtml())
+    ->setButtons("Save")
+    ->setTrigger("Add");
+    echo $modal_new_clue->getMainHtml();
+?>
+
 <div class='row'>
     <div class='col-md-6'>
         <div class='crossword-container'>

@@ -168,4 +168,8 @@ class Crossword extends Model {
         $html .= "</table>\n";
         return $html;
     }
+
+    public function getCluesHtml($include_answers) : string {
+        return '<pre>Not yet implemented</pre>\n';
+    }
 }
