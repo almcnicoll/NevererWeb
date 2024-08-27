@@ -20,7 +20,7 @@ class BootstrapForm {
      * Creates a field with the specified id, prefixed by the form's id, and adds it to the form's collection
      */
     function addField(string $id) : BootstrapFormField {
-        $fld = new BootstrapFormField($this->id.'-',$id);
+        $fld = new BootstrapFormField($this->id.'-'.$id);
         $this->fields[] = $fld;
         return $fld;
     }

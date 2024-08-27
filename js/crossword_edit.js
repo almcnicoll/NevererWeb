@@ -25,6 +25,9 @@ $(document).ready(
             }
         );
 
+        // Individual actions
+        $('#new-clue-default').on('click',createClue);
+
         // Refresh data
         refreshGrid();
         refreshClueList();
@@ -156,4 +159,55 @@ function refreshClue(id) {
     })
     .done(updateClues)
     .fail(displayAjaxError);
+}
+
+/**
+ * Flags an input as being problematic with a border highlight and an explanatory message
+ * @param {string} selector the jQuery selector for the field(s) to highlight
+ * @param {string} message the message to display underneath the field, as plain text or HTML
+ * @returns {void}
+ */
+function fieldProblem(selector, message) {
+    $(selector).each(
+        function() {
+            $(this).addClass('is-invalid');
+            if ($(this).siblings('.error-explain').length == 0) {
+                $("<div class='error-explain invalid-feedback'>&nbsp;</div>").insertAfter($(this));
+            }
+            $(this).siblings('.error-explain').html(message);
+        }
+    );
+}
+
+/**
+ * Gets the pattern for the supplied clue, in the form "(n)", "(n,p)", "(n-p)" etc.
+ * @param {string} answer the answer to the cryptic clue
+ * @returns {string} the pattern for the clue or null if the answer is blank or invalid
+ */
+function getAnswerPattern(answer) {
+    // TODO - make this work
+}
+
+/** Triggers the AJAX to create a clue from the new-clue modal */
+function createClue() {
+    // Populate vars
+    var row = $('#new-clue-row').val();
+    var col = $('#new-clue-col').val();
+    var answer = $('#new-clue-answer').val();
+    var clue = $('#new-clue-clue').val();
+    var explanation = $('#new-clue-explanation').val();
+
+    // Clear previous validation feedback
+    $('#new-clue').find('form').find('.is-invalid').removeClass('is-invalid');
+    $('#new-clue').find('form').find('.error-explain').remove();
+    // Perform new validation
+    if (!$.isNumeric(row)) { fieldProblem('#new-clue-row',"This field must be a number."); return; }
+    if (!$.isNumeric(col)) { fieldProblem('#new-clue-col',"This field must be a number."); return; }
+    if (answer.length == 0) { fieldProblem('#new-clue-answer',"This field must not be blank."); return; }
+    if (getAnswerPattern(answer) === null) { fieldProblem('#new-clue-answer',"This field must not be blank."); return; }
+
+    // Now fire off the request
+
+    // If all else is fine, hide the modal
+    bootstrap.Modal.getInstance(document.getElementById('new-clue')).hide();
 }
