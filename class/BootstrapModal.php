@@ -49,7 +49,7 @@ class BootstrapModal {
         } else {
             // Handle as a single button
             $this->footerButtons = [
-                "{$this->id}default" => [
+                "{$this->id}-default" => [
                     'text' => $buttons,
                     'class' => 'btn-primary',
                 ],
@@ -106,7 +106,7 @@ END_HTML;
 
     public function getTriggerHtml() : string {
         $html = <<<END_HTML
-<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#{$this->id}">
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#{$this->id}">
     {$this->triggerHtml}
 </button>
 END_HTML;

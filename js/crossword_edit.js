@@ -12,6 +12,19 @@ $(document).ready(
         rows = $('#crossword-edit tr').length;
         cols = $('#crossword-edit tr').first().children('td').length;
 
+        // Set up modal focus events
+        $('div.modal').each(
+            function() {
+                if ($(this).find('.focussed-input').length > 0) {
+                    var div = $(this)[0];
+                    var inp = $(this).find('.focussed-input')[0];
+                    div.addEventListener('shown.bs.modal', function() {
+                        inp.focus();
+                    });
+                }
+            }
+        );
+
         // Refresh data
         refreshGrid();
         refreshClueList();

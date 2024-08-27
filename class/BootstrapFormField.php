@@ -90,7 +90,7 @@ class BootstrapFormField {
         $html = <<<END_HTML
 <div class="form-group">
     <label for="{$this->id}">{$this->label}</label>
-    <input type="text" class="form-control {$this->class}" id="{$this->id}" aria-describedby="{$this->id}-help" placeholder="{$this->placeholder}" style="{$this->style}" {$attributes}>
+    <input type="{$this->type}" class="form-control {$this->class}" id="{$this->id}" aria-describedby="{$this->id}-help" placeholder="{$this->placeholder}" style="{$this->style}" {$attributes}>
     <small id="{$this->id}-help" class="form-text text-muted">{$this->help}</small>
   </div>
 END_HTML;
