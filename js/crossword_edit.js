@@ -186,6 +186,18 @@ function fieldProblem(selector, message) {
  */
 function getAnswerPattern(answer) {
     // TODO - make this work
+    var reRemoves = /[^A-Z\s\-]+/gi;
+    var reSplitters = /[\s\-]+/gi;
+    var reSplittersOnly = /^[\s\-]+$/gi;
+    var working_answer = answer.replace(reRemoves,'');
+    if (working_answer.length == 0) { return null; } // No valid letters
+    if (reSplittersOnly.test(working_answer)) { return null; } // Only splitter characters
+    var answer_parts = working_answer.split(reSplitters);
+    var pattern_parts = new Array();
+    for (var i in answer_parts) {
+        pattern_parts[i] = answer_parts[i].length;
+    }
+    return '('+pattern_parts.join(',')+')';
 }
 
 /** Triggers the AJAX to create a clue from the new-clue modal */
