@@ -18,6 +18,8 @@ class BootstrapFormField {
         $this->id = $id;
     }
 
+    //TODO - consider how to handle <select> and <textarea> inputs - new class or flags/types on this one?
+
     /**
      * Sets the field label (text or HTML)
      * @return BootstrapFormField the object itself, for method chaining
@@ -89,7 +91,13 @@ class BootstrapFormField {
         }
         $html = <<<END_HTML
 <div class="form-group">
+END_HTML;
+        if ($this->label != '') {
+            $html .= <<<END_HTML
     <label for="{$this->id}">{$this->label}</label>
+END_HTML;
+        }
+        $html .= <<<END_HTML
     <input type="{$this->type}" class="form-control {$this->class}" id="{$this->id}" aria-describedby="{$this->id}-help" placeholder="{$this->placeholder}" style="{$this->style}" {$attributes}>
     <small id="{$this->id}-help" class="form-text text-muted">{$this->help}</small>
   </div>

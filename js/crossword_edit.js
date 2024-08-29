@@ -34,6 +34,7 @@ $(document).ready(
     }
 );
 
+// Consider breaking out some of these into a separate JS file at some point?
 /**
  * Handles ajax errors, displaying them to the user
  * @param {string} json the error(s) to display, as JSON
@@ -41,6 +42,40 @@ $(document).ready(
 function displayAjaxError(json) {
     // Do nothing for the moment
     // TODO - need code here - perhaps a notification area
+}
+
+/**
+ * Retrieves data from the specified form(s) in a single object
+ * @param {string} selector the selector of the form to serialize
+ * @param {mixed} stripPrefix the string id to strip off the front of field names or {false} to not strip anything
+ * @returns {Object} the data in object form
+ */
+function serializeForm(selector, stripPrefix = false) {
+    // Retrieve and check selector
+    var data = new Object();
+    var forms = $(selector);
+    if (forms.length == 0) { return data; }
+    for (var i in forms) {
+        var form = forms[i];
+        if (form.prop('tagName').toUpperCase() == 'FORM') {
+            // Only work with <form> tags
+            form.find('input,select,textarea').each(
+                function() {
+                    var key = $(this).attr('name');
+                    if (key === undefined) { key = $(this).attr('id'); }
+                    if (key !== undefined) {
+                        // There's either a name or an id
+                        if (stripPrefix) {
+                            if (key.slice(0,stripPrefix.length) == stripPrefix) {
+                                key = key.slice(stripPrefix.length);
+                            }
+                        }
+                        data[key] = $(this).val();
+                    }
+                }
+            );
+        }
+    }
 }
 
 /**
@@ -146,6 +181,12 @@ function refreshClueList() {
     .fail(displayAjaxError);
 }
 
+/** Refreshes the clue list and grid */
+function refreshAll() {
+    refreshClueList();
+    refreshGrid();
+}
+
 /**
  * Refreshes the specified clue
  * @param {int} id the id of the placedclue to refresh
@@ -185,7 +226,6 @@ function fieldProblem(selector, message) {
  * @returns {string} the pattern for the clue or null if the answer is blank or invalid
  */
 function getAnswerPattern(answer) {
-    // TODO - make this work
     var reRemoves = /[^A-Z\s\-]+/gi;
     var reSplitters = /[\s\-]+/gi;
     var reSplittersOnly = /^[\s\-]+$/gi;
@@ -216,9 +256,19 @@ function createClue() {
     if (!$.isNumeric(row)) { fieldProblem('#new-clue-row',"This field must be a number."); return; }
     if (!$.isNumeric(col)) { fieldProblem('#new-clue-col',"This field must be a number."); return; }
     if (answer.length == 0) { fieldProblem('#new-clue-answer',"This field must not be blank."); return; }
-    if (getAnswerPattern(answer) === null) { fieldProblem('#new-clue-answer',"This field must not be blank."); return; }
+    var pattern = getAnswerPattern(answer);
+    if (pattern === null) { fieldProblem('#new-clue-answer',"This field must not be blank."); return; }
+    $('#new-clue-pattern').val(pattern);
 
     // Now fire off the request
+    var url = root_path + '/placed_clue/*/create/?domain=ajax';
+    var formData = serializeForm('#new-clue','new-clue-');
+    $.post({
+        url: url,
+        data: formData
+    })
+    .done(refreshAll)
+    .fail(displayAjaxError);
 
     // If all else is fine, hide the modal
     bootstrap.Modal.getInstance(document.getElementById('new-clue')).hide();
