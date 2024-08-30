@@ -55,11 +55,12 @@ function serializeForm(selector, stripPrefix = false) {
     var data = new Object();
     var forms = $(selector);
     if (forms.length == 0) { return data; }
-    for (var i in forms) {
+    for (var i=0; i<forms.length; i++) {
         var form = forms[i];
-        if (form.prop('tagName').toUpperCase() == 'FORM') {
+        var tagName = $(form).prop('tagName');
+        if ((tagName !== undefined) && (tagName.toUpperCase() == 'FORM')) {
             // Only work with <form> tags
-            form.find('input,select,textarea').each(
+            $(form).find('input,select,textarea').each(
                 function() {
                     var key = $(this).attr('name');
                     if (key === undefined) { key = $(this).attr('id'); }
@@ -262,7 +263,8 @@ function createClue() {
 
     // Now fire off the request
     var url = root_path + '/placed_clue/*/create/?domain=ajax';
-    var formData = serializeForm('#new-clue','new-clue-');
+    var formData = serializeForm('#new-clue form','new-clue-');
+    // TODO - check this data - it's not arriving in the $_POST of the target url
     $.post({
         url: url,
         data: formData

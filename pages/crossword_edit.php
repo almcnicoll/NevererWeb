@@ -66,13 +66,13 @@ if ($fatal_error) {
 <!-- MODALS -->
 <?php
     $form_new_clue = new BootstrapForm('new-clue');
-    $form_new_clue->addField('row')->setLabel('Starting row')->setHelp("The row in which the clue starts")->setType("number")->setClass('focussed-input')->setAdditionalAttributes(['min'=>1,'max'=>$crossword->rows]);
-    $form_new_clue->addField('col')->setLabel('Starting column')->setHelp("The column in which the clue starts")->setType("number")->setAdditionalAttributes(['min'=>1,'max'=>$crossword->cols]);
-    // TODO - add <select name='orientation'> for across/down
-    $form_new_clue->addField('answer')->setLabel('Answer')->setHelp("The answer to the cryptic clue, including spaces, punctuation, etc.")->setStyle("text-transform:uppercase");
+    $form_new_clue->addField('row')->setLabel('Starting row')->setType("number")->setDivClass('mb-3')->setClass('focussed-input border-secondary')->setStyle('max-width: 10em;')->setAdditionalAttributes(['min'=>1,'max'=>$crossword->rows]); /*->setHelp("The row in which the clue starts")*/
+    $form_new_clue->addField('col')->setLabel('Starting column')->setType("number")->setDivClass('mb-3')->setClass('border-secondary')->setStyle('max-width: 10em;')->setAdditionalAttributes(['min'=>1,'max'=>$crossword->cols]); /*->setHelp("The column in which the clue starts")*/
+    $form_new_clue->addField('orientation')->setLabel('Orientation')->setType('select')->setDivClass('border-bottom mb-3')->setClass('border-secondary')->setOptions(['across'=>'Across','down'=>'Down'])->setValue('Across'); /*->setHelp("Across or Down")*/
+    $form_new_clue->addField('answer')->setLabel('Answer')->setDivClass('mb-3')->setClass('border-secondary')->setStyle("text-transform:uppercase"); /*->setHelp("The answer to the cryptic clue, including spaces, punctuation, etc.")*/
     $form_new_clue->addField('pattern')->setLabel('')->setType('hidden');
-    $form_new_clue->addField('clue')->setLabel('Clue')->setHelp("The clue text");
-    $form_new_clue->addField('explanation')->setLabel('Explanation')->setHelp("An explanation of the working of the clue (optional, will not show on crossword output)");
+    $form_new_clue->addField('clue')->setLabel('Clue')->setDivClass('mb-3')->setClass('border-secondary'); /*->setHelp("The clue text")*/
+    $form_new_clue->addField('explanation')->setLabel('Explanation')->setClass('border-secondary'); /*->setHelp("An explanation of the working of the clue (optional, will not show on crossword output)")*/
     $modal_new_clue = new BootstrapModal('new-clue');
     $modal_new_clue->setTitle('Add clue')
     ->setBody($form_new_clue->getHtml())

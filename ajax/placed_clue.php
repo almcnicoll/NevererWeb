@@ -44,6 +44,8 @@ switch ($action) {
     case 'create':
         // TODO - Validation here
         // Populate and save the entities
+        error_log(print_r($_POST,true));
+        LoggedError::log(LoggedError::TYPE_PHP, 1, __FILE__, __LINE__, print_r($_REQUEST,true));
         $pc = new PlacedClue();
         $pc->x = $_POST['col'];
         $pc->y = $_POST['row'];

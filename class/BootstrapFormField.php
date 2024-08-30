@@ -4,7 +4,10 @@ class BootstrapFormField {
     public string $label = '';
     public string $help = '';
     public string $type = 'text';
+    public mixed $options = [];
+    public string $value = '';
     public string $placeholder = '';
+    public string $div_class = '';
     public string $class = '';
     public string $style = '';
     public mixed $tag_attributes = [];
@@ -17,8 +20,6 @@ class BootstrapFormField {
     {
         $this->id = $id;
     }
-
-    //TODO - consider how to handle <select> and <textarea> inputs - new class or flags/types on this one?
 
     /**
      * Sets the field label (text or HTML)
@@ -37,11 +38,30 @@ class BootstrapFormField {
         return $this;
     }
     /**
-     * Sets the field type attribute (text, number, password, ...)
+     * Sets the field type attribute (text, number, password, select, textarea, ...)
+     * @param string $type the type of field, as specified in the type="" attribute OR select OR textarea
      * @return BootstrapFormField the object itself, for method chaining
      */
     function setType(string $type) : BootstrapFormField {
         $this->type = $type;
+        return $this;
+    }
+    /**
+     * Sets the options for a 'select' form field
+     * @param mixed $options the options in the form of a k=>v array
+     * @return BootstrapFormField the object itself, for method chaining
+     */
+    function setOptions(mixed $options) : BootstrapFormField {
+        $this->options = $options;
+        return $this;
+    }
+    /**
+     * Sets the field's starting value
+     * @param string $value the starting value of the field - including for <select> fields
+     * @return BootstrapFormField the object itself, for method chaining
+     */
+    function setValue(string $value) : BootstrapFormField {
+        $this->value = $value;
         return $this;
     }
     /**
@@ -53,7 +73,17 @@ class BootstrapFormField {
         return $this;
     }
     /**
+     * Sets the content of the <div>'s class tag (in addition to form-group)
+     * @param string $div_class the class name(s) to add
+     * @return BootstrapFormField the object itself, for method chaining
+     */
+    function setDivClass(string $div_class) : BootstrapFormField {
+        $this->div_class = $div_class;
+        return $this;
+    }
+    /**
      * Sets the content of the class tag (in addition to form-control)
+     * @param string $class the class name(s) to add
      * @return BootstrapFormField the object itself, for method chaining
      */
     function setClass(string $class) : BootstrapFormField {
@@ -89,18 +119,44 @@ class BootstrapFormField {
         foreach ($this->tag_attributes as $k=>$v) {
             $attributes .= " {$k}=\"{$v}\" ";
         }
-        $html = <<<END_HTML
-<div class="form-group">
-END_HTML;
+        $div_start = "<div class=\"form-group {$this->div_class}\">";
+        $label_tag = '';
         if ($this->label != '') {
-            $html .= <<<END_HTML
-    <label for="{$this->id}">{$this->label}</label>
-END_HTML;
+            $label_tag = "<label for=\"{$this->id}\">{$this->label}</label>";
         }
-        $html .= <<<END_HTML
-    <input type="{$this->type}" class="form-control {$this->class}" id="{$this->id}" aria-describedby="{$this->id}-help" placeholder="{$this->placeholder}" style="{$this->style}" {$attributes}>
-    <small id="{$this->id}-help" class="form-text text-muted">{$this->help}</small>
-  </div>
+        switch (strtolower($this->type)) {
+            case 'select':
+                $input_tag = <<<END_TAG
+<select class="form-control {$this->class}" id="{$this->id}" name="{$this->id}" aria-describedby="{$this->id}-help" style="{$this->style}" {$attributes}>\n
+END_TAG;
+                foreach ($this->options as $k=>$v) {
+                    if ($v == $this->value) { $selected='selected'; } else { $selected = ''; }
+                    $input_tag .= "<option value=\"{$k}\" {$selected}>{$v}</option>\n";
+                }
+                $input_tag .= "</select>";
+                break;
+            case 'textarea':
+                $input_tag = <<<END_TAG
+<textarea class="form-control {$this->class}" id="{$this->id}" name="{$this->id}" aria-describedby="{$this->id}-help" placeholder="{$this->placeholder}" style="{$this->style}" {$attributes}>
+{$this->value}
+</textarea>
+END_TAG;
+                break;
+            default:
+                $input_tag = <<<END_TAG
+<input type="{$this->type}" class="form-control {$this->class}" id="{$this->id}" name="{$this->id}" aria-describedby="{$this->id}-help" placeholder="{$this->placeholder}" style="{$this->style}" {$attributes} value="{$this->value}">
+END_TAG;
+                break;
+        }
+        $help_text = "<small id=\"{$this->id}-help\" class=\"form-text text-muted\">{$this->help}</small>";
+        $div_end = "</div>";
+
+        $html = <<<END_HTML
+        $div_start
+        $label_tag
+        $input_tag
+        $help_text
+        $div_end
 END_HTML;
         return $html;
     }
