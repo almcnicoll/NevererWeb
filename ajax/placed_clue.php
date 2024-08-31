@@ -2,7 +2,14 @@
 
 function throw_error($errors) {
     $retval = ['errors' => $errors];
-    if (is_array($errors)) { error_log(print_r($errors,true)); } else { error_log($errors); }
+    if (is_array($errors)) {
+        $output = print_r($errors,true);
+        error_log($output);
+        @LoggedError::log('ajaxError',0,__FILE__,__LINE__,$output);
+    } else {
+        error_log($errors);
+        @LoggedError::log('ajaxError',0,__FILE__,__LINE__,$errors);
+    }
     die(json_encode($retval));
 }
 function populate_from_request($varnames) {
@@ -47,7 +54,6 @@ switch ($action) {
         // TODO - work out if we need to create other new clues for symmetry
         $crossword_id = array_shift($params);
         // Populate and save the entities
-        error_log(print_r($_POST,true));
         LoggedError::log(LoggedError::TYPE_PHP, 1, __FILE__, __LINE__, print_r($_REQUEST,true));
         $pc = new PlacedClue();
         $pc->crossword_id = $crossword_id;
