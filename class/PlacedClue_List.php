@@ -1,17 +1,24 @@
 <?php
 
 class PlacedClue_List extends Typed_List {
-  // called when accessed like echo $list[$offset];
+  /** called when accessed like echo $list[$offset]; 
+   * @return PlacedClue the item from the array
+  */
   public function offsetGet($offset) : PlacedClue {
     return $this->protected_get($offset);
   }
 
-  // called when accessed like foreach($list as $item) { // $item is type PlacedClue }
+  /** called when accessed like foreach($list as $item) { // $item is type PlacedClue }
+   * @return PlacedClue the item from the collection
+   */
   public function current() : PlacedClue {
-    // TODO [31-Aug-2024 14:17:35 UTC] PHP Fatal error:  Uncaught Error: Cannot call abstract method Typed_List::current() in C:\Bitnami\wampstack-8.0.9-0\apache2\htdocs\neverer-web\class\PlacedClue_List.php:11
-    return parent::current($this->_position);
+    return $this->protected_get($this->_position);
   }
 
+  /**
+   * Retrieves the current class
+   * @return string the name of the contained class (PlacedClue)
+   */
   public function get_type() : string {
     return PlacedClue::class;
   }
