@@ -1,14 +1,18 @@
 <?php
 
 class Grid extends Typed_List {
-    // called when accessed like echo $list[$offset];
+    /** called when accessed like echo $list[$offset]; 
+     * @return GridRow the item from the array
+     */
     public function offsetGet($offset) : GridRow {
         return $this->protected_get($offset);
     }
 
-    // called when accessed like foreach($list as $item) { // $item is type GridRow }
+    /** called when accessed like foreach($list as $item) { // $item is type GridRow }
+     * @return GridRow the item from the collection
+     */
     public function current() : GridRow {
-        return parent::current($this->_position);
+        return $this->protected_get($this->_position);
     }
 
     public function get_type() : string {

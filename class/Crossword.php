@@ -131,6 +131,7 @@ END_SQL;
     public function getGridJson($xMin=0, $yMin=0, $xMax=null, $yMax=null) : string {
         // Get clues
         $allPClues = $this->getSortedClueList();
+        error_log("PlacedClues print_r: ".print_r($allPClues,true));
         if ($xMax == null) { $xMax = $this->cols-1; }
         if ($yMax == null) { $yMax = $this->rows-1; }
         if ($xMax<$xMin) { return json_encode([]); }
@@ -148,32 +149,30 @@ END_SQL;
         foreach ($allPClues as $placed_clue) {
             $clue = $placed_clue->getClue();
             $len = $clue->getLength();
-            for ($i=0; $i<$len; $i++) {
-                switch ($placed_clue->orientation) {
-                    case 'Across':
-                        $y = $placed_clue->y;
-                        for ($ii=0; $ii<$len; $ii++) {
-                            $x = $placed_clue->x + $ii;
-                            $squares[$y][$x]->black_square = false;
-                            if ($squares[$y][$x]->letter != '') { $squares[$y][$x]->setFlag(GridSquare::FLAG_CONFLICT); } // If already set
-                            $squares[$y][$x]->letter = substr($clue->getAnswerLetters(),$i,1);
-                            if ($ii=0) { $squares[$y][$x]->clue_number = $placed_clue->getOrderingValue(); }
-                        }
-                        break;
-                    case 'Down':
-                        $x = $placed_clue->x;
-                        for ($ii=0; $ii<$len; $ii++) {
-                            $y = $placed_clue->y + $ii;
-                            $squares[$y][$x]->black_square = false;
-                            if ($squares[$y][$x]->letter != '') { $squares[$y][$x]->setFlag(GridSquare::FLAG_CONFLICT); } // If already set
-                            $squares[$y][$x]->letter = substr($clue->getAnswerLetters(),$i,1);
-                            if ($ii=0) { $squares[$y][$x]->clue_number = $placed_clue->getOrderingValue(); }
-                        }
-                        break;
-                    default:
-                        // We have to ignore it I guess?
-                        break;
-                }
+            switch (strtolower($placed_clue->orientation)) {
+                case 'across':
+                    $y = $placed_clue->y;
+                    for ($ii=0; $ii<$len; $ii++) {
+                        $x = $placed_clue->x + $ii;
+                        $squares[$y][$x]->black_square = false;
+                        if ($squares[$y][$x]->letter != '') { $squares[$y][$x]->setFlag(GridSquare::FLAG_CONFLICT); } // If already set
+                        $squares[$y][$x]->letter = substr($clue->getAnswerLetters(),$ii,1);
+                        if ($ii==0) { $squares[$y][$x]->clue_number = $placed_clue->place_number; }
+                    }
+                    break;
+                case 'down':
+                    $x = $placed_clue->x;
+                    for ($ii=0; $ii<$len; $ii++) {
+                        $y = $placed_clue->y + $ii;
+                        $squares[$y][$x]->black_square = false;
+                        if ($squares[$y][$x]->letter != '') { $squares[$y][$x]->setFlag(GridSquare::FLAG_CONFLICT); } // If already set
+                        $squares[$y][$x]->letter = substr($clue->getAnswerLetters(),$ii,1);
+                        if ($ii==0) { $squares[$y][$x]->clue_number = $placed_clue->place_number; }
+                    }
+                    break;
+                default:
+                    // We have to ignore it I guess?
+                    break;
             }
         }
 
