@@ -77,6 +77,7 @@ function serializeForm(selector, stripPrefix = false) {
             );
         }
     }
+    return data;
 }
 
 /**
@@ -262,9 +263,8 @@ function createClue() {
     $('#new-clue-pattern').val(pattern);
 
     // Now fire off the request
-    var url = root_path + '/placed_clue/*/create/?domain=ajax';
+    var url = root_path + '/placed_clue/*/create/' + crossword_id + '?domain=ajax';
     var formData = serializeForm('#new-clue form','new-clue-');
-    // TODO - check this data - it's not arriving in the $_POST of the target url
     $.post({
         url: url,
         data: formData
