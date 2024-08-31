@@ -35,8 +35,8 @@ switch ($action) {
         $crossword = Crossword::findFirst(['id','=',$crossword_id]);
         if ($crossword === null) { throw_error("Cannot find crossword with id {$crossword_id}"); }
         if (!$crossword->isOwnedBy($user->id)) { throw_error("Crossword with id {$crossword_id} does not belong to user #{$user->id}"); }
-        //TODO - output list of clues serialized to JSON here
-        die(json_encode([]));
+        $pcList = $crossword->getPlacedClues();
+        die(json_encode($pcList));
     case 'get':
         // Called as /ajax/placed_clue/*/get/[id]
         $pc_id = array_shift($params);
