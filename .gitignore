@@ -4,3 +4,4 @@ inc/secret.php
 /vendor/
 php_errors.log
 *.log
+phpinfo.php
