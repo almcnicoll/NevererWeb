@@ -35,8 +35,9 @@ class Crossword extends Model {
 
     public function getPlacedClues() : PlacedClue_List {
         $criteria = ['crossword_id','=',$this->id];
+        $orderBy = [['place_number','asc'],['orientation','asc']];
         $allClues = new PlacedClue_List(
-            PlacedClue::find($criteria)
+            PlacedClue::find($criteria, $orderBy)
         );
         return $allClues;
     }
@@ -56,6 +57,8 @@ class Crossword extends Model {
      * @param int $order specifies whether to return the clues in the form 1A,2D,3A,3D,4D,7A or 1A,3A,7A,2D,3D,4D
      */
     public function getSortedClueList(int $order = Crossword::SORT_ORDER_PLACE_NUMBER) : PlacedClue_List {
+        /*
+        // NB In theory this code shouldn't be necessary, as place_number should now be set every time a clue is saved
         $lastOrder = -1;
         $clueIncrement = 0;
         $placedClues = $this->getPlacedClues();
@@ -91,6 +94,9 @@ class Crossword extends Model {
         }
         $clues = new PlacedClue_List($sorted_clues);
         return $clues;
+        */
+        $placedClues = $this->getPlacedClues();
+        return $placedClues;
     }
 
     /** Sets the place numbers for all clues in the crossword */
