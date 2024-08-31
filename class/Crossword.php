@@ -128,10 +128,9 @@ END_SQL;
      * Gets the contents of the crossword as a Grid of GridSquares - all in JSON format
      * @return string the JSON-encoded object
      */
-    public function getGridJson($xMin=0, $yMin=0, $xMax=null, $yMax=null) : string {
+    public function getGridJson($xMin=0, $yMin=0, $xMax=null, $yMax=null) : string { // TODO - refactor this: rename, return objects instead of JSON, encode from caller?
         // Get clues
         $allPClues = $this->getSortedClueList();
-        error_log("PlacedClues print_r: ".print_r($allPClues,true));
         if ($xMax == null) { $xMax = $this->cols-1; }
         if ($yMax == null) { $yMax = $this->rows-1; }
         if ($xMax<$xMin) { return json_encode([]); }

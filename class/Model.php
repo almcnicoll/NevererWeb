@@ -11,6 +11,11 @@ class Model {
     static string $tableName;
     static $fields = ['id','created','modified'];
 
+    /** Call this to ensure that the class is loaded by autoloader. It performs no action and has no other function. */
+    public static function ensureLoaded() : void {
+        return;
+    }
+
     /**
      * Turns an orderBy variable (in our proprietary format) into a valid ORDER BY string (with leading space)
      * @param string $fields either an array of field names, or an array of arrays in the form ['field', 'asc|desc']
