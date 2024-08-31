@@ -23,7 +23,7 @@ $action = array_shift($params);
 
 switch ($action) {
     case 'list':
-        // Called as /ajax/placed_clue/list/[crossword_id]
+        // Called as /ajax/placed_clue/*/list/[crossword_id]
         $crossword_id = array_shift($params);
         $crossword = Crossword::findFirst(['id','=',$crossword_id]);
         if ($crossword === null) { throw_error("Cannot find crossword with id {$crossword_id}"); }
@@ -31,7 +31,7 @@ switch ($action) {
         //TODO - output list of clues serialized to JSON here
         die(json_encode([]));
     case 'get':
-        // Called as /ajax/placed_clue/get/[id]
+        // Called as /ajax/placed_clue/*/get/[id]
         $pc_id = array_shift($params);
         $placed_clue = PlacedClue::findFirst('id','=',$pc_id);
         if ($placed_clue === null) { throw_error("Cannot find clue with id {$pc_id}"); }
@@ -42,11 +42,15 @@ switch ($action) {
         //TODO - output clue serialized to JSON here
         die(json_encode([]));
     case 'create':
+        // Called as /ajax/placed_clue/*/create/[crossword_id]
         // TODO - Validation here
+        // TODO - work out if we need to create other new clues for symmetry
+        $crossword_id = array_shift($params);
         // Populate and save the entities
         error_log(print_r($_POST,true));
         LoggedError::log(LoggedError::TYPE_PHP, 1, __FILE__, __LINE__, print_r($_REQUEST,true));
         $pc = new PlacedClue();
+        $pc->crossword_id = $crossword_id;
         $pc->x = $_POST['col'];
         $pc->y = $_POST['row'];
         $pc->orientation = $_POST['orientation'];

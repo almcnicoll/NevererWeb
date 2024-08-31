@@ -63,7 +63,7 @@ class Crossword extends Model {
 
         for($i=0; $i<count($placedClues); $i++) {
             $pc = $placedClues[$i];
-            $ord = $pc->getOrder();
+            $ord = $pc->getOrderingValue();
 
             if ($ord != $lastOrder) {
                 $clueIncrement++;
@@ -93,6 +93,31 @@ class Crossword extends Model {
         return $clues;
     }
 
+    /** Sets the place numbers for all clues in the crossword */
+    public function setPlaceNumbers() {
+        // Create SQL
+        $table = PlacedClue::$tableName;
+        $sql = <<<END_SQL
+UPDATE `{$table}`
+INNER JOIN 
+(
+SELECT `y`*1000+`x` AS ordering_value, ROW_NUMBER() OVER () AS rownum
+FROM `{$table}`
+WHERE `crossword_id`=?
+GROUP BY ordering_value
+ORDER BY ordering_value ASC
+) `t_order` ON t_order.ordering_value=(`y`*1000+`x`)
+SET `{$table}`.`place_number` = `t_order`.`rownum`
+WHERE `crossword_id`=?
+ORDER BY `y`,`x`
+;
+END_SQL;
+        $pdo = db::getPDO();
+        $criteria_values = [$this->id,$this->id];
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($criteria_values);
+    }
+
     /**
      * Gets the contents of the crossword as a Grid of GridSquares - all in JSON format
      * @return string the JSON-encoded object
@@ -112,9 +137,7 @@ class Crossword extends Model {
             for ($x=$xMin; $x<=$xMax; $x++) {
                 $squares[$y][$x] = new GridSquare($x, $y, true);
             }
-            //error_log('*row '.$y."\n".print_r($squares[$y],true));
         }
-        //error_log(print_r($squares,true));
 
         foreach ($allPClues as $placed_clue) {
             $clue = $placed_clue->getClue();
@@ -128,7 +151,7 @@ class Crossword extends Model {
                             $squares[$y][$x]->black_square = false;
                             if ($squares[$y][$x]->letter != '') { $squares[$y][$x]->setFlag(GridSquare::FLAG_CONFLICT); } // If already set
                             $squares[$y][$x]->letter = substr($clue->getAnswerLetters(),$i,1);
-                            if ($ii=0) { $squares[$y][$x]->clue_number = $placed_clue->getOrder(); }
+                            if ($ii=0) { $squares[$y][$x]->clue_number = $placed_clue->getOrderingValue(); }
                         }
                         break;
                     case 'Down':
@@ -138,7 +161,7 @@ class Crossword extends Model {
                             $squares[$y][$x]->black_square = false;
                             if ($squares[$y][$x]->letter != '') { $squares[$y][$x]->setFlag(GridSquare::FLAG_CONFLICT); } // If already set
                             $squares[$y][$x]->letter = substr($clue->getAnswerLetters(),$i,1);
-                            if ($ii=0) { $squares[$y][$x]->clue_number = $placed_clue->getOrder(); }
+                            if ($ii=0) { $squares[$y][$x]->clue_number = $placed_clue->getOrderingValue(); }
                         }
                         break;
                     default:
