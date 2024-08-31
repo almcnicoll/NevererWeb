@@ -11,37 +11,49 @@ class Model {
     static string $tableName;
     static $fields = ['id','created','modified'];
 
-    // child classes can supply public static $defaultOrderBy as either an array of field names, or an array of arrays in the form ['field', 'asc|desc']
+    /**
+     * Turns an orderBy variable (in our proprietary format) into a valid ORDER BY string (with leading space)
+     * @param string $fields either an array of field names, or an array of arrays in the form ['field', 'asc|desc']
+     * @returns an ORDER BY statement with backticked fields and leading space, or a blank string if no fields supplied
+     */
+    static function parseOrderBy($fields) : string {
+        if (is_array($fields)) {
+            // More than one field
+            if (count($fields) == 0) { return ''; }
+            $parsedFields = [];
+            foreach ($fields as $f) {
+                if (is_array($f)) {
+                    // Sort direction supplied
+                    if ((strtolower($f[1])=='asc')||(strtolower($f[1])=='desc')) {
+                        $parsedFields[] = "`{$f[0]}` {$f[1]}";
+                    } else {
+                        // ... but not correctly
+                        throw new Exception("Field order must be ASC or DESC: '{$f[0]}' supplied.");
+                    }
+                } else {
+                    // No sort direction
+                    $parsedFields[] = "`{$f}`";
+                }
+            }
+            return ' ORDER BY '.implode(',',$parsedFields).' ';
+        } else {
+            // Only one field (and no sort direction)
+            if (empty($fields)) { return ''; }
+            return "`{$fields}`";
+        }
+    }
 
+    /**
+     * Gets the default ORDER BY statement for the relevant class/subclass
+     * child classes can supply public static $defaultOrderBy as either an array of field names, or an array of arrays in the form ['field', 'asc|desc']
+     * @return string a statement beginning with a space and 'ORDER BY'
+     */
     public static function getDefaultOrderBy() : string {
         $calledClass = get_called_class();
         $soughtProperty = 'defaultOrderBy';
         if(property_exists($calledClass,$soughtProperty)) {
             $fields = $calledClass::$$soughtProperty;
-            if (is_array($fields)) {
-                // More than one field
-                if (count($fields) == 0) { return ''; }
-                $parsedFields = [];
-                foreach ($fields as $f) {
-                    if (is_array($f)) {
-                        // Sort direction supplied
-                        if ((strtolower($f[1])=='asc')||(strtolower($f[1])=='desc')) {
-                            $parsedFields[] = "`{$f[0]}` {$f[1]}";
-                        } else {
-                            // ... but not correctly
-                            throw new Exception("Field order must be ASC or DESC: '{$f[0]}' supplied.");
-                        }
-                    } else {
-                        // No sort direction
-                        $parsedFields[] = "`{$f}`";
-                    }
-                }
-                return ' ORDER BY '.implode(',',$parsedFields).' ';
-            } else {
-                // Only one field (and no sort direction)
-                if (empty($fields)) { return ''; }
-                return "`{$fields}`";
-            }
+            return static::parseOrderBy($fields);
         }
         return ''; // No defaultOrderBy set
     }
@@ -107,14 +119,20 @@ class Model {
         return $result;
     }
 
-    public static function findFirst($criteria) {
+    public static function findFirst($criteria, $orderBy = null) {
         // TODO - would be better (more efficient in db) to run query with LIMIT 1 instead of this
-        $values = static::find($criteria);
+        $values = static::find($criteria, $orderBy);
         if (count($values)==0) { return null; }
         return $values[0];
     }
 
-    public static function find($criteria) : array {
+    /**
+     * Finds records matching the specified criteria
+     * @param array each criterion should be an array in the form [field,operator,value], and multiple criteria should be specified as an array of arrays
+     * @param string $orderBy either an array of field names OR an array of arrays in the form ['field', 'asc|desc'] OR null to use default ordering
+     * @return mixed an array of objects of the class or subclass calling the function
+     */
+    public static function find($criteria, $orderBy = null) : array {
         $pdo = db::getPDO();
 
         // Check arguments
@@ -179,9 +197,15 @@ class Model {
             }
         }
 
+        if ($orderBy === null) {
+            $orderSql = static::getDefaultOrderBy();
+        } else {
+            $orderSql = static::parseOrderBy($orderBy);
+        }
+        
         $sql = "SELECT * FROM `".static::$tableName."` "
                 ."WHERE ".implode(" AND ", $criteria_strings)
-                .static::getDefaultOrderBy();
+                .$orderSql;
         //error_log($sql);
         //error_log(print_r($criteria_values,true));
         $stmt = $pdo->prepare($sql);
