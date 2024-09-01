@@ -178,6 +178,7 @@ td.crossword-grid-square {
     text-align: center;
     vertical-align: middle;
     text-transform: capitalize;
+    font-weight: bold;
 }
 div.clue-number {
     float: left;
