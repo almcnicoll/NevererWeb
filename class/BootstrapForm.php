@@ -3,7 +3,7 @@
  * Represents a form element (with contents) in Bootstrap 5.x
  * and includes a bunch of utility functions for generating markup
  */
-class BootstrapForm {
+class BootstrapForm extends BaseClass {
     public string $id = '';
     public mixed $fields = [];
 

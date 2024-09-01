@@ -1,5 +1,6 @@
 <?php
-class BootstrapFormField {
+/** Represents a field on a Bootstrap form */
+class BootstrapFormField extends BaseClass {
     public string $id = '';
     public string $label = '';
     public string $help = '';

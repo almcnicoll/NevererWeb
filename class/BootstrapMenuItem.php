@@ -2,13 +2,10 @@
 /**
  * Allows for streamlined creation of Bootstrap 5.x modal dialogs
  */
-class BootstrapModal extends BaseClass {
+class BootstrapMenuItem extends BaseClass {
     public string $id = '';
-    public string $titleHtml = '';
     public string $bodyHtml = '';
-    public mixed $footerButtons = [];
-    public string $triggerType = 'button';
-    public string $triggerHtml = '';
+    public BootstrapMenuItem_List $childItems = [];
 
     /**
      * Creates the BootstrapModal object
@@ -46,7 +43,6 @@ class BootstrapModal extends BaseClass {
     function setButtons(mixed $buttons) : BootstrapModal {
         if (is_array($buttons)) {
             // Handle as an array of buttons
-            $this->footerButtons = $buttons;
         } else {
             // Handle as a single button
             $this->footerButtons = [
