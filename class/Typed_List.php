@@ -14,7 +14,7 @@
  *   }
  * }
  */
-abstract class Typed_List implements \ArrayAccess, \Iterator, \Countable, \SeekableIterator {
+abstract class Typed_List extends BaseClass implements \ArrayAccess, \Iterator, \Countable, \SeekableIterator {
 
     protected string $_type = "mixed";
     protected $_position = 0;

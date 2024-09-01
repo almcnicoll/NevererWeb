@@ -132,7 +132,7 @@ END_SQL;
      * @param ?int $yMax the maximum row to retrieve from (default: last row)
      * @return Grid the grid object, ready for use or serialization
      */
-    public function getGrid(int $xMin=0, int $yMin=0, ?int $xMax=null, ?int $yMax=null) : string {
+    public function getGrid(int $xMin=0, int $yMin=0, ?int $xMax=null, ?int $yMax=null) : Grid {
         // Get clues
         $allPClues = $this->getSortedClueList();
         if ($xMax == null) { $xMax = $this->cols-1; }

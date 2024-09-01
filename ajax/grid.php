@@ -23,6 +23,7 @@
     switch ($action) {
         case 'get':
             // Called as /ajax/grid/get/[id]?xMin=&yMin=&xMax=&yMax=
+            Grid::ensureLoaded();
             $crossword_id = array_shift($params);
             $crossword = Crossword::findFirst(['id','=',$crossword_id]);
             if ($crossword === null) { throw_error("Cannot find crossword with id {$crossword_id}"); }
