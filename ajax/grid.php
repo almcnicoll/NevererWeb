@@ -29,8 +29,8 @@
             if (!$crossword->isOwnedBy($user->id)) { throw_error("Crossword with id {$crossword_id} does not belong to user #{$user->id}"); }
             $xMin = 0; $xMax = $crossword->cols-1; $yMin = 0; $yMax = $crossword->rows-1;
             populate_from_request(['xMin','xMax','yMin','yMax']);
-            //error_log(print_r([$xMin,$yMin,$xMax,$yMax],true));
-            die($crossword->getGridJson($xMin,$yMin,$xMax,$yMax));
+            $grid = $crossword->getGrid($xMin,$yMin,$xMax,$yMax);
+            die(json_encode($grid->toArray()));
         default:
             $file = str_replace(__DIR__,'',__FILE__);
             throw_error("Invalid action {$action} passed to {$file}");

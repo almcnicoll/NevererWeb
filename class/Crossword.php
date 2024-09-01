@@ -125,10 +125,14 @@ END_SQL;
     }
 
     /**
-     * Gets the contents of the crossword as a Grid of GridSquares - all in JSON format
-     * @return string the JSON-encoded object
+     * Gets the contents of the crossword as a Grid of GridSquares
+     * @param int $xMin the minimum column to retrieve from (default: 0)
+     * @param int $yMin the minimum row to retrieve from (default: 0)
+     * @param ?int $xMax the maximum column to retrieve from (default: last col)
+     * @param ?int $yMax the maximum row to retrieve from (default: last row)
+     * @return Grid the grid object, ready for use or serialization
      */
-    public function getGridJson($xMin=0, $yMin=0, $xMax=null, $yMax=null) : string { // TODO - refactor this: rename, return objects instead of JSON, encode from caller?
+    public function getGrid(int $xMin=0, int $yMin=0, ?int $xMax=null, ?int $yMax=null) : string {
         // Get clues
         $allPClues = $this->getSortedClueList();
         if ($xMax == null) { $xMax = $this->cols-1; }
@@ -174,8 +178,7 @@ END_SQL;
                     break;
             }
         }
-
-        return json_encode($squares->toArray());
+        return $squares;
     }
 
     public function getGridHtml($include_answers) : string {
