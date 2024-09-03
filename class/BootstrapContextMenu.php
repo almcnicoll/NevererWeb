@@ -39,7 +39,7 @@ class BootstrapContextMenu extends BaseClass {
     function setItems(mixed $items) : BootstrapContextMenu {
         if (is_array($items)) {
             // Handle as an array of buttons
-
+            $this->menuItems = $items;
         } else {
             // Handle as a single button
             $this->menuItems = [
@@ -62,11 +62,21 @@ class BootstrapContextMenu extends BaseClass {
     }
 
     /**
-     * Gets the HTML for the modal itself
+     * Gets the HTML for the menu itself
      * @return string the HTML with correct substitutions made
      */
-    public function getMainHtml() : string {
-        $html = '';
+    public function getHtml() : string {
+        $items_string = '';
+        foreach ($this->menuItems as $k=>$item) {
+            $items_string .= $item->getHtml()."\n";
+        }
+        $html = <<<END_HTML
+        <div id="context-menu-{$this->id}" class="dropdown clearfix">
+            <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu" style="display:block;position:static;margin-bottom:5px;">
+                {$items_string}
+            </ul>
+        </div>
+END_HTML;
         return $html;
     }
 }
