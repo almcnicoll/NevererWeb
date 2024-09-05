@@ -14,6 +14,11 @@ class PlacedClue extends Model {
     public static $defaultOrderBy = ['y','x','orientation'];
     public int $placeNumber = 0;
 
+    public const ACROSS = 'across';
+    public const DOWN = 'down';
+
+    // TODO - some way of having a Clue object linked to a PlacedClue object without saving either to the database (so they can save at the same time)
+
     /** 
      * Extends the built-in save method to update the clue numbers once saved
      * - we can't do this easily beforehand as the clue may not yet be in the database, or may be about to be updated  

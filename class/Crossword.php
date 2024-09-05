@@ -153,7 +153,7 @@ END_SQL;
             $clue = $placed_clue->getClue();
             $len = $clue->getLength();
             switch (strtolower($placed_clue->orientation)) {
-                case 'across':
+                case PlacedClue::ACROSS:
                     $y = $placed_clue->y;
                     for ($ii=0; $ii<$len; $ii++) {
                         $x = $placed_clue->x + $ii;
@@ -163,7 +163,7 @@ END_SQL;
                         if ($ii==0) { $squares[$y][$x]->clue_number = $placed_clue->place_number; }
                     }
                     break;
-                case 'down':
+                case PlacedClue::DOWN:
                     $x = $placed_clue->x;
                     for ($ii=0; $ii<$len; $ii++) {
                         $y = $placed_clue->y + $ii;
@@ -179,6 +179,87 @@ END_SQL;
             }
         }
         return $squares;
+    }
+
+    /**
+     * Retrieves all existing clues from the crossword which overlap with the specified clue
+     * @param PlacedClue $placedClue the clue to check
+     * @param bool $problemsOnly whether to return only those clues which overlap in a problematic manner (same orientation)
+     */
+    public function getOverlapClues(PlacedClue $placedClue, $problemsOnly = true) : PlacedClue_List {
+        $overlap_clues = new PlacedClue_List();
+        // TODO - overlap logic here - return all clues that overlap with the specified one
+        // TODO - ensure that comparison doesn't compare clue with itself - the supplied PlacedClue might or might not be in the database! (use id field, allowing that it might be unset)
+        return $overlap_clues;
+    }
+
+    /**
+     * Examines the supplied clue and the crossword's symmetry setting and then determines if any additional clues need adding at the same time
+     * @param PlacedClue $newClue the clue being created
+     * @return PlacedClue_List the new clues to be created - returns an empty PlacedClue_List if none match
+     */
+    public function getNewSymmetryClues(PlacedClue $newClue) : PlacedClue_List {
+        $new_clues = new PlacedClue_List();
+        // TODO - symmetry logic here
+        // TODO - decide whether to throw an error if the new symmetry clue clashes with an existing clue of the same orientation
+        // TODO - if so, also throw an error if the new symmetry clue partially overlaps with the supplied clue
+        // NOTE - should not throw an error if it totally overlaps - just don't return an additional clue
+        if ($this->rotational_symmetry_order > 1) { // Otherwise there's no symmetry, so return blank list
+            // Logic for 2-fold
+            $cReflect180 = new Clue();
+            $cReflect180->answer = str_repeat('?',strlen($newClue->getClue()->answer));
+            $pcReflect180 = new PlacedClue();
+            $pcReflect180->x = $this->cols-$newClue->x;
+            $pcReflect180->y = $this->rows-$newClue->y;
+            $pcReflect180->orientation = $newClue->orientation;
+            if (
+                ($pcReflect180->orientation == PlacedClue::ACROSS && $pcReflect180->y != $newClue->y)
+                ||
+                ($pcReflect180->orientation == PlacedClue::DOWN && $pcReflect180->x != $newClue->x)
+            ) {
+                $new_clues[] = $pcReflect180;
+            }
+            if ($this->rotational_symmetry_order > 2) {
+                // Logic for 4-fold
+                $cReflect90 = new Clue();
+                $cReflect90->answer = str_repeat('?',strlen($newClue->getClue()->answer));
+                $pcReflect90 = new PlacedClue();
+                $pcReflect90->x = $newClue->y;
+                $pcReflect90->y = $this->cols-$newClue->x;
+                $pcReflect90->orientation = (($newClue->orientation == PlacedClue::ACROSS)?PlacedClue::DOWN:PlacedClue::ACROSS);
+                $cReflect270 = new Clue();
+                $cReflect270->answer = str_repeat('?',strlen($newClue->getClue()->answer));
+                $pcReflect270 = new PlacedClue();
+                $pcReflect270->x = $this->rows-$newClue->y;
+                $pcReflect270->y = $newClue->x;
+                $pcReflect270->orientation = (($newClue->orientation == PlacedClue::ACROSS)?PlacedClue::DOWN:PlacedClue::ACROSS);
+            }
+            // Add 90-degree rotation, then check if 270-degree rotation duplicates (we should already have handled non-duplicate but clashing in errors above)
+            // TODO - implement bracketed comment above
+            $new_clues[] = $pcReflect90;
+            if (
+                ($pcReflect90->orientation == PlacedClue::ACROSS && $pcReflect90->y != $pcReflect270->y)
+                ||
+                ($pcReflect90->orientation == PlacedClue::DOWN && $pcReflect90->x != $pcReflect270->x)
+            ) {
+                $new_clues[] = $pcReflect270;
+            }
+        }
+        return $new_clues;
+    }
+
+    /**
+     * Examines the supplied clue and the crossword's symmetry setting and then determines if there are existing clues that match symmetry rules
+     * @param PlacedClue $newClue the clue being created
+     * @return PlacedClue_List any clues that match the symmetry rules - returns an empty PlacedClue_List if none match
+     */
+    public function getExistingSymmetryClues(PlacedClue $newClue) : PlacedClue_List {
+        $new_clues = new PlacedClue_List();
+        // TODO - symmetry logic here
+        if ($this->rotational_symmetry_order > 1) { // Otherwise there's no symmetry, so return blank list
+            //
+        }
+        return $new_clues;
     }
 
     public function getGridHtml($include_answers) : string {
