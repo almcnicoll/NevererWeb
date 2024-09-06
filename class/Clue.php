@@ -69,4 +69,11 @@ class Clue extends Model {
     public function getAnswerLetters() : string {
         return preg_replace(Clue::NON_PATTERN_CHARS,'',$this->answer);
     }
+
+    /** Returns a blank clone (same length, no specified letters) of the current clue */
+    public function blankClone() : Clue {
+        $clone = new Clue();
+        $clone->answer = str_repeat('?',strlen($this->answer));
+        return $clone;
+    }
 }

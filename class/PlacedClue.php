@@ -17,7 +17,7 @@ class PlacedClue extends Model {
     public const ACROSS = 'across';
     public const DOWN = 'down';
 
-    // TODO - some way of having a Clue object linked to a PlacedClue object without saving either to the database (so they can save at the same time)
+    // TODO - HIGH PRIORITY some way of having a Clue object linked to a PlacedClue object without saving either to the database (so they can save at the same time) - consider a negative-id solution
 
     /** 
      * Extends the built-in save method to update the clue numbers once saved
@@ -62,5 +62,73 @@ class PlacedClue extends Model {
 
     public function getClue() : Clue {
       return Clue::findFirst(['placedclue_id','=',$this->id]);
+    }
+
+    public static function invertOrientation(string $originalOrientation) : string {
+      switch($originalOrientation) {
+        case PlacedClue::ACROSS:
+          return PlacedClue::DOWN;
+        case PlacedClue::DOWN:
+          return PlacedClue::ACROSS;
+        default:
+          throw new InvalidArgumentException("Value supplied was neither across nor down. Please use the class constants PlacedClue::ACROSS / PlacedClue::DOWN to avoid this.");
+      }
+    }
+
+    /**
+     * Creates a PlacedClue that is based on the current PlacedClue but rotated by the specified number of degrees
+     * @param int $degrees the number of degrees to rotate: 0, 90, 180, 270
+     * @return PlacedClue a new (blank) PlacedClue object
+     */
+    public function getRotatedClue(int $degrees) : PlacedClue {
+      // Check arguments
+      if (!isset($this->crossword_id)) {
+        throw new InvalidArgumentException("Supplied template clue does not link to a Crossword object");
+      }
+      $validRotations = [0,90,180,270];
+      if (!in_array($degrees, $validRotations)) {
+        throw new InvalidArgumentException("Cannot rotate by {$degrees} degrees: valid values are ".implode(', ',$validRotations));
+      }
+      // Retrieve variables
+      $crossword = $this->getCrossword();
+      $clueLength = strlen($this->getClue()->answer);
+      // Do rotation
+      switch ($degrees) {
+        case 0:
+          $pcReflect0 = new PlacedClue();
+          $pcReflect0->orientation = $this->orientation;
+          $pcReflect0->x = $this->x;
+          $pcReflect0->y = $this->y;
+          return $pcReflect0;
+        case 90:
+          $pcReflect90 = new PlacedClue();
+          $pcReflect90->orientation = PlacedClue::invertOrientation($this->orientation);
+          $pcReflect90->x = $this->y;
+          $pcReflect90->y = $crossword->cols-$this->x;
+          // If it's a DOWN clue, this gives us the END of the new clue - we want the START
+          if ($this->orientation == PlacedClue::DOWN) { $pcReflect90->x -= $clueLength; }
+          return $pcReflect90;
+        case 180:
+          $cReflect180 = new Clue();
+          $cReflect180->answer = str_repeat('?',$clueLength);
+          $pcReflect180 = new PlacedClue();
+          $pcReflect180->orientation = $this->orientation;
+          $pcReflect180->x = $crossword->cols-$this->x;
+          $pcReflect180->y = $crossword->rows-$this->y;
+          // This gives us the END of the new clue - we want the START
+          if ($pcReflect180->orientation == PlacedClue::ACROSS) { $pcReflect180->x -= $clueLength; } else { $pcReflect180->y -= $clueLength; }
+          return $pcReflect180;
+          break;
+        case 270:
+          $pcReflect270 = new PlacedClue();
+          $pcReflect270->orientation = PlacedClue::invertOrientation($this->orientation);
+          $pcReflect270->x = $crossword->rows-$this->y;
+          $pcReflect270->y = $this->x;
+          // If it's an ACROSS clue, this gives us the END of the new clue - we want the START
+          if ($this->orientation == PlacedClue::ACROSS) { $pcReflect270->y -= $clueLength; }
+          return $pcReflect270;
+          break;
+      }
+      // TODO - can't really return value properly until we have allowed for PlacedClues "containing" Clues before they're saved
     }
 }
