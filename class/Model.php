@@ -58,13 +58,25 @@ class Model extends BaseClass {
         return ''; // No defaultOrderBy set
     }
 
+    /**
+     * Retrieves the created field as a nullable DateTime
+     * @return ?DateTime the created date
+     */
     public function getCreated():?DateTime {
         return $this->created;
     }
+    /**
+     * Retrieves the modified field as a nullable DateTime
+     * @return ?DateTime the modified date
+     */
     public function getModified():?DateTime {
         return $this->modified;
     }
 
+    /**
+     * Retrieves the number of entities in the database
+     * @return int the number of entities
+     */
     public static function count() : int {
         $pdo = db::getPDO();
         
@@ -76,6 +88,10 @@ class Model extends BaseClass {
         return $result;
     }
 
+    /**
+     * Retrieves all the entities from the database
+     * @return mixed an array of the entities
+     */
     public static function getAll() : array {
         $pdo = db::getPDO();
         
@@ -88,6 +104,11 @@ class Model extends BaseClass {
         return $results;
     }
 
+    /**
+     * Determines if an entity with the specified id exists
+     * @param int $id the id to check
+     * @return bool true if the entity exists, otherwise false
+     */
     public static function checkForId(int $id) : bool {
         $pdo = db::getPDO();
 
@@ -103,7 +124,12 @@ class Model extends BaseClass {
         return ($result['c']>0);
     }
 
-    public static function getById(int $id) {
+    /**
+     * Retrieves the entity with the specified id
+     * @param int $id the id of the entity
+     * @return ?static the entity, or null if no matching entity is found
+     */
+    public static function getById(int $id) : ?static {
         $pdo = db::getPDO();
 
         $sql = "SELECT * FROM `".static::$tableName."` WHERE id=:id";
@@ -223,6 +249,10 @@ class Model extends BaseClass {
         return $results;
     }
 
+    /**
+     * Saves the entity
+     * @return ?int the id of the created entity
+     */
     public function save() : ?int {
         $pdo = db::getPDO();
 
@@ -266,6 +296,10 @@ class Model extends BaseClass {
         return $this->id;
     }
 
+    /**
+     * Deletes the entity
+     * @return bool whether the entity was successfully deleted
+     */
     public function delete() : bool {
         $pdo = db::getPDO();
 
@@ -288,6 +322,10 @@ class Model extends BaseClass {
         return true;
     }
 
+    /**
+     * Deletes an entity by id
+     * @return bool whether the entity was successfully deleted
+     */
     public static function deleteById($id) : bool {
         $pdo = db::getPDO();
 
@@ -308,6 +346,10 @@ class Model extends BaseClass {
         return true;
     }
 
+    /**
+     * Clones the entity
+     * @return static the cloned object
+     */
     public function clone($preserveID = false, $preserveCreated = false, $preserveModified = false) {
         $clone = new static();
 
