@@ -13,6 +13,7 @@ class Crossword extends Model {
     public static $defaultOrderBy = [['modified','DESC'],['id','DESC']];
 
     public function getUser() : User {
+        /** @var User $uTmp */
         $uTmp = User::findFirst(['id','=',$this->user_id]);
         if ($uTmp == null) { throw new Exception("No matching user for this crossword"); }
         return $uTmp;

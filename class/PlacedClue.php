@@ -17,6 +17,9 @@ class PlacedClue extends Model {
     public const ACROSS = 'across';
     public const DOWN = 'down';
 
+    /** Contains a Clue object for when a PlacedClue is being created from scratch */
+    protected ?Clue $__captiveClue = null;
+
     // TODO - HIGH PRIORITY some way of having a Clue object linked to a PlacedClue object without saving either to the database (so they can save at the same time) - consider a negative-id solution
 
     /** 
@@ -26,8 +29,15 @@ class PlacedClue extends Model {
      */
     public function save() : ?int {
       if (!isset($this->place_number)) { $this->place_number = 0; } // Don't let's have this throw an error
+      
       $returnVal = parent::save(); // Call parent save logic
       $crossword = $this->getCrossword(); // Retrieve the crossword
+      // Save any "captive" clue that hasn't yet been saved
+      if ($this->__captiveClue != null) {
+        $this->__captiveClue->id = $this->id;
+        $this->__captiveClue->save();
+        $this->__captiveClue = null;
+      }
       if ($crossword !== null) { $crossword->setPlaceNumbers(); } // Update the place_numbers of all clues in the crossword
       return $returnVal;
     }
@@ -37,6 +47,7 @@ class PlacedClue extends Model {
      * @throws Will throw an exception if the crossword specified by the crossword_id field cannot be found in the database
      */
     public function getCrossword() : Crossword {
+        /** @var Crossword $cTmp */  
         $cTmp = Crossword::findFirst(['id','=',$this->crossword_id]);
         if ($cTmp == null) { throw new Exception("No matching crossword for this clue"); }
         return $cTmp;
@@ -60,8 +71,17 @@ class PlacedClue extends Model {
       return $this->calculateOrder($this->y, $this->x);
     }
 
+    /** Retrieves the clue for this PlacedClue, creating it if need be
+     * @return Clue the underlying Clue object
+     */
     public function getClue() : Clue {
-      return Clue::findFirst(['placedclue_id','=',$this->id]);
+      if ($this->__captiveClue != null) { return $this->__captiveClue; }
+      $clue = Clue::findFirst(['placedclue_id','=',$this->id]);
+      if ($clue == null) {
+        $this->__captiveClue = new Clue();
+        return $clue;
+      }
+      return $clue;
     }
 
     public static function invertOrientation(string $originalOrientation) : string {
