@@ -20,11 +20,10 @@ class PlacedClue extends Model {
     /** Contains a Clue object for when a PlacedClue is being created from scratch */
     protected ?Clue $__captiveClue = null;
 
-    // TODO - HIGH PRIORITY some way of having a Clue object linked to a PlacedClue object without saving either to the database (so they can save at the same time) - consider a negative-id solution
-
     /** 
-     * Extends the built-in save method to update the clue numbers once saved
-     * - we can't do this easily beforehand as the clue may not yet be in the database, or may be about to be updated  
+     * Extends the built-in save method:
+     * - updates the clue numbers once saved (can't do this beforehand as the clue may not yet be in the db, or may be about to be updated)
+     * - saves any "captive clue" (not yet in db)
      * @return ?int the id of the saved record or null if the save failed
      */
     public function save() : ?int {
@@ -84,6 +83,22 @@ class PlacedClue extends Model {
       return $clue;
     }
 
+    /**
+     * Sets the captive clue for the PlacedClue when it already exists
+     */
+    public function setClue(Clue $clue, bool $safety = true) : void {
+      if ($safety) {
+        if ($safety && ($this->__captiveClue != null)) { throw new Exception("Captive clue already exists - will not overwrite in safety mode"); }
+      }
+      $this->__captiveClue = $clue;
+      if (isset($this->id) || ($this->id != null)) { $this->__captiveClue->placedclue_id = $this->id; }
+    }
+
+    /**
+     * Returns the opposite clue orientation from the one passed in
+     * @param string $originalOrientation the orientation of which we want to find the opposite - it is recommended to use the PlacedClue::ACROSS and PlacedClue::DOWN constants
+     * @return string the opposite orientation
+     */
     public static function invertOrientation(string $originalOrientation) : string {
       switch($originalOrientation) {
         case PlacedClue::ACROSS:
@@ -119,12 +134,14 @@ class PlacedClue extends Model {
           $pcReflect0->orientation = $this->orientation;
           $pcReflect0->x = $this->x;
           $pcReflect0->y = $this->y;
+          $pcReflect0->setClue($this->getClue()->clone(),false);
           return $pcReflect0;
         case 90:
           $pcReflect90 = new PlacedClue();
           $pcReflect90->orientation = PlacedClue::invertOrientation($this->orientation);
           $pcReflect90->x = $this->y;
           $pcReflect90->y = $crossword->cols-$this->x;
+          $pcReflect90->setClue($this->getClue()->clone(),false);
           // If it's a DOWN clue, this gives us the END of the new clue - we want the START
           if ($this->orientation == PlacedClue::DOWN) { $pcReflect90->x -= $clueLength; }
           return $pcReflect90;
@@ -135,6 +152,7 @@ class PlacedClue extends Model {
           $pcReflect180->orientation = $this->orientation;
           $pcReflect180->x = $crossword->cols-$this->x;
           $pcReflect180->y = $crossword->rows-$this->y;
+          $pcReflect180->setClue($this->getClue()->clone(),false);
           // This gives us the END of the new clue - we want the START
           if ($pcReflect180->orientation == PlacedClue::ACROSS) { $pcReflect180->x -= $clueLength; } else { $pcReflect180->y -= $clueLength; }
           return $pcReflect180;
@@ -144,11 +162,14 @@ class PlacedClue extends Model {
           $pcReflect270->orientation = PlacedClue::invertOrientation($this->orientation);
           $pcReflect270->x = $crossword->rows-$this->y;
           $pcReflect270->y = $this->x;
+          $pcReflect270->setClue($this->getClue()->clone(),false);
           // If it's an ACROSS clue, this gives us the END of the new clue - we want the START
           if ($this->orientation == PlacedClue::ACROSS) { $pcReflect270->y -= $clueLength; }
           return $pcReflect270;
           break;
+        default:
+          // This won't happen, as it's covered above
+          throw new InvalidArgumentException("Cannot rotate by {$degrees} degrees: valid values are ".implode(', ',$validRotations));
       }
-      // TODO - can't really return value properly until we have allowed for PlacedClues "containing" Clues before they're saved
     }
 }
