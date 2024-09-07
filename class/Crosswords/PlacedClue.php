@@ -4,6 +4,7 @@ namespace Crosswords {
   use Exception, InvalidArgumentException;
   class PlacedClue extends Model {
       public int $crossword_id;
+      // NB co-ordinates are ZERO-based
       public int $x;
       public int $y;
       public string $orientation = 'Unset';
@@ -76,12 +77,15 @@ namespace Crosswords {
        * @return Clue the underlying Clue object
        */
       public function getClue() : Clue {
-        if ($this->__captiveClue != null) { return $this->__captiveClue; }
+        if ($this->__captiveClue != null) { error_log("We have an unsaved 'captive' clue in PlacedClue id {$this->id}"); return $this->__captiveClue; }
         $clue = Clue::findFirst(['placedclue_id','=',$this->id]);
         if ($clue == null) {
+          error_log("Couldn't find clue with placedclue_id {$this->id}");
           $this->__captiveClue = new Clue();
           return $this->__captiveClue;
         }
+        error_log("Returning clue id {$clue->id} with answer {$clue->answer}");
+        error_log(print_r($clue,true));
         return $clue;
       }
 
@@ -137,7 +141,7 @@ namespace Crosswords {
             $pcReflect0->orientation = $this->orientation;
             $pcReflect0->x = $this->x;
             $pcReflect0->y = $this->y;
-            $pcReflect0->setClue($this->getClue()->clone(),false);
+            $pcReflect0->setClue($this->getClue()->blankClone(),false);
             return $pcReflect0;
           case 90:
             $pcReflect90 = new PlacedClue();
@@ -145,19 +149,19 @@ namespace Crosswords {
             $pcReflect90->orientation = PlacedClue::invertOrientation($this->orientation);
             $pcReflect90->x = $this->y;
             $pcReflect90->y = $crossword->cols-$this->x;
-            $pcReflect90->setClue($this->getClue()->clone(),false);
+            $pcReflect90->setClue($this->getClue()->blankClone(),false);
             // If it's a DOWN clue, this gives us the END of the new clue - we want the START
-            if ($this->orientation == PlacedClue::DOWN) { $pcReflect90->x -= $clueLength; }
+            if ($this->orientation == PlacedClue::DOWN) { $pcReflect90->x -= ($clueLength-1); }
             return $pcReflect90;
           case 180:
             $pcReflect180 = new PlacedClue();
             $pcReflect180->crossword_id = $this->crossword_id;
             $pcReflect180->orientation = $this->orientation;
-            $pcReflect180->x = $crossword->cols-$this->x;
-            $pcReflect180->y = $crossword->rows-$this->y;
-            $pcReflect180->setClue($this->getClue()->clone(),false);
+            $pcReflect180->x = $crossword->cols-$this->x-1;
+            $pcReflect180->y = $crossword->rows-$this->y-1;
+            $pcReflect180->setClue($this->getClue()->blankClone(),false);
             // This gives us the END of the new clue - we want the START
-            if ($pcReflect180->orientation == PlacedClue::ACROSS) { $pcReflect180->x -= $clueLength; } else { $pcReflect180->y -= $clueLength; }
+            if ($pcReflect180->orientation == PlacedClue::ACROSS) { $pcReflect180->x -= ($clueLength-1); } else { $pcReflect180->y -= ($clueLength-1); }
             return $pcReflect180;
             break;
           case 270:
@@ -166,9 +170,9 @@ namespace Crosswords {
             $pcReflect270->orientation = PlacedClue::invertOrientation($this->orientation);
             $pcReflect270->x = $crossword->rows-$this->y;
             $pcReflect270->y = $this->x;
-            $pcReflect270->setClue($this->getClue()->clone(),false);
+            $pcReflect270->setClue($this->getClue()->blankClone(),false);
             // If it's an ACROSS clue, this gives us the END of the new clue - we want the START
-            if ($this->orientation == PlacedClue::ACROSS) { $pcReflect270->y -= $clueLength; }
+            if ($this->orientation == PlacedClue::ACROSS) { $pcReflect270->y -= ($clueLength-1); }
             return $pcReflect270;
             break;
           default:

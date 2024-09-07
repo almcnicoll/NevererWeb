@@ -28,6 +28,7 @@
             // Called as /ajax/grid/get/[id]?xMin=&yMin=&xMax=&yMax=
             Grid::ensureLoaded();
             $crossword_id = array_shift($params);
+            /** @var Crossword $crossword */
             $crossword = Crossword::findFirst(['id','=',$crossword_id]);
             if ($crossword === null) { throw_error("Cannot find crossword with id {$crossword_id}"); }
             if (!$crossword->isOwnedBy($user->id)) { throw_error("Crossword with id {$crossword_id} does not belong to user #{$user->id}"); }

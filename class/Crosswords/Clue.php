@@ -23,6 +23,27 @@ namespace Crosswords {
         public const PATTERN_WHITESPACE = "/\\s+/";
 
         /**
+         * Constructs the class, initialising some default values
+         */
+        public function __construct()
+        {
+            $this->question = '';
+            $this->answer = '';
+            $this->explanation = '';
+        }
+
+        /** 
+         * Extends the built-in save method:
+         * - updates the pattern of the clue
+         * @return ?int the id of the saved record or null if the save failed
+         */
+        public function save() : ?int {
+            $this->pattern = Clue::getPattern($this->answer);
+            $returnVal = parent::save(); // Call parent save logic
+            return $returnVal;
+        }
+
+        /**
          * Get the length of the clue in grid squares (i.e. ignoring punctuation and spaces)
          * @return int the total length
          */
@@ -36,7 +57,7 @@ namespace Crosswords {
             } else {
                 $parts = explode(',',str_replace('(','',str_replace(')','',$this->pattern)));
                 $length = 0;
-                foreach ($parts as $part) { $length += $part; }
+                foreach ($parts as $part) { $length += (int)$part; }
                 return $length;
             }
         }
@@ -46,6 +67,9 @@ namespace Crosswords {
          */
         public static function getPattern(string $input) : string {
             // Rationalise the string
+            // Question-marks indicate unspecified letters - replace them with an actual letter for pattern purposes
+            $input = str_replace('?','z',$input);
+            // Now get rid of any other non-answer characters
             $input = preg_replace(Clue::NON_PATTERN_CHARS,'',$input);
             // Split on valid delimiters (at time of writing, whitespace and hyphen)
             // NB Delimiters are returned because they are bracketed in the regexp

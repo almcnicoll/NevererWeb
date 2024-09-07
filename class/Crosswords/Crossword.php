@@ -138,8 +138,10 @@ END_SQL;
          * @return Grid the grid object, ready for use or serialization
          */
         public function getGrid(int $xMin=0, int $yMin=0, ?int $xMax=null, ?int $yMax=null) : Grid {
+            //TODO - this appears to be missing out clues (or leaving them blank) under certain circumstances
             // Get clues
             $allPClues = $this->getSortedClueList();
+            //error_log("Clues in list: ".count($allPClues));
             if ($xMax == null) { $xMax = $this->cols-1; }
             if ($yMax == null) { $yMax = $this->rows-1; }
             if ($xMax<$xMin) { return json_encode([]); }
@@ -156,12 +158,13 @@ END_SQL;
 
             foreach ($allPClues as $placed_clue) {
                 $clue = $placed_clue->getClue();
+                error_log("Clue with id {$clue->id} has answer {$clue->answer}");
                 $len = $clue->getLength();
                 switch (strtolower($placed_clue->orientation)) {
                     case PlacedClue::ACROSS:
                         $y = $placed_clue->y;
                         for ($ii=0; $ii<$len; $ii++) {
-                            $x = $placed_clue->x + $ii;
+                            $x = $placed_clue->x + $ii; if ($x>=$this->cols) {continue;}
                             $squares[$y][$x]->black_square = false;
                             if ($squares[$y][$x]->letter != '') { $squares[$y][$x]->setFlag(GridSquare::FLAG_CONFLICT); } // If already set
                             $squares[$y][$x]->letter = substr($clue->getAnswerLetters(),$ii,1);
@@ -171,7 +174,7 @@ END_SQL;
                     case PlacedClue::DOWN:
                         $x = $placed_clue->x;
                         for ($ii=0; $ii<$len; $ii++) {
-                            $y = $placed_clue->y + $ii;
+                            $y = $placed_clue->y + $ii; if ($y>=$this->rows) {continue;}
                             $squares[$y][$x]->black_square = false;
                             if ($squares[$y][$x]->letter != '') { $squares[$y][$x]->setFlag(GridSquare::FLAG_CONFLICT); } // If already set
                             $squares[$y][$x]->letter = substr($clue->getAnswerLetters(),$ii,1);
