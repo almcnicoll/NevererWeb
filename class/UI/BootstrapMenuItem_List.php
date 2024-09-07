@@ -1,7 +1,8 @@
 <?php
 
 namespace UI {
-  class BootstrapMenuItem_List extends \Typed_List {
+  use Basic\Typed_List;
+  class BootstrapMenuItem_List extends Typed_List {
     /** called when accessed like echo $list[$offset]; 
      * @return BootstrapMenuItem the item from the array
     */

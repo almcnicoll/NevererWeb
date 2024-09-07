@@ -1,7 +1,8 @@
 <?php
 /** Represents a field on a Bootstrap form */
 namespace UI {
-    class BootstrapFormField extends \BaseClass {
+    use Basic\BaseClass;
+    class BootstrapFormField extends BaseClass {
         public string $id = '';
         public string $label = '';
         public string $help = '';

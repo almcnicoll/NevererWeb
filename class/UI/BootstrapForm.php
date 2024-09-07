@@ -4,7 +4,8 @@
  * and includes a bunch of utility functions for generating markup
  */
 namespace UI {
-    class BootstrapForm extends \BaseClass {
+    use Basic\BaseClass;
+    class BootstrapForm extends BaseClass {
         public string $id = '';
         public mixed $fields = [];
 

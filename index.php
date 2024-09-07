@@ -1,5 +1,8 @@
 <?php
 require_once('autoload.php');
+
+use Security\User, Security\PageInfo;
+
 User::ensureLoaded(); // To force autoloading of User class
 // For clarity, $user contains the user object and $_SESSION['USER'] contains the serialized version
 if (session_status() === PHP_SESSION_ACTIVE) {

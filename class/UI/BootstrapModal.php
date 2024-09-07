@@ -3,7 +3,8 @@
  * Allows for streamlined creation of Bootstrap 5.x modal dialogs
  */
 namespace UI {
-    class BootstrapModal extends \BaseClass {
+    use Basic\BaseClass;
+    class BootstrapModal extends BaseClass {
         public string $id = '';
         public string $titleHtml = '';
         public string $bodyHtml = '';

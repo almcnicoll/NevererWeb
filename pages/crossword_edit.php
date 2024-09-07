@@ -1,4 +1,6 @@
 <?php
+    use Crosswords\Crossword, Crosswords\PlacedClue;
+
     $fatal_error = false;
 
     $error_messages = [];
