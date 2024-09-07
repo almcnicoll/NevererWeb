@@ -1,5 +1,6 @@
 <?php
 @session_start();
+use Security\Config;
 class Autoloader
 {
     public static function register()
