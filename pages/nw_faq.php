@@ -1,4 +1,7 @@
 <?php
+use Security\Config;
+use Misc\FAQ;
+
 // TODO - find a more universal way of displaying error messages (perhaps using header.php?)
 //  as well as a better way of storing them (session variable? class variable? PageInfo?) 
 if (!isset($error_messages)) { $error_messages = []; }

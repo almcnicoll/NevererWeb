@@ -2,6 +2,7 @@
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
+use Security\Config;
 
 if (isset($_REQUEST['your_name'])) {
     if (!isset($config)) { $config = Config::get(); }

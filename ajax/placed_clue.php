@@ -1,5 +1,6 @@
 <?php
 use Logging\LoggedError;
+use Crosswords\Clue, Crosswords\Crossword, Crosswords\PlacedClue;
 
 function throw_error($errors) {
     $retval = ['errors' => $errors];
@@ -52,23 +53,27 @@ switch ($action) {
     case 'create':
         // Called as /ajax/placed_clue/*/create/[crossword_id]
         // TODO - Validation here
-        // TODO - work out if we need to create other new clues for symmetry
         $crossword_id = array_shift($params);
         // Populate and save the entities
-        LoggedError::log(LoggedError::TYPE_PHP, 1, __FILE__, __LINE__, print_r($_REQUEST,true));
         $pc = new PlacedClue();
         $pc->crossword_id = $crossword_id;
         $pc->x = $_POST['col'];
         $pc->y = $_POST['row'];
         $pc->orientation = $_POST['orientation'];
-        $pc->save();
-        $c = new Clue();
+        $c = $pc->getClue();
         $c->answer = $_POST['answer'];
         $c->pattern = $_POST['pattern'];
         $c->question = $_POST['clue'];
         $c->explanation = $_POST['explanation'];
-        $c->placedclue_id = $pc->id;
-        $c->save();
+        $pc->save();
+        
+        // Work out if we need to create other new clues for symmetry
+        $crossword = $pc->getCrossword();
+        if ($crossword != null) {
+            $additionalClues = $crossword->getNewSymmetryClues($pc);
+            foreach($additionalClues as $apc) { $apc->save(); }
+        }
+        
         die(json_encode([])); // TODO - consider returning a success/fail, or perhaps the PlacedClue itself in JSON
     default:
         $file = str_replace(__DIR__,'',__FILE__);

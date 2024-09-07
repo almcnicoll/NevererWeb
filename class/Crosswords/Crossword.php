@@ -121,9 +121,8 @@ namespace Crosswords {
     ) `t_order` ON t_order.ordering_value=(`y`*1000+`x`)
     SET `{$table}`.`place_number` = `t_order`.`rownum`
     WHERE `crossword_id`=?
-    ORDER BY `y`,`x`
-    ;
-    END_SQL;
+    ORDER BY `y`,`x`;
+END_SQL;
             $pdo = db::getPDO();
             $criteria_values = [$this->id,$this->id];
             $stmt = $pdo->prepare($sql);
@@ -206,7 +205,6 @@ namespace Crosswords {
          */
         public function getNewSymmetryClues(PlacedClue $newClue) : PlacedClue_List {
             $newClues = new PlacedClue_List();
-            // TODO - symmetry logic here
             // TODO - decide whether to throw an error if the new symmetry clue clashes with an existing clue of the same orientation
             // TODO - if so, also throw an error if the new symmetry clue partially overlaps with the supplied clue
             // NOTE - should not throw an error if it totally overlaps - just don't return an additional clue
@@ -238,16 +236,16 @@ namespace Crosswords {
                     $pcReflect90 = $newClue->getRotatedClue(90);
                     $cReflect270 = $newClue->getClue()->blankClone();
                     $pcReflect270 = $newClue->getRotatedClue(270);
-                }
-                // Add 90-degree rotation, then check if 270-degree rotation duplicates (we should already have handled non-duplicate but clashing in errors above)
-                // TODO - implement bracketed comment above
-                $newClues[] = $pcReflect90;
-                if (
-                    ($pcReflect90->orientation == PlacedClue::ACROSS && $pcReflect90->y != $pcReflect270->y)
-                    ||
-                    ($pcReflect90->orientation == PlacedClue::DOWN && $pcReflect90->x != $pcReflect270->x)
-                ) {
-                    $newClues[] = $pcReflect270;
+                    // Add 90-degree rotation, then check if 270-degree rotation duplicates (we should already have handled non-duplicate but clashing in errors above)
+                    // TODO - implement bracketed comment above
+                    $newClues[] = $pcReflect90;
+                    if (
+                        ($pcReflect90->orientation == PlacedClue::ACROSS && $pcReflect90->y != $pcReflect270->y)
+                        ||
+                        ($pcReflect90->orientation == PlacedClue::DOWN && $pcReflect90->x != $pcReflect270->x)
+                    ) {
+                        $newClues[] = $pcReflect270;
+                    }
                 }
             }
             return $newClues;

@@ -1,6 +1,8 @@
 <?php
     // Class & session loading
     require_once('autoload.php');
+
+    use Security\User, Security\AuthMethod;
     $discard = new User(); // To force autoloading of User class
     if (session_status() === PHP_SESSION_ACTIVE) {
         if (isset($_SESSION['USER'])) { $user = unserialize($_SESSION['USER']); }

@@ -1,4 +1,6 @@
 <?php
+    use Security\User;
+    
     $error_messages = [];
     if (isset($_REQUEST['error_message'])) {
         $error_messages[] = $_REQUEST['error_message'];

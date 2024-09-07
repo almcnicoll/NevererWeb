@@ -1,4 +1,5 @@
 <?php
+use Crosswords\Crossword;
 
 $error_messages = [];
 if (isset($_REQUEST['error_message'])) {

@@ -1,4 +1,7 @@
 <?php
+    use UI\Grid;
+    use Crosswords\Crossword;
+
     function throw_error($errors) {
         $retval = ['errors' => $errors];
         if (is_array($errors)) { error_log(print_r($errors,true)); } else { error_log($errors); }

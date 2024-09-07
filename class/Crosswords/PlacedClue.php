@@ -35,7 +35,7 @@ namespace Crosswords {
         $crossword = $this->getCrossword(); // Retrieve the crossword
         // Save any "captive" clue that hasn't yet been saved
         if ($this->__captiveClue != null) {
-          $this->__captiveClue->id = $this->id;
+          $this->__captiveClue->placedclue_id = $this->id;
           $this->__captiveClue->save();
           $this->__captiveClue = null;
         }
@@ -80,7 +80,7 @@ namespace Crosswords {
         $clue = Clue::findFirst(['placedclue_id','=',$this->id]);
         if ($clue == null) {
           $this->__captiveClue = new Clue();
-          return $clue;
+          return $this->__captiveClue;
         }
         return $clue;
       }
@@ -133,6 +133,7 @@ namespace Crosswords {
         switch ($degrees) {
           case 0:
             $pcReflect0 = new PlacedClue();
+            $pcReflect0->crossword_id = $this->crossword_id;
             $pcReflect0->orientation = $this->orientation;
             $pcReflect0->x = $this->x;
             $pcReflect0->y = $this->y;
@@ -140,6 +141,7 @@ namespace Crosswords {
             return $pcReflect0;
           case 90:
             $pcReflect90 = new PlacedClue();
+            $pcReflect90->crossword_id = $this->crossword_id;
             $pcReflect90->orientation = PlacedClue::invertOrientation($this->orientation);
             $pcReflect90->x = $this->y;
             $pcReflect90->y = $crossword->cols-$this->x;
@@ -148,9 +150,8 @@ namespace Crosswords {
             if ($this->orientation == PlacedClue::DOWN) { $pcReflect90->x -= $clueLength; }
             return $pcReflect90;
           case 180:
-            $cReflect180 = new Clue();
-            $cReflect180->answer = str_repeat('?',$clueLength);
             $pcReflect180 = new PlacedClue();
+            $pcReflect180->crossword_id = $this->crossword_id;
             $pcReflect180->orientation = $this->orientation;
             $pcReflect180->x = $crossword->cols-$this->x;
             $pcReflect180->y = $crossword->rows-$this->y;
@@ -161,6 +162,7 @@ namespace Crosswords {
             break;
           case 270:
             $pcReflect270 = new PlacedClue();
+            $pcReflect270->crossword_id = $this->crossword_id;
             $pcReflect270->orientation = PlacedClue::invertOrientation($this->orientation);
             $pcReflect270->x = $crossword->rows-$this->y;
             $pcReflect270->y = $this->x;

@@ -1,3 +1,8 @@
+<?php
+    use Security\User;
+    use Crosswords\Crossword;
+?>
+
 <script type='text/javascript'>
     $(document).ready( function() {
         $('#deleteAccountAreYouSure').on('change', function() {
