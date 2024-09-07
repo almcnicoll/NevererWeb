@@ -1,5 +1,8 @@
 <?php
 require_once('autoload.php');
+
+use Security\AuthMethod;
+
 if (isset($_REQUEST['redirect_url'])) {
     $_SESSION['redirect_url_once'] = $_REQUEST['redirect_url'];
 }

@@ -212,7 +212,6 @@ END_SQL;
             if ($this->rotational_symmetry_order > 1) { // Otherwise there's no symmetry, so return blank list
                 // TODO - work out how to create the Clue objects in the getRotatedClue function instead of here (where they're not actually used!)
                 // Logic for 2-fold
-                $cReflect180 = $newClue->getClue()->blankClone();
                 $pcReflect180 = $newClue->getRotatedClue(180);
                 // Now check for clashes with existing clues
                 if (count($this->getOverlapClues($pcReflect180, true))>0) {
