@@ -4,6 +4,7 @@
  * NB - see https://codepen.io/anirugu/pen/xjjxvG for how to implement in HTML/JS/CSS
  */
 namespace UI {
+    use Basic\BaseClass;
     class BootstrapContextMenu extends BaseClass {
         public string $id = '';
         public string $titleHtml = '';

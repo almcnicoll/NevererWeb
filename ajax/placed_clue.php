@@ -1,4 +1,5 @@
 <?php
+use Logging\LoggedError;
 
 function throw_error($errors) {
     $retval = ['errors' => $errors];
