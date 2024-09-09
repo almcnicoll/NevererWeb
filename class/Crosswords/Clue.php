@@ -91,7 +91,7 @@ namespace Crosswords {
          * @return string the letters as a string
          */
         public function getAnswerLetters() : string {
-            return preg_replace(Clue::NON_PATTERN_CHARS,'',$this->answer);
+            return preg_replace(Clue::NON_PATTERN_CHARS,'',preg_replace(Clue::PATTERN_SPLIT_CHARS,'',$this->answer));
         }
 
         /** Returns a blank clone (same length, no specified letters) of the current clue */
