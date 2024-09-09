@@ -1,6 +1,8 @@
 <?php
 require_once('autoload.php');
 
+use Basic\DbUpdate, Basic\db;
+
 $version = 0;
 $updates = [];
 
