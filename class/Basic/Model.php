@@ -1,5 +1,7 @@
 <?php
 namespace Basic {
+
+    use InvalidArgumentException;
     use PDO,Exception,DateTime;
     class Model extends BaseClass {
         static $allowedOperators = ['=','!=','>','<','>=','<=','LIKE','IS','IS NOT','IN'];
@@ -380,6 +382,27 @@ namespace Basic {
             }
 
             return $clone;
+        }
+
+        /**
+         * Ensures that the specified field is set (often used before saving)
+         * @param string $fieldName the name of the field to check
+         * @param mixed $valueIfUnset the value to use if the field isn't set
+         * @param mixed $unsetValue the field is considered unset if it fails isset() OR if it matches this value (default null)
+         * @return static the original object, to allow for easy method chaining
+         */
+        public function ensureFieldSet(string $fieldName, mixed $valueIfUnset = '', mixed $unsetValue = null) : static {
+            // Check that the property exists
+            if (!property_exists($this, $fieldName)) { throw new InvalidArgumentException("No field {$fieldName} in class ".static::class); }
+            if (!isset($this->$$fieldName)) {
+                // If it's unset, set it to the specified value
+                $this->$$fieldName = $valueIfUnset;
+            } elseif ($this->$$fieldName == $unsetValue) {
+                // If it's equal to the unsetValue, set it to the specified value
+                $this->$$fieldName = $valueIfUnset;
+            }
+            // Return the original object
+            return $this;
         }
     }
 }
