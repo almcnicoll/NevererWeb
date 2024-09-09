@@ -5,6 +5,8 @@ namespace Crosswords {
     use Security\User;
     use UI\Grid, UI\GridRow, UI\GridSquare;
     use Exception, Exceptions\IllegalClueOverlapException;
+    use Logging\LoggedError;
+
     class Crossword extends Model {
         public int $user_id;
         public ?string $title = null;
@@ -106,27 +108,39 @@ namespace Crosswords {
         }
 
         /** Sets the place numbers for all clues in the crossword */
-        public function setPlaceNumbers() {
+        public function setClueNumbers() {
             // Create SQL
             $table = PlacedClue::$tableName;
             $sql = <<<END_SQL
     UPDATE `{$table}`
     INNER JOIN 
     (
-    SELECT `y`*1000+`x` AS ordering_value, ROW_NUMBER() OVER () AS rownum
-    FROM `{$table}`
-    WHERE `crossword_id`=?
-    GROUP BY ordering_value
-    ORDER BY ordering_value ASC
-    ) `t_order` ON t_order.ordering_value=(`y`*1000+`x`)
+    SELECT `y`,`x`, ROW_NUMBER() OVER (PARTITION BY crossword_id ORDER BY `y`,`x` ASC) AS rownum
+    FROM `placedclues`
+    WHERE `crossword_id` = :crossword_id1
+    GROUP BY crossword_id,`y`,`x`
+    ) `t_order` ON t_order.`y`=`placedclues`.`y` AND t_order.`x`=`placedclues`.`x`
     SET `{$table}`.`place_number` = `t_order`.`rownum`
-    WHERE `crossword_id`=?
-    ORDER BY `y`,`x`;
+    WHERE `crossword_id` = :crossword_id2;
 END_SQL;
+            // Initialise & configure connection
             $pdo = db::getPDO();
-            $criteria_values = [$this->id,$this->id];
+            $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+            // Prepare the statement
             $stmt = $pdo->prepare($sql);
-            $stmt->execute($criteria_values);
+            // Apparently we can't reuse a parameter name, even if the value is the same (https://www.php.net/manual/en/pdo.prepare.php)
+            $stmt->bindParam(':crossword_id1', $this->id, \PDO::PARAM_INT);
+            $stmt->bindParam(':crossword_id2', $this->id, \PDO::PARAM_INT);
+            try {
+                // Run that query!
+                $stmt->execute();
+            } catch (\PDOException $pex) {
+                LoggedError::log('PDOException',0,__FILE__,__LINE__,$pex->getCode()."\n".print_r($pex->errorInfo,true));
+                error_log('PDOException',0,__FILE__,__LINE__,$pex->getCode()."\n".print_r($pex->errorInfo,true));
+            } catch (Exception $ex) {
+                LoggedError::log('Exception',$ex->getCode(),__FILE__,__LINE__,$ex->getMessage());
+                error_log('Exception',$ex->getCode(),__FILE__,__LINE__,$ex->getMessage());
+            }
         }
 
         /**
@@ -138,7 +152,8 @@ END_SQL;
          * @return Grid the grid object, ready for use or serialization
          */
         public function getGrid(int $xMin=0, int $yMin=0, ?int $xMax=null, ?int $yMax=null) : Grid {
-            //TODO - this appears to be missing out clues (or leaving them blank) under certain circumstances
+            // Set numbering
+            $this->setClueNumbers();
             // Get clues
             $allPClues = $this->getSortedClueList();
             //error_log("Clues in list: ".count($allPClues));

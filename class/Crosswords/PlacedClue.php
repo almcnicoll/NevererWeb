@@ -40,7 +40,7 @@ namespace Crosswords {
           $this->__captiveClue->save();
           $this->__captiveClue = null;
         }
-        if ($crossword !== null) { $crossword->setPlaceNumbers(); } // Update the place_numbers of all clues in the crossword
+        if ($crossword !== null) { $crossword->setClueNumbers(); } // Update the place_numbers of all clues in the crossword
         return $returnVal;
       }
 
@@ -55,24 +55,6 @@ namespace Crosswords {
           return $cTmp;
       }
 
-      /**
-       * Gets a value for the given x and y co-ords which can be used to order a clue within a crossword
-       * @param int $row the row of the clue
-       * @param int $col the column of the clue
-       * @return int the ordering value
-       */
-      static function calculateOrder(int $row, int $col) : int {
-        return ($row*1000) + $col;
-      }
-
-      /**
-       * Gets a value that orders the clue within the crossword
-       * @return int a number which orders the clue within the crossword
-       */
-      function getOrderingValue() : int {
-        return $this->calculateOrder($this->y, $this->x);
-      }
-
       /** Retrieves the clue for this PlacedClue, creating it if need be
        * @return Clue the underlying Clue object
        */
@@ -84,8 +66,6 @@ namespace Crosswords {
           $this->__captiveClue = new Clue();
           return $this->__captiveClue;
         }
-        error_log("Returning clue id {$clue->id} with answer {$clue->answer}");
-        error_log(print_r($clue,true));
         return $clue;
       }
 
