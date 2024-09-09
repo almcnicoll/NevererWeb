@@ -78,7 +78,7 @@ namespace Crosswords {
                 if ($parts[$i] === '') {
                     // If part is now blank, it was a whitespace delimiter and should be replaced with a comma
                     $parts[$i] = ',';
-                } elseif (preg_match(Clue::PATTERN_SPLIT_CHARS,$parts[$i]) === false) {
+                } elseif (preg_match('^'.Clue::PATTERN_SPLIT_CHARS,$parts[$i].'$') === false) {
                     // Otherwise if it doesn't match a splitting character, it must be letters - replace them with their length
                     $parts[$i] = strlen($parts[$i]);
                 }
