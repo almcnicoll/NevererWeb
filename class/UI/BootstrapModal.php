@@ -84,6 +84,7 @@ namespace UI {
                     $buttons .= "<button type='button' class='btn {$button['class']}' id='{$button_id}'>{$button['text']}</button>\n";
                 }
             }
+            // TODO - close button not working on modals
             $html = <<<END_HTML
         <div class="modal" id="{$this->id}" tabindex="-1" role="dialog" aria-labelledby="{$this->id}Label" aria-hidden="true">
             <div class="modal-dialog" role="document">
