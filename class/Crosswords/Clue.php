@@ -27,9 +27,6 @@ namespace Crosswords {
          */
         public function __construct()
         {
-            $this->question = '';
-            $this->answer = '';
-            $this->explanation = '';
         }
 
         /** 
@@ -38,6 +35,7 @@ namespace Crosswords {
          * @return ?int the id of the saved record or null if the save failed
          */
         public function save() : ?int {
+            $this->ensureFieldSet('question')->ensureFieldSet('answer');
             $this->pattern = Clue::getPattern($this->answer);
             $returnVal = parent::save(); // Call parent save logic
             return $returnVal;
