@@ -165,9 +165,10 @@ END_SQL;
                         $y = $placed_clue->y;
                         for ($ii=0; $ii<$len; $ii++) {
                             $x = $placed_clue->x + $ii; if ($x>=$this->cols) {continue;}
+                            $newLetter = substr($clue->getAnswerLetters(),$ii,1);
                             $squares[$y][$x]->black_square = false;
-                            if ($squares[$y][$x]->letter != '') { $squares[$y][$x]->setFlag(GridSquare::FLAG_CONFLICT); } // If already set
-                            $squares[$y][$x]->letter = substr($clue->getAnswerLetters(),$ii,1);
+                            if (($squares[$y][$x]->letter != '') && ($squares[$y][$x]->letter != $newLetter)) { $squares[$y][$x]->setFlag(GridSquare::FLAG_CONFLICT); } // If already set
+                            $squares[$y][$x]->letter = $newLetter;
                             if ($ii==0) { $squares[$y][$x]->clue_number = $placed_clue->place_number; }
                         }
                         break;
@@ -175,9 +176,10 @@ END_SQL;
                         $x = $placed_clue->x;
                         for ($ii=0; $ii<$len; $ii++) {
                             $y = $placed_clue->y + $ii; if ($y>=$this->rows) {continue;}
+                            $newLetter = substr($clue->getAnswerLetters(),$ii,1);
                             $squares[$y][$x]->black_square = false;
-                            if ($squares[$y][$x]->letter != '') { $squares[$y][$x]->setFlag(GridSquare::FLAG_CONFLICT); } // If already set
-                            $squares[$y][$x]->letter = substr($clue->getAnswerLetters(),$ii,1);
+                            if (($squares[$y][$x]->letter != '') && ($squares[$y][$x]->letter != $newLetter)) { $squares[$y][$x]->setFlag(GridSquare::FLAG_CONFLICT); } // If already set
+                            $squares[$y][$x]->letter = $newLetter;
                             if ($ii==0) { $squares[$y][$x]->clue_number = $placed_clue->place_number; }
                         }
                         break;
