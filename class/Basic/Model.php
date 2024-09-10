@@ -1,6 +1,6 @@
 <?php
 namespace Basic {
-
+    // TODO - LOW consider adding table relationships so we can do cascading deletes etc.
     use InvalidArgumentException;
     use PDO,Exception,DateTime;
     class Model extends BaseClass {
@@ -326,17 +326,12 @@ namespace Basic {
                 throw new Exception("Could not delete: no matching record in database");
             }
 
-            // TODO - pay attention to related tables
-
             $sql = "DELETE FROM `".static::$tableName."` WHERE id=:id";
             $params = [
                 "id" => $this->id,
             ];
             $stmt = $pdo->prepare($sql);
-            $stmt->execute($params);
-            
-            // TODO - pay attention to results
-            return true;
+            return $stmt->execute($params); // Return success or failure of the delete
         }
 
         /**
@@ -357,10 +352,7 @@ namespace Basic {
                 "id" => $id,
             ];
             $stmt = $pdo->prepare($sql);
-            $stmt->execute($params);
-            
-            // TODO - pay attention to results
-            return true;
+            return $stmt->execute($params); // Return success or failure of the delete
         }
 
         /**
