@@ -156,8 +156,7 @@ namespace Basic {
          * @return an object of the class or subclass calling the function, or null if no record is found
          */
         public static function findFirst($criteria, $orderBy = null) : ?static {
-            // TODO - would be better (more efficient in db) to run query with LIMIT 1 instead of this
-            $values = static::find($criteria, $orderBy);
+            $values = static::find($criteria, $orderBy, 1);
             if (count($values)==0) { return null; }
             return $values[0];
         }
@@ -168,7 +167,7 @@ namespace Basic {
          * @param string $orderBy either an array of field names OR an array of arrays in the form ['field', 'asc|desc'] OR null to use default ordering
          * @return mixed an array of objects of the class or subclass calling the function - an empty array if there are no matches
          */
-        public static function find($criteria, $orderBy = null) : array {
+        public static function find($criteria, $orderBy = null, $limit = null, $offset = null) : array {
             $pdo = db::getPDO();
 
             // Check arguments
@@ -238,10 +237,25 @@ namespace Basic {
             } else {
                 $orderSql = static::parseOrderBy($orderBy);
             }
+
+            if ($limit === null) {
+                $limitSql = '';
+            } else {
+                if (!is_numeric($limit)) { throw new InvalidArgumentException("Invalid value for limit: {$limit}"); }
+                $limitNum = intval($limit);
+                if ($offset === null) {
+                    $limitSql = ' LIMIT '.(string)$limitNum.' ';
+                } else {
+                    if (!is_numeric($offset)) { throw new InvalidArgumentException("Invalid value for offset: {$offset}"); }
+                    $offsetNum = intval($offset);
+                    $limitSql = ' LIMIT '.(string)$limitNum.' OFFSET '.(string)$offsetNum.' ';
+                }
+            }
             
             $sql = "SELECT * FROM `".static::$tableName."` "
                     ."WHERE ".implode(" AND ", $criteria_strings)
-                    .$orderSql;
+                    .$orderSql
+                    .$limitSql;
             //error_log($sql);
             //error_log(print_r($criteria_values,true));
             $stmt = $pdo->prepare($sql);
