@@ -99,6 +99,14 @@ namespace Crosswords {
       }
 
       /**
+       * Retrieves the length of the underlying clue
+       * @return int the length of the clue
+       */
+      public function getLength() : int {
+        return $this->getLength();
+      }
+
+      /**
        * Sets the captive clue for the PlacedClue when it already exists
        */
       public function setClue(Clue $clue, bool $safety = true) : void {
@@ -198,11 +206,11 @@ namespace Crosswords {
         // Populate variables for current clue
         $Ax1 = $this->x; $Ax2 = $this->x;
         $Ay1 = $this->y; $Ay2 = $this->y;
-        if ($this->orientation == PlacedClue::ACROSS) { $Ax2 += ($this->getClue()->getLength()-1); } else { $Ay2 += ($this->getClue()->getLength()-1); }
+        if ($this->orientation == PlacedClue::ACROSS) { $Ax2 += ($this->getLength()-1); } else { $Ay2 += ($this->getLength()-1); }
         // Populate variables for comparison clue
         $Bx1 = $comparisonClue->x; $Bx2 = $comparisonClue->x;
         $By1 = $comparisonClue->y; $By2 = $comparisonClue->y;
-        if ($comparisonClue->orientation == PlacedClue::ACROSS) { $Bx2 += ($comparisonClue->getClue()->getLength()-1); } else { $By2 += ($comparisonClue->getClue()->getLength()-1); }
+        if ($comparisonClue->orientation == PlacedClue::ACROSS) { $Bx2 += ($comparisonClue->getLength()-1); } else { $By2 += ($comparisonClue->getLength()-1); }
         // Compare
         if ($Ax2 < $Bx1) { return false; } // A wholly to the left of B
         if ($Ax1 > $Bx2) { return false; } // A wholly to the right of B
