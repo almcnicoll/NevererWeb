@@ -296,16 +296,49 @@ END_SQL;
 
         /**
          * Examines the supplied clue and the crossword's symmetry setting and then determines if there are existing clues that match symmetry rules
-         * @param PlacedClue $newClue the clue being created
+         * @param PlacedClue $placedClue the clue whose rotations are to be checked
          * @return PlacedClue_List any clues that match the symmetry rules - returns an empty PlacedClue_List if none match
          */
-        public function getExistingSymmetryClues(PlacedClue $newClue) : PlacedClue_List {
-            $newClues = new PlacedClue_List();
-            // TODO - symmetry logic here
-            if ($this->rotational_symmetry_order > 1) { // Otherwise there's no symmetry, so return blank list
-                //
+        public function getExistingSymmetryClues(PlacedClue $placedClue) : PlacedClue_List {
+            $existingClues = new PlacedClue_List();
+            // If there's no symmetry, there's no symmetry clues
+            if ($this->rotational_symmetry_order == 1) { return $existingClues; }
+            // Define the 180 rotation
+            $templateClues = new PlacedClue_List();
+            $pcReflect180 = $placedClue->getRotatedClue(180);
+            // Consider this a symmetry clue if it isn't an exact overlap of the original
+            if (($pcReflect180->x != $placedClue->x) || ($pcReflect180->y != $placedClue->y)) {
+                $templateClues[] = $pcReflect180;
             }
-            return $newClues;
+            if ($this->rotational_symmetry_order > 2) {
+                // Define the 90 & 270 rotations
+                $pcReflect90 = $placedClue->getRotatedClue(90);
+                $pcReflect270 = $placedClue->getRotatedClue(270);
+                $templateClues[] = $pcReflect90;
+                // Consider the 270 a symmetry clue if it isn't an exact overlap of the 90
+                if (($pcReflect90->x != $pcReflect270->x) || ($pcReflect90->y != $pcReflect270->y)) {
+                    $templateClues[] = $pcReflect270;
+                }
+            }
+            // If we've not found any valid rotations to check, there's no symmetry clues
+            if (count($templateClues) == 0) { return $existingClues; }
+
+            // Otherwise, loop through existing clues, checking them against the templates
+            $checkClues = $this->getPlacedClues();
+            foreach ($checkClues as $check) {
+                foreach ($templateClues as $template) {
+                    if (
+                        ($check->orientation === $template->orientation) &&
+                        ($check->x === $template->x) &&
+                        ($check->y === $template->y) &&
+                        ($check->getLength() == $template->getLength())
+                    ) {
+                        $existingClues[] = $check;
+                    }
+                }
+            }
+            // Now return what we've found
+            return $existingClues;
         }
 
         public function getGridHtml($include_answers) : string {
