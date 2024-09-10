@@ -227,8 +227,14 @@ END_SQL;
          */
         public function getOverlapClues(PlacedClue $placedClue, $problemsOnly = true) : PlacedClue_List {
             $overlapClues = new PlacedClue_List();
-            // TODO - overlap logic here - return all clues that overlap with the specified one
-            // TODO - ensure that comparison doesn't compare clue with itself - the supplied PlacedClue might or might not be in the database! (use id field, allowing that it might be unset)
+            $allClues = $this->getPlacedClues();
+            foreach ($allClues as $clue) {
+                if ($placedClue->overlapsWith($clue)) {
+                    if (!$problemsOnly || ($placedClue->orientation == $clue->orientation)) {
+                        $overlapClues[] = $clue;
+                    }
+                }
+            }
             return $overlapClues;
         }
 
@@ -236,15 +242,12 @@ END_SQL;
          * Examines the supplied clue and the crossword's symmetry setting and then determines if any additional clues need adding at the same time
          * @param PlacedClue $newClue the clue being created
          * @return PlacedClue_List the new clues to be created - returns an empty PlacedClue_List if none match
+         * @throws IllegalClueOverlapException if the clues to be created would overlap illegally with an existing clue or each other (except if they would be exact duplicates)
          */
         public function getNewSymmetryClues(PlacedClue $newClue) : PlacedClue_List {
             $newClues = new PlacedClue_List();
-            // TODO - decide whether to throw an error if the new symmetry clue clashes with an existing clue of the same orientation
-            // TODO - if so, also throw an error if the new symmetry clue partially overlaps with the supplied clue
-            // NOTE - should not throw an error if it totally overlaps - just don't return an additional clue
             $clueLength = strlen($newClue->getClue()->answer);
             if ($this->rotational_symmetry_order > 1) { // Otherwise there's no symmetry, so return blank list
-                // TODO - work out how to create the Clue objects in the getRotatedClue function instead of here (where they're not actually used!)
                 // Logic for 2-fold
                 $pcReflect180 = $newClue->getRotatedClue(180);
                 // Now check for clashes with existing clues
@@ -252,31 +255,38 @@ END_SQL;
                     throw new IllegalClueOverlapException("2-fold symmetry clue overlaps illegally");
                 }
                 // If no clashes with existing clues, check it doesn't overlap itself
-                if (
-                    ($pcReflect180->orientation == PlacedClue::ACROSS && $pcReflect180->y == $newClue->y)
-                    ||
-                    ($pcReflect180->orientation == PlacedClue::DOWN && $pcReflect180->x == $newClue->x)
-                ) {
-                    // TODO - Check if it's partial overlap (throw error) or full overlap (don't add duplicate)
-
+                if ($pcReflect180->overlapsWith($newClue)) {
+                    // The mirrored clue will have the same orientation and length, so if it starts in the same place then it's not a problem - but we don't want a second clue added
+                    // However, if it starts in a different place, it's going to cause a partial overlap, which should throw an error
+                    if (($newClue->x != $pcReflect180->x) || ($newClue->y != $pcReflect180->y)) {
+                        throw new IllegalClueOverlapException("2-fold symmetry clue overlaps illegally");
+                    }
+                    // Otherwise just keep going without doing anything
                 } else {
                     // All good - just add it
                     $newClues[] = $pcReflect180;
                 }
                 if ($this->rotational_symmetry_order > 2) {
                     // Logic for 4-fold
-                    $cReflect90 = $newClue->getClue()->blankClone();
+                    // Symmetry here shouldn't really result in bad overlaps, unless people manually mess with the symmetry of the puzzle - but we need to allow for that
                     $pcReflect90 = $newClue->getRotatedClue(90);
-                    $cReflect270 = $newClue->getClue()->blankClone();
                     $pcReflect270 = $newClue->getRotatedClue(270);
-                    // Add 90-degree rotation, then check if 270-degree rotation duplicates (we should already have handled non-duplicate but clashing in errors above)
-                    // TODO - implement bracketed comment above
-                    $newClues[] = $pcReflect90;
-                    if (
-                        ($pcReflect90->orientation == PlacedClue::ACROSS && $pcReflect90->y != $pcReflect270->y)
-                        ||
-                        ($pcReflect90->orientation == PlacedClue::DOWN && $pcReflect90->x != $pcReflect270->x)
-                    ) {
+                    // Check that the new clues don't overlap illegally with other existing clues
+                    if ((count($this->getOverlapClues($pcReflect90, true))>0) || (count($this->getOverlapClues($pcReflect270, true))>0)) {
+                        throw new IllegalClueOverlapException("4-fold symmetry clue overlaps illegally");
+                    }
+                    // Check that they don't overlap illegally with each other
+                    if ($pcReflect90->overlapsWith($pcReflect270)) {
+                        // The clues will have the same orientation and length, so if they start in the same place then it's not a problem - but only add one of them
+                        // However, if they start in different places, it's going to cause a partial overlap, which should throw an error
+                        if (($pcReflect90->x != $pcReflect270->x) || ($pcReflect90->y != $pcReflect270->y)) {
+                            throw new IllegalClueOverlapException("4-fold symmetry clue overlaps illegally");
+                        }
+                        // Otherwise just add the one clue
+                        $newClues[] = $pcReflect90;
+                    } else {
+                        // They don't overlap each other, so add both
+                        $newClues[] = $pcReflect90;
                         $newClues[] = $pcReflect270;
                     }
                 }

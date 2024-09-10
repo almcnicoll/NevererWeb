@@ -3,6 +3,7 @@ namespace Crosswords {
   use Basic\Model;
   use Exception, InvalidArgumentException;
   class PlacedClue extends Model {
+      
       public int $crossword_id;
       // NB co-ordinates are ZERO-based
       public int $x;
@@ -22,6 +23,34 @@ namespace Crosswords {
 
       /** Contains a Clue object for when a PlacedClue is being created from scratch */
       protected ?Clue $__captiveClue = null;
+      /** Contains a unique identifier for when a PlacedClue has not yet been saved - retrieved only by getUniqueId() */
+      protected ?int $__uniqueID = null;
+
+      /** 
+       * Returns an id that can be compared to those of other PlacedClues
+       * @return int|string the numeric id of the record in the database or a string that is unique to this PlacedClue
+       */
+      public function getUniqueId() : int|string {
+        if (isset($this->id) && $this->id !== null) {
+          // If we have a database ID, return that
+          return $this->id;
+        } else {
+          // Otherwise return a unique string ID
+          if ($this->__uniqueID === null) {
+            // If the string ID field is unset, assign it a value
+            $this->__uniqueID = uniqid('nev',true);
+          }
+          // Return string
+          return $this->__uniqueID;
+        }
+      }
+
+      /**
+       * Checks if two PlacedClue variables are actually referencing the same PlacedClue
+       */
+      public function is(PlacedClue $comparisonClue) : bool {
+        return $this->getUniqueId() === $comparisonClue->getUniqueId();
+      }
 
       /** 
        * Extends the built-in save method:
@@ -159,6 +188,27 @@ namespace Crosswords {
             // This won't happen, as it's covered above
             throw new InvalidArgumentException("Cannot rotate by {$degrees} degrees: valid values are ".implode(', ',$validRotations));
         }
+      }
+
+      /**
+       * Checks if the current PlacedClue overlaps with the comparison clue
+       */
+      public function overlapsWith(PlacedClue $comparisonClue) : bool {
+        // TODO - ensure that comparison doesn't compare clue with itself - the supplied PlacedClue might or might not be in the database! (use id field, allowing that it might be unset)
+        // Populate variables for current clue
+        $Ax1 = $this->x; $Ax2 = $this->x;
+        $Ay1 = $this->y; $Ay2 = $this->y;
+        if ($this->orientation == PlacedClue::ACROSS) { $Ax2 += ($this->getClue()->getLength()-1); } else { $Ay2 += ($this->getClue()->getLength()-1); }
+        // Populate variables for comparison clue
+        $Bx1 = $comparisonClue->x; $Bx2 = $comparisonClue->x;
+        $By1 = $comparisonClue->y; $By2 = $comparisonClue->y;
+        if ($comparisonClue->orientation == PlacedClue::ACROSS) { $Bx2 += ($comparisonClue->getClue()->getLength()-1); } else { $By2 += ($comparisonClue->getClue()->getLength()-1); }
+        // Compare
+        if ($Ax2 < $Bx1) { return false; } // A wholly to the left of B
+        if ($Ax1 > $Bx2) { return false; } // A wholly to the right of B
+        if ($Ay2 < $By1) { return false; } // A wholly above B
+        if ($Ay1 > $By2) { return false; } // A wholly below B
+        return true; // Otherwise they overlap
       }
   }
 }
