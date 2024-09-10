@@ -41,7 +41,7 @@ $(document).ready(
  */
 function displayAjaxError(json) {
     // Do nothing for the moment
-    // TODO - need code here - perhaps a notification area
+    // TODO - need code here - use Bootstrap Toasts methinks https://getbootstrap.com/docs/5.2/components/toasts/
 }
 
 /**
