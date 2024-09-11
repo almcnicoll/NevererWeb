@@ -202,7 +202,8 @@ namespace Crosswords {
        * Checks if the current PlacedClue overlaps with the comparison clue
        */
       public function overlapsWith(PlacedClue $comparisonClue) : bool {
-        // TODO - ensure that comparison doesn't compare clue with itself - the supplied PlacedClue might or might not be in the database! (use id field, allowing that it might be unset)
+        // If clues are the same clue, we define them as not overlapping
+        if ($this->is($comparisonClue)) { return false; }
         // Populate variables for current clue
         $Ax1 = $this->x; $Ax2 = $this->x;
         $Ay1 = $this->y; $Ay2 = $this->y;
