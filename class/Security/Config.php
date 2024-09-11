@@ -41,7 +41,7 @@ namespace Security {
             // When to perform user authentication on the specified pages
             //  values are PAGEAUTH_NONE (don't authenticate), PAGEAUTH_LATE (authenticate after content rendered) or PAGE_AUTH_EARLY (authenticate first thing)
             //  the default is 'early' and any unrecognised values will be handled as 'early'
-            // TODO - move this to separate Route/Page class?
+            // TODO - LOW move this to separate Route/Page class?
             self::$__config['pageinfo'] = [];
             self::$__config['pageinfo']['index'] = new PageInfo(PageInfo::AUTH_EARLY, '/nw/intro');
             self::$__config['pageinfo']['nw_intro'] = new PageInfo(PageInfo::AUTH_NEVER, false);
