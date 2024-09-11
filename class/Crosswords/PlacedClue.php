@@ -23,34 +23,6 @@ namespace Crosswords {
 
       /** Contains a Clue object for when a PlacedClue is being created from scratch */
       protected ?Clue $__captiveClue = null;
-      /** Contains a unique identifier for when a PlacedClue has not yet been saved - retrieved only by getUniqueId() */
-      protected ?int $__uniqueID = null;
-
-      /** 
-       * Returns an id that can be compared to those of other PlacedClues
-       * @return int|string the numeric id of the record in the database or a string that is unique to this PlacedClue
-       */
-      public function getUniqueId() : int|string {
-        if (isset($this->id) && $this->id !== null) {
-          // If we have a database ID, return that
-          return $this->id;
-        } else {
-          // Otherwise return a unique string ID
-          if ($this->__uniqueID === null) {
-            // If the string ID field is unset, assign it a value
-            $this->__uniqueID = uniqid('nev',true);
-          }
-          // Return string
-          return $this->__uniqueID;
-        }
-      }
-
-      /**
-       * Checks if two PlacedClue variables are actually referencing the same PlacedClue
-       */
-      public function is(PlacedClue $comparisonClue) : bool {
-        return $this->getUniqueId() === $comparisonClue->getUniqueId();
-      }
 
       /** 
        * Extends the built-in save method:

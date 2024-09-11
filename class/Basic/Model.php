@@ -14,6 +14,46 @@ namespace Basic {
         static string $tableName;
         static $fields = ['id','created','modified'];
 
+        /** Contains a unique identifier for when a PlacedClue has not yet been saved - retrieved only by getUniqueId() */
+        protected ?int $__uniqueID = null;
+  
+        /** 
+         * Returns an id that can be compared to those of other objects of the same class
+         * @return int|string the numeric id of the record in the database or a string that is unique to this object
+         */
+        public function getUniqueId() : int|string {
+          if (isset($this->id) && $this->id !== null) {
+            // If we have a database ID, return that
+            return $this->id;
+          } else {
+            // Otherwise return a unique string ID
+            if ($this->__uniqueID === null) {
+              // If the string ID field is unset, assign it a value
+              $this->__uniqueID = uniqid('nev',true);
+            }
+            // Return string
+            return $this->__uniqueID;
+          }
+        }
+
+        /** Retrieves the table name from static context
+         * @return string the table name in static::$tableName
+         */
+        protected function getTableName() : string {
+            if (isset(static::$tableName)) {
+                return static::$tableName;
+            } else {
+                return '';
+            }
+        }
+  
+        /**
+         * Checks if two variables are actually referencing the same object
+         */
+        public function is(Model $comparisonObj) : bool {
+          return ($this->getTableName() == $comparisonObj->getTableName()) && ($this->getUniqueId() === $comparisonObj->getUniqueId());
+        }
+
         /**
          * Turns an orderBy variable (in our proprietary format) into a valid ORDER BY string (with leading space)
          * @param string $fields either an array of field names, or an array of arrays in the form ['field', 'asc|desc']
