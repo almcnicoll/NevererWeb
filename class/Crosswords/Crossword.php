@@ -182,6 +182,7 @@ END_SQL;
                             $x = $placed_clue->x + $ii; if ($x>=$this->cols) {continue;}
                             $newLetter = substr($clue->getAnswerLetters(),$ii,1);
                             $squares[$y][$x]->black_square = false;
+                            $squares[$y][$x]->placed_clue_ids[] = $placed_clue->id;
                             if ($squares[$y][$x]->letter != '') {
                                 // Don't overwrite existing letter
                                 if (($newLetter != '') && ($squares[$y][$x]->letter != $newLetter)) {

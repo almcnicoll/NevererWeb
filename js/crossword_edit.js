@@ -1,5 +1,6 @@
 var rows = 0;
 var cols = 0;
+var selectedClue = 0;
 
 const FLAG_CONFLICT = 1;
 const FLAG_FEWMATCHES = 2;    
@@ -274,4 +275,14 @@ function createClue() {
 
     // If all else is fine, hide the modal
     bootstrap.Modal.getInstance(document.getElementById('new-clue')).hide();
+}
+
+/**
+ * Handles left-clicking a grid square:
+ * If square is black, deselects everything
+ * If square is white, selects its clue
+ * If square is an intersection and a clue is already selected, selects the other intersecting clue
+ */
+function toggleSelect() {
+    //
 }

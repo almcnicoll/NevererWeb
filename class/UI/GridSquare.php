@@ -9,18 +9,20 @@ namespace UI {
         public string $letter = '';
         public ?int $clue_number = null;
         public int $flags = 0;
+        public mixed $placed_clue_ids = [];
 
         public const FLAG_CONFLICT = 1;
         public const FLAG_FEWMATCHES = 2;    
         public const FLAG_NOMATCHES = 4;
 
-        public function __construct(int $x, int $y, bool $black_square, string $letter = '', ?int $clue_number = null, int $flags = 0) {
+        public function __construct(int $x, int $y, bool $black_square, string $letter = '', ?int $clue_number = null, int $flags = 0, mixed $placed_clue_ids = []) {
             $this->x = $x;
             $this->y = $y;
             $this->black_square = $black_square;
             $this->letter = $letter;
             $this->clue_number = $clue_number;
             $this->flags = $flags;
+            $this->placed_clue_ids = $placed_clue_ids;
         }
 
         public function toJson() {
