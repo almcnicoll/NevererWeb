@@ -28,6 +28,7 @@ $(document).ready(
 
         // Individual actions
         $('#new-clue-default').on('click',createClue);
+        $('td.crossword-grid-square').on('click',toggleSelect);
 
         // Refresh data
         refreshGrid();
@@ -104,6 +105,7 @@ function updateGridSquares(json) {
             if (square.flags & FLAG_CONFLICT) { sq.addClass('conflict'); } else { sq.removeClass('conflict'); }
             if (square.flags & FLAG_FEWMATCHES) { sq.addClass('few-matches'); } else { sq.removeClass('few-matches'); }
             if (square.flags & FLAG_NOMATCHES) { sq.addClass('no-matches'); } else { sq.removeClass('no-matches'); }
+            sq.data('placed-clue-ids',square.placed_clue_ids.join(','));
             sq.children('.letter-holder').text(square.letter);
         }
     }
@@ -284,5 +286,48 @@ function createClue() {
  * If square is an intersection and a clue is already selected, selects the other intersecting clue
  */
 function toggleSelect() {
-    //
+    // TODO - click handling
+    var cluesHereString = $(this).data('placed-clue-ids');
+    if ((cluesHereString === undefined) || (cluesHereString === '')) {
+        // Black square - deselect all clues
+        selectClue(0);
+    } else {
+        // White square - see if we're already selecting a clue
+        var cluesHere = cluesHereString.split(',');
+        if (selectedClue == 0) {
+            // No clue selected - select first in array
+            selectClue(parseInt(cluesHere[0]));
+        } else if (selectedClue == parseInt(cluesHere[0])) {
+            // Clue selected is first in array - see if there's another that intersects
+            if (cluesHere.length>1) {
+                // Yes there is - select that
+                selectClue(parseInt(cluesHere[1]));
+            }
+        } else {
+            // Clue selected isn't first in array - toggle back to first one
+            selectClue(parseInt(cluesHere[0]));
+        }
+    }
+}
+
+/**
+ * Selects the specified clue in the UI
+ * @param {int} id the id of the clue to select, or 0 to select nothing
+ * @returns void
+ */
+function selectClue(id = 0) {
+    // Set variables
+    selectedClue = id;
+    var reSel = new RegExp('\\b'+id+'\\b'); // To allow for standalone numbers and comma-delimited ones, but not digits within larger numbers
+    // Remove selection classes
+    $('.crossword-grid-square').removeClass('ui-select');
+    if (id == 0) { return; } // Nothing more to do if we're just deselecting - save some unneeded looping
+    // Add selection classes
+    $('.crossword-grid-square').each(
+        function() {
+            if (reSel.test($(this).data('placed-clue-ids'))) {
+                $(this).addClass('ui-select');
+            }
+        }
+    );
 }

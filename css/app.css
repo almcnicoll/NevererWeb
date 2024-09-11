@@ -180,6 +180,10 @@ td.crossword-grid-square {
     text-transform: capitalize;
     font-weight: bold;
 }
+td.crossword-grid-square.ui-select {
+    background-color: #ffff80;
+    border: #555 1px solid;
+}
 div.clue-number {
     float: left;
     font-size: 50%;

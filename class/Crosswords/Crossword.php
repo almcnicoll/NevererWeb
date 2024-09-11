@@ -112,16 +112,16 @@ namespace Crosswords {
             // Create SQL
             $table = PlacedClue::$tableName;
             $sql = <<<END_SQL
-    UPDATE `{$table}`
-    INNER JOIN 
-    (
-    SELECT `y`,`x`, ROW_NUMBER() OVER (PARTITION BY crossword_id ORDER BY `y`,`x` ASC) AS rownum
-    FROM `placedclues`
-    WHERE `crossword_id` = :crossword_id1
-    GROUP BY crossword_id,`y`,`x`
-    ) `t_order` ON t_order.`y`=`placedclues`.`y` AND t_order.`x`=`placedclues`.`x`
-    SET `{$table}`.`place_number` = `t_order`.`rownum`
-    WHERE `crossword_id` = :crossword_id2;
+UPDATE `{$table}`
+INNER JOIN 
+(
+SELECT `y`,`x`, ROW_NUMBER() OVER (PARTITION BY crossword_id ORDER BY `y`,`x` ASC) AS rownum
+FROM `placedclues`
+WHERE `crossword_id` = :crossword_id1
+GROUP BY crossword_id,`y`,`x`
+) `t_order` ON t_order.`y`=`placedclues`.`y` AND t_order.`x`=`placedclues`.`x`
+SET `{$table}`.`place_number` = `t_order`.`rownum`
+WHERE `crossword_id` = :crossword_id2;
 END_SQL;
             // Initialise & configure connection
             $pdo = db::getPDO();
@@ -171,18 +171,18 @@ END_SQL;
                 }
             }
 
-            foreach ($allPClues as $placed_clue) {
-                $clue = $placed_clue->getClue();
+            foreach ($allPClues as $placedClue) {
+                $clue = $placedClue->getClue();
                 error_log("Clue with id {$clue->id} has answer {$clue->answer}");
                 $len = $clue->getLength();
-                switch (strtolower($placed_clue->orientation)) {
+                switch (strtolower($placedClue->orientation)) {
                     case PlacedClue::ACROSS:
-                        $y = $placed_clue->y;
+                        $y = $placedClue->y;
                         for ($ii=0; $ii<$len; $ii++) {
-                            $x = $placed_clue->x + $ii; if ($x>=$this->cols) {continue;}
+                            $x = $placedClue->x + $ii; if ($x>=$this->cols) {continue;}
                             $newLetter = substr($clue->getAnswerLetters(),$ii,1);
-                            $squares[$y][$x]->black_square = false;
-                            $squares[$y][$x]->placed_clue_ids[] = $placed_clue->id;
+                            $squares[$y][$x]->black_square = false; // It's not a black square
+                            $squares[$y][$x]->placed_clue_ids[] = $placedClue->id; // It is part of this clue
                             if ($squares[$y][$x]->letter != '') {
                                 // Don't overwrite existing letter
                                 if (($newLetter != '') && ($squares[$y][$x]->letter != $newLetter)) {
@@ -192,15 +192,16 @@ END_SQL;
                                 // Overwrite if what's there is blank
                                 $squares[$y][$x]->letter = $newLetter;
                             }
-                            if ($ii==0) { $squares[$y][$x]->clue_number = $placed_clue->place_number; }
+                            if ($ii==0) { $squares[$y][$x]->clue_number = $placedClue->place_number; }
                         }
                         break;
                     case PlacedClue::DOWN:
-                        $x = $placed_clue->x;
+                        $x = $placedClue->x;
                         for ($ii=0; $ii<$len; $ii++) {
-                            $y = $placed_clue->y + $ii; if ($y>=$this->rows) {continue;}
+                            $y = $placedClue->y + $ii; if ($y>=$this->rows) {continue;}
                             $newLetter = substr($clue->getAnswerLetters(),$ii,1);
-                            $squares[$y][$x]->black_square = false;
+                            $squares[$y][$x]->black_square = false; // It's not a black square
+                            $squares[$y][$x]->placed_clue_ids[] = $placedClue->id; // It is part of this clue
                             if ($squares[$y][$x]->letter != '') {
                                 // Don't overwrite existing letter
                                 if (($newLetter != '') && ($squares[$y][$x]->letter != $newLetter)) {
@@ -210,7 +211,7 @@ END_SQL;
                                 // Overwrite if what's there is blank
                                 $squares[$y][$x]->letter = $newLetter;
                             }
-                            if ($ii==0) { $squares[$y][$x]->clue_number = $placed_clue->place_number; }
+                            if ($ii==0) { $squares[$y][$x]->clue_number = $placedClue->place_number; }
                         }
                         break;
                     default:
