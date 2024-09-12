@@ -92,9 +92,17 @@ if ($fatal_error) {
         </div>
     </div>
     <div class='col-md-6'>
-        <div><?= $modal_new_clue->getTriggerHtml(); ?></div>
+        <table class='d-none'>
+            <tr id='clue-row-template'>
+                <td class='clue-orientation-and-number'>&nbsp;</td>
+                <td class='clue-question'>&nbsp;</td>
+            </tr>
+        </table>
+        <div>
+            <?= $modal_new_clue->getTriggerHtml(); ?>
+        </div>
         <div class='clue-container'>
-        <?= $crossword->getCluesHtml(true); ?>
+            <?= $crossword->getCluesHtml(true); ?>
         </div>
     </div>
 </div>

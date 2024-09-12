@@ -120,23 +120,15 @@ function updateGridSquares(json) {
 function updateClueList(json, removeMissing=true) {
     // Loop through the list of PlacedClues, updating as we go
     // NB - json comes in as a multidimensional array ([row][col])
-    all_squares = JSON.parse(json);
+    all_clues = JSON.parse(json);
     // TODO - caught errors will return errors here - consider throwing them with a 400/500 error server-side - otherwise they need managing here - rudimentary method below
-    if (all_squares.hasOwnProperty('errors')) {
+    if (all_clues.hasOwnProperty('errors')) {
         displayAjaxError(json);
         return;
     }
-    for (var y in all_squares) {
-        for (var x in all_squares[y]) {
-            var square = all_squares[y][x];
-            var sq = $('#square-'+y+'-'+x);
-            if (square.black_square) { sq.addClass('black-square'); } else { sq.removeClass('black-square'); }
-            if (square.clue_number === null) { sq.children('.clue-number').text(''); } else { sq.children('.clue-number').text(square.clue_number); }
-            if (square.flags & FLAG_CONFLICT) { sq.addClass('conflict'); } else { sq.removeClass('conflict'); }
-            if (square.flags & FLAG_FEWMATCHES) { sq.addClass('few-matches'); } else { sq.removeClass('few-matches'); }
-            if (square.flags & FLAG_NOMATCHES) { sq.addClass('no-matches'); } else { sq.removeClass('no-matches'); }
-            sq.children('.letter-holder').text(square.letter);
-        }
+    for (var i in all_clues) {
+        var clue = all_clues[i];
+        // TODO - HIGH refresh code here (NB ensure we respect removeMissing)
     }
 }
 
