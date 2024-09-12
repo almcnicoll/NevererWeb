@@ -15,7 +15,7 @@ namespace Basic {
         static $fields = ['id','created','modified'];
 
         /** Contains a unique identifier for when a PlacedClue has not yet been saved - retrieved only by getUniqueId() */
-        protected ?int $__uniqueID = null;
+        protected ?string $__uniqueID = null;
   
         /** 
          * Returns an id that can be compared to those of other objects of the same class

@@ -15,7 +15,7 @@ const FLAG_NOMATCHES = 4;
     return false; // Nothing to remove
 }*/
 function removeFromArray(arr,value) {
-    var index = arr.indexOf(val);
+    var index = arr.indexOf(value);
     if (index > -1) {
         arr.splice(index,1);
         return true; // We removed it

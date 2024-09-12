@@ -251,5 +251,17 @@ namespace Basic {
         public function __toString() : string {
             return json_encode(array_slice($this->_list, 0, 5));
         }
+
+        /**
+         * Convert the class object to an array for JSON-encoding
+         */
+        public function toArray() : mixed {
+            $output = [];
+            foreach ($this->_list as $item) {
+                /** @var BaseClass $item */
+                $output[] = $item->expose();
+            }
+            return $output;
+        }
     }
 }

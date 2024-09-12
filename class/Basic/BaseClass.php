@@ -6,5 +6,12 @@ namespace Basic {
         public static function ensureLoaded() : void {
             return;
         }
+
+        /**
+         * Access the object in a JSON-encodable form
+         */
+        public function expose() : mixed {
+            return get_object_vars($this);
+        }
     }
 }

@@ -39,18 +39,19 @@ switch ($action) {
         if ($crossword === null) { throw_error("Cannot find crossword with id {$crossword_id}"); }
         if (!$crossword->isOwnedBy($user->id)) { throw_error("Crossword with id {$crossword_id} does not belong to user #{$user->id}"); }
         $pcList = $crossword->getPlacedClues();
-        die(json_encode($pcList));
+        die(json_encode($pcList->toArray()));
     case 'get':
         // Called as /ajax/placed_clue/*/get/[id]
         $pc_id = array_shift($params);
-        $placed_clue = PlacedClue::findFirst('id','=',$pc_id);
-        if ($placed_clue === null) { throw_error("Cannot find clue with id {$pc_id}"); }
-        $crossword_id = $placed_clue->crossword_id;
+        /** @var PlacedClue $placedClue */
+        $placedClue = PlacedClue::findFirst('id','=',$pc_id);
+        if ($placedClue === null) { throw_error("Cannot find clue with id {$pc_id}"); }
+        $crossword_id = $placedClue->crossword_id;
         $crossword = Crossword::findFirst(['id','=',$crossword_id]);
         if ($crossword === null) { throw_error("Cannot find crossword with id {$crossword_id}"); }
         if (!$crossword->isOwnedBy($user->id)) { throw_error("Crossword with id {$crossword_id} does not belong to user #{$user->id}"); }
         //TODO - output clue serialized to JSON here
-        die(json_encode([]));
+        die(json_encode($placedClue->expose()));
     case 'create':
         // Called as /ajax/placed_clue/*/create/[crossword_id]
         // TODO - Validation here

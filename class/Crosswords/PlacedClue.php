@@ -190,5 +190,19 @@ namespace Crosswords {
         if ($Ay1 > $By2) { return false; } // A wholly below B
         return true; // Otherwise they overlap
       }
+
+
+      /**
+       * Access the object in a JSON-encodable form
+       * Extends the base method to also retrieve and output Clue object
+       */
+      public function expose($includeClue = true) : mixed {
+        $output = parent::expose();
+        if ($includeClue) {
+          $clue = $this->getClue();
+          $output['clue'] = $clue->expose();
+        }
+        return $output;
+      }
   }
 }

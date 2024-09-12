@@ -334,9 +334,9 @@ END_SQL;
 
         public function getCluesHtml($include_answers) : string {
             $html = "<table id='clue-list' class='clue-grid'>\n";
-            $html .= "\t<tr id='clues-across' class='clue-orientation-header'><th colspan='*'>Across</th></tr>\n";
+            $html .= "\t<tr id='clues-across' class='clue-orientation-header'><th colspan='2'>Across</th></tr>\n";
             $html .= "\t<tbody id='clues-across-container' class='clue-orientation-container'></tbody>\n";
-            $html .= "\t<tr id='clues-down' class='clue-orientation-header'><th colspan='*'>Down</th></tr>\n";
+            $html .= "\t<tr id='clues-down' class='clue-orientation-header'><th colspan='2'>Down</th></tr>\n";
             $html .= "\t<tbody id='clues-down-container' class='clue-orientation-container'></tbody>\n";
             $html .= "</table>\n";
             return $html;

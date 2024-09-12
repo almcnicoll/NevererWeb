@@ -27,6 +27,7 @@ namespace UI {
         public function toArray() : mixed {
             $output = [];
             foreach ($this->_list as $item) {
+                /** @var GridRow $item */
                 $output[] = $item->toArray();
             }
             return $output;
