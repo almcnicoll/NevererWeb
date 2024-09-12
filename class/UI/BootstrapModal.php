@@ -110,10 +110,10 @@ namespace UI {
 
         public function getTriggerHtml() : string {
             $html = <<<END_HTML
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#{$this->id}">
+    <button type="button" id='{$this->id}__Trigger' class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#{$this->id}">
         {$this->triggerHtml}
     </button>
-    END_HTML;
+END_HTML;
             return $html;
         }
     }

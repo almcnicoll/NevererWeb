@@ -345,7 +345,6 @@ END_SQL;
 
         public function getGridHtml($include_answers) : string {
             // Consider sending blank grid, to be populated by AJAX call
-            $allClues = $this->getSortedClueList();
             $html = "<table id='crossword-edit' class='crossword-grid'>\n";
             for ($y=0; $y<$this->rows; $y++) {
                 $html .= "\t<tr class='crossword-grid-row' id='row-{$y}'>\n";
@@ -362,7 +361,12 @@ END_SQL;
         }
 
         public function getCluesHtml($include_answers) : string {
-            return '<pre>Not yet implemented</pre>\n';
+            // TODO - Add <tbody> below each header - you can have multiple <tbody> elements in a table, so that will make grouping easy
+            $html = "<table id='clue-list' class='clue-grid'>\n";
+            $html .= "\t<tr id='clues-across' class='clue-orientation-header'><th colspan='*'>Across</th></tr>\n";
+            $html .= "\t<tr id='clues-down' class='clue-orientation-header'><th colspan='*'>Down</th></tr>\n";
+            $html .= "</table>\n";
+            return $html;
         }
     }
 }

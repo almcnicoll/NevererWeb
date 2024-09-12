@@ -79,7 +79,7 @@ if ($fatal_error) {
     $modal_new_clue->setTitle('Add clue')
     ->setBody($form_new_clue->getHtml())
     ->setButtons("Save")
-    ->setTrigger("Add");
+    ->setTrigger("+");
     echo $modal_new_clue->getMainHtml();
 ?>
 
@@ -92,9 +92,9 @@ if ($fatal_error) {
         </div>
     </div>
     <div class='col-md-6'>
+        <div><?= $modal_new_clue->getTriggerHtml(); ?></div>
         <div class='clue-container'>
         <?= $crossword->getCluesHtml(true); ?>
         </div>
-        <div><?= $modal_new_clue->getTriggerHtml(); ?></div>
     </div>
 </div>

@@ -199,6 +199,21 @@ td.conflict .letter-holder {
     color: #ff0000;
     font-style: italic;
 }
+table.clue-grid {
+    margin: auto;
+    width: 90%;
+    border: #333 2px solid;
+}
+tr.clue-orientation-header {
+    background-color: #333;
+    color: #fff;
+    font-weight: bold;
+    text-align: center;
+}
+#new-clue__Trigger {
+    position: absolute;
+    margin-top: -8px;
+}
 
 /* Google signin bits */
 .g-signin2>div {
