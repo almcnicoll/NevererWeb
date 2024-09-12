@@ -364,7 +364,9 @@ END_SQL;
             // TODO - Add <tbody> below each header - you can have multiple <tbody> elements in a table, so that will make grouping easy
             $html = "<table id='clue-list' class='clue-grid'>\n";
             $html .= "\t<tr id='clues-across' class='clue-orientation-header'><th colspan='*'>Across</th></tr>\n";
+            $html .= "\t<tbody id='clues-across-container' class='clue-orientation-container'></tbody>\n";
             $html .= "\t<tr id='clues-down' class='clue-orientation-header'><th colspan='*'>Down</th></tr>\n";
+            $html .= "\t<tbody id='clues-down-container' class='clue-orientation-container'></tbody>\n";
             $html .= "</table>\n";
             return $html;
         }
