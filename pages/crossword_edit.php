@@ -93,8 +93,8 @@ if ($fatal_error) {
     </div>
     <div class='col-md-6'>
         <table class='d-none'>
-            <tr id='clue-row-template'>
-                <td class='clue-orientation-and-number'>&nbsp;</td>
+            <tr id='clue-row-template' class='clue-row' data-clue-orientation='' data-clue-number='0'>
+                <td class='clue-number'>&nbsp;</td>
                 <td class='clue-question'>&nbsp;</td>
             </tr>
         </table>

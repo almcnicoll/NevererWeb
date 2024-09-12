@@ -16,7 +16,6 @@ namespace Crosswords {
       static $fields = ['id','crossword_id','x','y','orientation','place_number','status','created','modified'];
 
       public static $defaultOrderBy = ['y','x','orientation'];
-      public int $placeNumber = 0;
 
       public const ACROSS = 'across';
       public const DOWN = 'down';

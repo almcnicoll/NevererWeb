@@ -6,6 +6,23 @@ const FLAG_CONFLICT = 1;
 const FLAG_FEWMATCHES = 2;    
 const FLAG_NOMATCHES = 4;
 
+/*Array.prototype.removeByValue = function(val) {
+    var index = this.indexOf(val);
+    if (index > -1) {
+        this.splice(index,1);
+        return true; // We removed it
+    }
+    return false; // Nothing to remove
+}*/
+function removeFromArray(arr,value) {
+    var index = arr.indexOf(val);
+    if (index > -1) {
+        arr.splice(index,1);
+        return true; // We removed it
+    }
+    return false; // Nothing to remove
+}
+
 $(document).ready(
     /** On-load actions here */
     function() {
@@ -118,17 +135,65 @@ function updateGridSquares(json) {
  * @returns {void}
  */
 function updateClueList(json, removeMissing=true) {
+    // TODO - HIGH test this code
     // Loop through the list of PlacedClues, updating as we go
     // NB - json comes in as a multidimensional array ([row][col])
-    all_clues = JSON.parse(json);
+    allClues = JSON.parse(json);
     // TODO - caught errors will return errors here - consider throwing them with a 400/500 error server-side - otherwise they need managing here - rudimentary method below
-    if (all_clues.hasOwnProperty('errors')) {
+    if (allClues.hasOwnProperty('errors')) {
         displayAjaxError(json);
         return;
     }
-    for (var i in all_clues) {
-        var clue = all_clues[i];
-        // TODO - HIGH refresh code here (NB ensure we respect removeMissing)
+    var lastOrientation = '';
+    var lastClueNumber = 0;
+    var unusedIds = $.map($(".clue-row"), function(n, i){
+        return n.id;
+    });
+    // Clues should be in order - all across and then all down
+    for (var i in allClues) {
+        var pClue = allClues[i];
+        var num = pClue.place_number;
+        var ori = pClue.orientation;
+        if (ori !== lastOrientation) { lastClueNumber = 0; lastOrientation = ori } // Change of orientation = back to the start of numbering
+        var id = ori + '-' + num;
+        var clueRow = $('tr#'+id+'.clue-row');
+        if (clueRow.length > 0) {
+            // We have this clue already - update it
+            clueRow.find('.clue-number').text(num); // Update number
+            clueRow.find('.clue-question').text(pClue.clue.question); // Update question
+            //unusedIds.removeByValue(id); // And remove it from unused list
+            removeFromArray(unusedIds,id);
+        } else {
+            // We need to add this clue
+            var tbody_container = $('#clues-'+ori+'-container');
+            var insertBefore = false;
+            tbody_container.find('tr.clue-row').each(
+                function() {
+                    if (insertBefore === false) {
+                        // Let's look for a row where our insert clue-number is lower then the row clue-number
+                        if ($(this).data('clue-number') > num) {
+                            insertBefore = $(this).attr('id');
+                        }
+                    }
+                }
+            );
+            // Create the row
+            var newRow = $('tr#clue-row-template').clone().attr('id',id).data('clue-orientation',ori).data('clue-number',num);
+            newRow.find('.clue-number').text(num);
+            newRow.find('.clue-question').text(pClue.clue.question);
+            if (insertBefore === false) {
+                // No clues to put before, so add it at the end
+                tbody_container.append(newRow);
+            } else {
+                // Insert before the specified clue
+                newRow.insertBefore('#'+insertBefore);
+            }
+        }
+    }
+    if (removeMissing) {
+        for(var i in unusedIds) {
+            $('#'+unusedIds[i]).remove();
+        }
     }
 }
 

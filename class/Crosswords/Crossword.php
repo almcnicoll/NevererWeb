@@ -5,6 +5,7 @@ namespace Crosswords {
     use Security\User;
     use UI\Grid, UI\GridRow, UI\GridSquare;
     use Exception, Exceptions\IllegalClueOverlapException;
+    use InvalidArgumentException;
     use Logging\LoggedError;
 
     class Crossword extends Model {
@@ -65,45 +66,16 @@ namespace Crosswords {
          * @param int $order specifies whether to return the clues in the form 1A,2D,3A,3D,4D,7A or 1A,3A,7A,2D,3D,4D
          */
         public function getSortedClueList(int $order = Crossword::SORT_ORDER_PLACE_NUMBER) : PlacedClue_List {
-            /*
-            // NB In theory this code shouldn't be necessary, as place_number should now be set every time a clue is saved
-            $lastOrder = -1;
-            $clueIncrement = 0;
+            // TODO clue sorting not in place
             $placedClues = $this->getPlacedClues();
-            $sorted_clues = [];
-
-            for($i=0; $i<count($placedClues); $i++) {
-                $pc = $placedClues[$i];
-                $ord = $pc->getOrderingValue();
-
-                if ($ord != $lastOrder) {
-                    $clueIncrement++;
-                }
-
-                if ($pc->orientation != 'Unset') {
-                    $k = $pc->orientation.$clueIncrement;
-                    while (array_key_exists($k, $sorted_clues)) {
-                        // This happens when we mirror clues that are on an axis of symmetry and we end up with two across/down clues starting in the same place - just ignore and increment as often as needed
-                        $clueIncrement++;
-                        $k = $pc->orientation.$clueIncrement;
-                    }
-                    $pc->placeNumber = $clueIncrement;
-                    $sorted_clues[$k] = $pc;
-                }
-
-                $lastOrder = $ord;
+            switch ($order) {
+                case Crossword::SORT_ORDER_AD:
+                    break;
+                case Crossword::SORT_ORDER_PLACE_NUMBER:
+                    break;
+                default:
+                    throw new InvalidArgumentException("Invalid sorting argument: {$order}");
             }
-            if ($order == Crossword::SORT_ORDER_AD) {
-                // Order by Across then Down
-                ksort($sorted_clues,SORT_STRING);
-            } else {
-                // Order by place number
-                uksort($sorted_clues,[Crossword::class,'sortCluePlaceByNumber']);
-            }
-            $clues = new PlacedClue_List($sorted_clues);
-            return $clues;
-            */
-            $placedClues = $this->getPlacedClues();
             return $placedClues;
         }
 
@@ -361,7 +333,6 @@ END_SQL;
         }
 
         public function getCluesHtml($include_answers) : string {
-            // TODO - Add <tbody> below each header - you can have multiple <tbody> elements in a table, so that will make grouping easy
             $html = "<table id='clue-list' class='clue-grid'>\n";
             $html .= "\t<tr id='clues-across' class='clue-orientation-header'><th colspan='*'>Across</th></tr>\n";
             $html .= "\t<tbody id='clues-across-container' class='clue-orientation-container'></tbody>\n";
