@@ -46,6 +46,7 @@ $(document).ready(
         // Individual actions
         $('#new-clue-default').on('click',createClue);
         $('td.crossword-grid-square').on('click',toggleSelect);
+        $('td.crossword-grid-square').on('contextmenu',function(){alert('test');});
 
         // Refresh data
         refreshGrid();

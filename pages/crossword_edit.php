@@ -83,6 +83,17 @@ if ($fatal_error) {
     echo $modal_new_clue->getMainHtml();
 ?>
 
+<!-- CONTEXT MENUS -->
+<?php
+    $menu_grid_square = new UI\BootstrapContextMenu('menu-grid-square');
+    $menu_grid_square->setItems( new UI\BootstrapMenuItem_List( [
+        new UI\BootstrapContextMenu('new-clue-across'),
+        new UI\BootstrapContextMenu('new-clue-down'),
+        new UI\BootstrapContextMenu('clear-grid-square'),
+    ] ) );
+    echo $menu_grid_square->getHtml();
+?>
+
 <div class='row'>
     <div class='col-md-6'>
         <div class='crossword-container'>
