@@ -81,7 +81,8 @@ namespace UI {
                     if (!is_array($button)) { continue; } // Skip any invalid buttons
                     if (!key_exists('text',$button)) { $button['text'] = $button_id; }
                     if (!key_exists('class',$button)) { $button['class'] = ''; }
-                    $buttons .= "<button type='button' class='btn {$button['class']}' id='{$button_id}'>{$button['text']}</button>\n";
+                    if (count($this->footerButtons)==1) { $button['type'] = 'submit'; } else { $button['type'] = 'button'; }
+                    $buttons .= "<button type='{$button['type']}' class='btn {$button['class']}' id='{$button_id}'>{$button['text']}</button>\n";
                 }
             }
             // TODO - close button not working on modals

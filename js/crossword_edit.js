@@ -78,7 +78,7 @@ $(document).ready(
         rows = $('#crossword-edit tr').length;
         cols = $('#crossword-edit tr').first().children('td').length;
 
-        // Set up modal focus events
+        // Set up modal events
         $('div.modal').each(
             function() {
                 if ($(this).find('.focussed-input').length > 0) {
@@ -90,6 +90,9 @@ $(document).ready(
                 }
             }
         );
+        $('div.modal form').on('keypress', function(eventObject) { 
+            if (eventObject.which==13) { $(this).parents('div.modal').find(':submit').trigger('click'); eventObject.preventDefault=true; } 
+        })
 
         // Individual actions
         $('#new-clue-default').on('click',createClue);
