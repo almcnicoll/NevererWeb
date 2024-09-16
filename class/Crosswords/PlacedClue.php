@@ -74,7 +74,7 @@ namespace Crosswords {
        * @return int the length of the clue
        */
       public function getLength() : int {
-        return $this->getLength();
+        return $this->getClue()->getLength();
       }
 
       /**

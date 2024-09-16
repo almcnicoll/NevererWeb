@@ -60,8 +60,9 @@ function gridSquareMenuClickHandler(eventObject) {
             new bootstrap.Modal('#new-clue').toggle();
             $('#new-clue #new-clue-answer').focus();
             break;
-        case 'menu-grid-square-clear-grid-square':
-            break;
+        // TODO clear-square functionality
+        /*case 'menu-grid-square-clear-grid-square':
+            break;*/
         default:
             alert('Not yet implemented!');
             break;
