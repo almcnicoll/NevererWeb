@@ -23,6 +23,53 @@ function removeFromArray(arr,value) {
     return false; // Nothing to remove
 }
 
+/**
+ * Handles right-clicks or other context menu launches
+ * @param {Event} eventObject the event containing the various metadata
+ */
+function gridSquareRightClickHandler(eventObject) {
+    // Stop propagation and right-click handling
+    eventObject.stopPropagation();
+    eventObject.preventDefault();
+    // Retrieve and store the trigger square (id is square-r-c)
+    var parts = eventObject.currentTarget.id.split('-');
+    $('#context-menu-menu-grid-square').data('trigger-row',parts[1]).data('trigger-col',parts[2]);
+    // Move and show menu
+    $('#context-menu-menu-grid-square').css('left',eventObject.pageX).css('top',eventObject.pageY).toggle();
+}
+
+/**
+ * Handles the clicking of any action from the GridSquareMenu context menu
+ * @param {Event} eventObject 
+ */
+function gridSquareMenuClickHandler(eventObject) {
+    // Determine what was clicked
+    var action = eventObject.currentTarget.id;
+    switch (action) {
+        case 'menu-grid-square-new-clue-across':
+            $('#new-clue input#new-clue-row').val( $('#context-menu-menu-grid-square').data('trigger-row') );
+            $('#new-clue input#new-clue-col').val( $('#context-menu-menu-grid-square').data('trigger-col') );
+            $('#new-clue select#new-clue-orientation').val('across');
+            new bootstrap.Modal('#new-clue').toggle();
+            $('#new-clue #new-clue-answer').focus();
+            break;
+        case 'menu-grid-square-new-clue-down':
+            $('#new-clue input#new-clue-row').val( $('#context-menu-menu-grid-square').data('trigger-row') );
+            $('#new-clue input#new-clue-col').val( $('#context-menu-menu-grid-square').data('trigger-col') );
+            $('#new-clue select#new-clue-orientation').val('down');
+            new bootstrap.Modal('#new-clue').toggle();
+            $('#new-clue #new-clue-answer').focus();
+            break;
+        case 'menu-grid-square-clear-grid-square':
+            break;
+        default:
+            alert('Not yet implemented!');
+            break;
+    }
+    // Hide menu
+    $('#context-menu-menu-grid-square').hide();
+}
+
 $(document).ready(
     /** On-load actions here */
     function() {
@@ -46,7 +93,8 @@ $(document).ready(
         // Individual actions
         $('#new-clue-default').on('click',createClue);
         $('td.crossword-grid-square').on('click',toggleSelect);
-        $('td.crossword-grid-square').on('contextmenu',function(){alert('test');});
+        $('td.crossword-grid-square').on('contextmenu', gridSquareRightClickHandler);
+        $('#context-menu-menu-grid-square .dropdown-item').on('click', gridSquareMenuClickHandler);
 
         // Refresh data
         refreshGrid();
@@ -289,7 +337,7 @@ function fieldProblem(selector, message) {
  * @returns {string} the pattern for the clue or null if the answer is blank or invalid
  */
 function getAnswerPattern(answer) {
-    var reRemoves = /[^A-Z\s\-]+/gi;
+    var reRemoves = /[^A-Z\s\-\?]+/gi; // NB includes question mark here, as it's used for unknowns
     var reSplitters = /[\s\-]+/gi;
     var reSplittersOnly = /^[\s\-]+$/gi;
     var working_answer = answer.replace(reRemoves,'');
@@ -309,8 +357,8 @@ function createClue() {
     var row = $('#new-clue-row').val();
     var col = $('#new-clue-col').val();
     var answer = $('#new-clue-answer').val();
-    var clue = $('#new-clue-clue').val();
-    var explanation = $('#new-clue-explanation').val();
+    //var clue = $('#new-clue-clue').val();
+    //var explanation = $('#new-clue-explanation').val();
 
     // Clear previous validation feedback
     $('#new-clue').find('form').find('.is-invalid').removeClass('is-invalid');

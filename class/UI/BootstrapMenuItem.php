@@ -73,7 +73,7 @@ namespace UI {
                 $html = "<li id='{$parent_id}-{$this->id}'>SUB-MENUS NOT YET SUPPORTED</a>";
             } else {
                 // Standard item
-                $html = "<li id='{$parent_id}-{$this->id}'><a href='#' class='dropdown-item'>{$this->label}</a>";
+                $html = "<li><a href='#' id='{$parent_id}-{$this->id}' class='dropdown-item'>{$this->label}</a>";
             }
             if ($this->dividerAfter) { $html .= "<li class='divider'></li>"; }
             return $html;
