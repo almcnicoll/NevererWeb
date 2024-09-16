@@ -54,7 +54,6 @@ namespace UI {
          */
         public function getHtml() : string {
             $items_string = '';
-            // TODO - HIGH these items are not currently outputting correctly
             foreach ($this->menuItems as $k=>$item) {
                 $items_string .= $item->getHtml($this->id)."\n";
             }
