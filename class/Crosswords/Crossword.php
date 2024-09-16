@@ -145,7 +145,6 @@ END_SQL;
 
             foreach ($allPClues as $placedClue) {
                 $clue = $placedClue->getClue();
-                error_log("Clue with id {$clue->id} has answer {$clue->answer}");
                 $len = $clue->getLength();
                 switch (strtolower($placedClue->orientation)) {
                     case PlacedClue::ACROSS:
