@@ -23,54 +23,6 @@ function removeFromArray(arr,value) {
     return false; // Nothing to remove
 }
 
-/**
- * Handles right-clicks or other context menu launches
- * @param {Event} eventObject the event containing the various metadata
- */
-function gridSquareRightClickHandler(eventObject) {
-    // Stop propagation and right-click handling
-    eventObject.stopPropagation();
-    eventObject.preventDefault();
-    // Retrieve and store the trigger square (id is square-r-c)
-    var parts = eventObject.currentTarget.id.split('-');
-    $('#context-menu-menu-grid-square').data('trigger-row',parts[1]).data('trigger-col',parts[2]);
-    // Move and show menu
-    $('#context-menu-menu-grid-square').css('left',eventObject.pageX).css('top',eventObject.pageY).toggle();
-}
-
-/**
- * Handles the clicking of any action from the GridSquareMenu context menu
- * @param {Event} eventObject 
- */
-function gridSquareMenuClickHandler(eventObject) {
-    // Determine what was clicked
-    var action = eventObject.currentTarget.id;
-    switch (action) {
-        case 'menu-grid-square-new-clue-across':
-            $('#new-clue input#new-clue-row').val( $('#context-menu-menu-grid-square').data('trigger-row') );
-            $('#new-clue input#new-clue-col').val( $('#context-menu-menu-grid-square').data('trigger-col') );
-            $('#new-clue select#new-clue-orientation').val('across');
-            new bootstrap.Modal('#new-clue').toggle();
-            $('#new-clue #new-clue-answer').focus();
-            break;
-        case 'menu-grid-square-new-clue-down':
-            $('#new-clue input#new-clue-row').val( $('#context-menu-menu-grid-square').data('trigger-row') );
-            $('#new-clue input#new-clue-col').val( $('#context-menu-menu-grid-square').data('trigger-col') );
-            $('#new-clue select#new-clue-orientation').val('down');
-            new bootstrap.Modal('#new-clue').toggle();
-            $('#new-clue #new-clue-answer').focus();
-            break;
-        // TODO clear-square functionality
-        /*case 'menu-grid-square-clear-grid-square':
-            break;*/
-        default:
-            alert('Not yet implemented!');
-            break;
-    }
-    // Hide menu
-    $('#context-menu-menu-grid-square').hide();
-}
-
 $(document).ready(
     /** On-load actions here */
     function() {
@@ -396,7 +348,9 @@ function createClue() {
  * If square is an intersection and a clue is already selected, selects the other intersecting clue
  */
 function toggleSelect() {
-    // TODO - click handling
+    // Hide the right-click menu
+    $('#context-menu-menu-grid-square').hide();
+    // Handle left-click
     var cluesHereString = $(this).data('placed-clue-ids');
     if ((cluesHereString === undefined) || (cluesHereString === '')) {
         // Black square - deselect all clues
@@ -440,4 +394,55 @@ function selectClue(id = 0) {
             }
         }
     );
+}
+
+/**
+ * Handles right-clicks or other context menu launches
+ * @param {Event} eventObject the event containing the various metadata
+ */
+function gridSquareRightClickHandler(eventObject) {
+    // Stop propagation and right-click handling
+    eventObject.stopPropagation();
+    eventObject.preventDefault();
+    // Retrieve and store the trigger square (id is square-r-c)
+    var parts = eventObject.currentTarget.id.split('-');
+    $('#context-menu-menu-grid-square').data('trigger-row',parts[1]).data('trigger-col',parts[2]);
+    // Check the validity of each item
+    // TODO - change from visibility to enabled/disabled to prevent menu from being unfamiliar each time?
+    if(eventObject.currentTarget.classList.contains('black-square')) { $('#menu-grid-square-clear-grid-square').hide(); } else { $('#menu-grid-square-clear-grid-square').show(); }
+    // Move and show menu
+    $('#context-menu-menu-grid-square').css('left',eventObject.pageX).css('top',eventObject.pageY).show();
+}
+
+/**
+ * Handles the clicking of any action from the GridSquareMenu context menu
+ * @param {Event} eventObject 
+ */
+function gridSquareMenuClickHandler(eventObject) {
+    // Determine what was clicked
+    var action = eventObject.currentTarget.id;
+    switch (action) {
+        case 'menu-grid-square-new-clue-across':
+            $('#new-clue input#new-clue-row').val( $('#context-menu-menu-grid-square').data('trigger-row') );
+            $('#new-clue input#new-clue-col').val( $('#context-menu-menu-grid-square').data('trigger-col') );
+            $('#new-clue select#new-clue-orientation').val('across');
+            new bootstrap.Modal('#new-clue').toggle();
+            $('#new-clue #new-clue-answer').focus();
+            break;
+        case 'menu-grid-square-new-clue-down':
+            $('#new-clue input#new-clue-row').val( $('#context-menu-menu-grid-square').data('trigger-row') );
+            $('#new-clue input#new-clue-col').val( $('#context-menu-menu-grid-square').data('trigger-col') );
+            $('#new-clue select#new-clue-orientation').val('down');
+            new bootstrap.Modal('#new-clue').toggle();
+            $('#new-clue #new-clue-answer').focus();
+            break;
+        // TODO clear-square functionality
+        /*case 'menu-grid-square-clear-grid-square':
+            break;*/
+        default:
+            alert('Not yet implemented!');
+            break;
+    }
+    // Hide menu
+    $('#context-menu-menu-grid-square').hide();
 }

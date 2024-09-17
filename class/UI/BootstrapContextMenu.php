@@ -59,11 +59,9 @@ namespace UI {
             }
             // style="display:block;position:static;margin-bottom:5px;"
             $html = <<<END_HTML
-            <!-- <div id="context-menu-{$this->id}" class="dropdown clearfix"> -->
-                <ul id="context-menu-{$this->id}" class="dropdown-menu" role="menu">
+                <ul id="context-menu-{$this->id}" class="dropdown-menu context-menu" role="menu">
                     {$items_string}
                 </ul>
-            <!-- </div> -->
     END_HTML;
             return $html;
         }

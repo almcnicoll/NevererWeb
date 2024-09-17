@@ -1,5 +1,5 @@
 @import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css");
-
+/* https://coolors.co/6d5acf-ffffff-000000-f78e69-00a896 */
 html {
     background-color: #6D5ACF;
 }
@@ -213,6 +213,15 @@ tr.clue-orientation-header {
 #new-clue__Trigger {
     position: absolute;
     margin-top: -8px;
+}
+
+/* Menus */
+ul.context-menu {
+    box-shadow: 5px 5px 10px 1px #000000;
+    border: #F78E69 2px solid;
+}
+ul.context-menu li:hover, ul.context-menu a:hover {
+    background-color: #00a896;
 }
 
 /* Google signin bits */
