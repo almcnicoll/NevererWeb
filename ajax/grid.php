@@ -1,6 +1,7 @@
 <?php
     use UI\Grid;
     use Crosswords\Crossword;
+use Crosswords\PlacedClue;
 
     function throw_error($errors) {
         $retval = ['errors' => $errors];
@@ -27,15 +28,40 @@
         case 'get':
             // Called as /ajax/grid/get/[id]?xMin=&yMin=&xMax=&yMax=
             Grid::ensureLoaded();
+            // Retrieve crossword
             $crossword_id = array_shift($params);
             /** @var Crossword $crossword */
             $crossword = Crossword::findFirst(['id','=',$crossword_id]);
             if ($crossword === null) { throw_error("Cannot find crossword with id {$crossword_id}"); }
             if (!$crossword->isOwnedBy($user->id)) { throw_error("Crossword with id {$crossword_id} does not belong to user #{$user->id}"); }
+            // Retrieve grid from crossword
             $xMin = 0; $xMax = $crossword->cols-1; $yMin = 0; $yMax = $crossword->rows-1;
             populate_from_request(['xMin','xMax','yMin','yMax']);
             $grid = $crossword->getGrid($xMin,$yMin,$xMax,$yMax);
             die(json_encode($grid->toArray()));
+        case 'clear':
+            // Called as /ajax/grid/clear/[id]/?xMin=&yMin=&xMax=&yMax=
+            Grid::ensureLoaded(); PlacedClue::ensureLoaded(); Crossword::ensureLoaded();
+            // Retrieve crossword
+            $crossword_id = array_shift($params);
+            /** @var Crossword $crossword */
+            $crossword = Crossword::findFirst(['id','=',$crossword_id]);
+            if ($crossword === null) { throw_error("Cannot find crossword with id {$crossword_id}"); }
+            if (!$crossword->isOwnedBy($user->id)) { throw_error("Crossword with id {$crossword_id} does not belong to user #{$user->id}"); }
+            // Retrieve grid from crossword
+            $xMin = 0; $xMax = $crossword->cols-1; $yMin = 0; $yMax = $crossword->rows-1;
+            populate_from_request(['xMin','xMax','yMin','yMax']);
+            $grid = $crossword->getGrid($xMin,$yMin,$xMax,$yMax);
+            // Now loop through the area, looking for affected clues
+            $affectedPlacedClues = [];
+            for ($y=0;$y<=($yMax-$yMin);$y++) {
+                for ($x=0;$x<=($xMax-$xMin);$x++) {
+                    $affectedPlacedClues = array_merge($affectedPlacedClues,$grid[$y][$x]->placed_clue_ids);
+                }
+            }
+            $affectedPlacedClues = array_unique($affectedPlacedClues);
+            // TODO - HIGH complete clear-square code
+            // Now loop through the affected clues, working out which letters to change to question-marks
         default:
             $file = str_replace(__DIR__,'',__FILE__);
             throw_error("Invalid action {$action} passed to {$file}");
