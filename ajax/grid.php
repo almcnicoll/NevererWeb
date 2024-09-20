@@ -60,8 +60,31 @@ use Crosswords\PlacedClue;
                 }
             }
             $affectedPlacedClues = array_unique($affectedPlacedClues);
-            // TODO - HIGH complete clear-square code
             // Now loop through the affected clues, working out which letters to change to question-marks
+            /** @var PlacedClue $placedClue */
+            foreach($affectedPlacedClues as $placedClue) {
+                // For each clue, clear between specified rows/columns
+                switch ($placedClue->orientation) {
+                    case PlacedClue::ACROSS:
+                        // Determine which columns to/from need clearing
+                        $startClear = $xMin - $placedClue->x;
+                        $endClear = $xMax - $placedClue->x;
+                        break;
+                    case PlacedClue::DOWN:
+                        // Determine which columns to/from need clearing
+                        $startClear = $yMin - $placedClue->y;
+                        $endClear = $yMax - $placedClue->y;
+                        break;
+                    default:
+                        // Ignore clues with no orientation
+                        continue;
+                }
+                // Retrieve clue and clear the relevant parts
+                // TODO - HIGH test the maths and substitutions below
+                $answer = $placedClue->getClue()->answer;
+                $placedClue->getClue()->answer = substr($answer,0,$startClear) . str_repeat('?',$endClear-$startClear+1) . substr($answer,$endClear);
+                $placedClue->getClue()->save();
+            }
         default:
             $file = str_replace(__DIR__,'',__FILE__);
             throw_error("Invalid action {$action} passed to {$file}");
