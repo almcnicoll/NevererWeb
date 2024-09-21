@@ -82,7 +82,7 @@ use Crosswords\PlacedClue;
                 // Retrieve clue and clear the relevant parts
                 // TODO - HIGH test the maths and substitutions below
                 $answer = $placedClue->getClue()->answer;
-                $placedClue->getClue()->answer = substr($answer,0,$startClear) . str_repeat('?',$endClear-$startClear+1) . substr($answer,$endClear);
+                $placedClue->getClue()->answer = substr($answer,0,$startClear) . str_repeat('?',$endClear-$startClear+1) . substr($answer+1,$endClear);
                 $placedClue->getClue()->save();
             }
         default:
