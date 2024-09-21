@@ -59,7 +59,7 @@ namespace Crosswords {
        * @return Clue the underlying Clue object
        */
       public function getClue() : Clue {
-        if ($this->__captiveClue != null) { error_log("We have an unsaved 'captive' clue in PlacedClue id {$this->id}"); return $this->__captiveClue; }
+        if ($this->__captiveClue != null) { return $this->__captiveClue; }
         $clue = Clue::findFirst(['placedclue_id','=',$this->id]);
         if ($clue == null) {
           error_log("Couldn't find clue with placedclue_id {$this->id}");
@@ -203,6 +203,29 @@ namespace Crosswords {
           $output['clue'] = $clue->expose();
         }
         return $output;
+      }
+
+      /**
+       * Clears the letters between the specified points, replacing them with question-mark placeholders
+       * @param int $start the zero-based start point
+       * @param int $end the zero-based end point
+       * @param bool $save whether to save the clue after the substitution is done
+       */
+      public function clearBetween($start, $end, $save = false) : void {
+        // Get answer
+        $answer = $this->getClue()->answer;
+        // Check that the start is valid
+        if ($start < 0) { $start = 0; }
+        if ($start >= strlen($answer)) { $start = strlen($answer)-1; }
+        // Check that our endpoint isn't too big
+        if ($end >= strlen($answer)) { $end = strlen($answer)-1; }
+        // Now splice the answer with question marks
+        // TODO - HIGH - this isn't actually changing the underlying object.
+        $this->getClue()->answer = substr($answer,0,$start) . str_repeat('?',$end-$start+1) . substr($answer,$end+1);
+        // Save if so requested
+        if ($save) {
+          $this->getClue()->save();
+        }
       }
   }
 }

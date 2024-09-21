@@ -10,7 +10,10 @@ use Crosswords\PlacedClue;
     }
     function populate_from_request($varnames) {
         foreach ($varnames as $varname) {
-            if (isset($_REQUEST[$varname])) { $$varname = $_REQUEST[$varname]; }
+            if (isset($_REQUEST[$varname])) {
+                global $$varname;
+                $$varname = $_REQUEST[$varname]; 
+            }
         }
     }
 
@@ -62,7 +65,10 @@ use Crosswords\PlacedClue;
             $affectedPlacedClues = array_unique($affectedPlacedClues);
             // Now loop through the affected clues, working out which letters to change to question-marks
             /** @var PlacedClue $placedClue */
-            foreach($affectedPlacedClues as $placedClue) {
+            foreach($affectedPlacedClues as $placedClueId) {
+                // Retrieve object
+                /** @var PlacedClue $placedClue */
+                $placedClue = PlacedClue::getById($placedClueId);
                 // For each clue, clear between specified rows/columns
                 switch ($placedClue->orientation) {
                     case PlacedClue::ACROSS:
@@ -80,10 +86,8 @@ use Crosswords\PlacedClue;
                         continue;
                 }
                 // Retrieve clue and clear the relevant parts
-                // TODO - HIGH test the maths and substitutions below
-                $answer = $placedClue->getClue()->answer;
-                $placedClue->getClue()->answer = substr($answer,0,$startClear) . str_repeat('?',$endClear-$startClear+1) . substr($answer+1,$endClear);
-                $placedClue->getClue()->save();
+                $placedClue->clearBetween($startClear,$endClear, true);
+                break;
             }
         default:
             $file = str_replace(__DIR__,'',__FILE__);

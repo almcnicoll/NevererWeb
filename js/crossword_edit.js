@@ -436,9 +436,18 @@ function gridSquareMenuClickHandler(eventObject) {
             new bootstrap.Modal('#new-clue').toggle();
             $('#new-clue #new-clue-answer').focus();
             break;
-        // TODO clear-square functionality
-        /*case 'menu-grid-square-clear-grid-square':
-            break;*/
+        case 'menu-grid-square-clear-grid-square':
+            // Get vars
+            var y = $('#context-menu-menu-grid-square').data('trigger-row');
+            var x = $('#context-menu-menu-grid-square').data('trigger-col');
+            // Now fire off the request
+            var url = root_path + '/grid/*/clear/' + crossword_id + '?domain=ajax&xMin='+x+'&xMax='+x+'&yMin='+y+'&yMax='+y;
+            $.post({
+                url: url
+            })
+            .done(refreshGrid)
+            .fail(displayAjaxError);
+            break;
         default:
             alert('Not yet implemented!');
             break;
