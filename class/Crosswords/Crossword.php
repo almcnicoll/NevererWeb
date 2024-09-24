@@ -124,6 +124,7 @@ END_SQL;
          * @return Grid the grid object, ready for use or serialization
          */
         public function getGrid(int $xMin=0, int $yMin=0, ?int $xMax=null, ?int $yMax=null) : Grid {
+            // TODO - HIGH code doesn't handle partial answers (i.e. when some letters are question-marks)
             // Set numbering
             $this->setClueNumbers();
             // Get clues
@@ -149,8 +150,10 @@ END_SQL;
                 switch (strtolower($placedClue->orientation)) {
                     case PlacedClue::ACROSS:
                         $y = $placedClue->y;
+                        if (($y<$yMin || $y>$yMax)) { continue; } // This may happen if we're pulling a partial grid
                         for ($ii=0; $ii<$len; $ii++) {
                             $x = $placedClue->x + $ii; if ($x>=$this->cols) {continue;}
+                            if (($x<$xMin || $x>$xMax)) { continue; } // This may happen if we're pulling a partial grid
                             $newLetter = substr($clue->getAnswerLetters(),$ii,1);
                             $squares[$y][$x]->black_square = false; // It's not a black square
                             $squares[$y][$x]->placed_clue_ids[] = $placedClue->id; // It is part of this clue
@@ -168,8 +171,10 @@ END_SQL;
                         break;
                     case PlacedClue::DOWN:
                         $x = $placedClue->x;
+                        if (($x<$xMin || $x>$xMax)) { continue; } // This may happen if we're pulling a partial grid
                         for ($ii=0; $ii<$len; $ii++) {
                             $y = $placedClue->y + $ii; if ($y>=$this->rows) {continue;}
+                            if (($y<$yMin || $y>$yMax)) { continue; } // This may happen if we're pulling a partial grid
                             $newLetter = substr($clue->getAnswerLetters(),$ii,1);
                             $squares[$y][$x]->black_square = false; // It's not a black square
                             $squares[$y][$x]->placed_clue_ids[] = $placedClue->id; // It is part of this clue

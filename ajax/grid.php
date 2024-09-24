@@ -56,6 +56,7 @@ use Crosswords\PlacedClue;
             populate_from_request(['xMin','xMax','yMin','yMax']);
             $grid = $crossword->getGrid($xMin,$yMin,$xMax,$yMax);
             // Now loop through the area, looking for affected clues
+            // TODO HIGH if we aren't clearing from the top-left corner, we get out-of-bounds array issues here - need to fix
             $affectedPlacedClues = [];
             for ($y=0;$y<=($yMax-$yMin);$y++) {
                 for ($x=0;$x<=($xMax-$xMin);$x++) {

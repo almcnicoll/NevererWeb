@@ -55,7 +55,7 @@ namespace Crosswords {
           return $cTmp;
       }
 
-      /** Retrieves the clue for this PlacedClue, creating it if need be
+      /** Retrieves the clue for this PlacedClue, creating it if need be, and caches it for repeat use
        * @return Clue the underlying Clue object
        */
       public function getClue() : Clue {
@@ -66,6 +66,8 @@ namespace Crosswords {
           $this->__captiveClue = new Clue();
           return $this->__captiveClue;
         }
+        // NB the line below is key. Otherwise repeat calls to getClue() on the same PlacedClue will re-retrieve the object from the database, losing any local changes already made
+        $this->__captiveClue = $clue;
         return $clue;
       }
 
@@ -220,11 +222,12 @@ namespace Crosswords {
         // Check that our endpoint isn't too big
         if ($end >= strlen($answer)) { $end = strlen($answer)-1; }
         // Now splice the answer with question marks
-        // TODO - HIGH - this isn't actually changing the underlying object.
-        $this->getClue()->answer = substr($answer,0,$start) . str_repeat('?',$end-$start+1) . substr($answer,$end+1);
+        $clue = $this->getClue();
+        $newAnswer = substr($answer,0,$start) . str_repeat('?',$end-$start+1) . substr($answer,$end+1);
+        $clue->answer = $newAnswer;
         // Save if so requested
         if ($save) {
-          $this->getClue()->save();
+          $clue->save();
         }
       }
   }
