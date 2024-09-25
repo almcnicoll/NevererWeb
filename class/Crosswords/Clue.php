@@ -17,7 +17,7 @@ namespace Crosswords {
 
         public static $defaultOrderBy = ['id'];
 
-        public const NON_PATTERN_CHARS = "/([^A-Za-z0-9\\s\\-]+)/i";
+        public const NON_PATTERN_CHARS = "/([^A-Za-z0-9\\s\\-\\?]+)/i";
         public const PATTERN_SPLIT_CHARS = "/([\\s\\-]+)/i";
         public const PATTERN_ANSWER_CHARS = "/[A-Za-z9-0]+/i";
         public const PATTERN_WHITESPACE = "/\\s+/";
