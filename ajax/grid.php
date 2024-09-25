@@ -87,8 +87,9 @@ use Crosswords\PlacedClue;
                 }
                 // Retrieve clue and clear the relevant parts
                 $placedClue->clearBetween($startClear,$endClear, true);
-                break;
             }
+            $output = ['placed_clues' => $affectedPlacedClues];
+            die(json_encode($output));
         default:
             $file = str_replace(__DIR__,'',__FILE__);
             throw_error("Invalid action {$action} passed to {$file}");
