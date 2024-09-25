@@ -124,7 +124,6 @@ END_SQL;
          * @return Grid the grid object, ready for use or serialization
          */
         public function getGrid(int $xMin=0, int $yMin=0, ?int $xMax=null, ?int $yMax=null) : Grid {
-            // TODO - HIGH code doesn't handle partial answers (i.e. when some letters are question-marks)
             // Set numbering
             $this->setClueNumbers();
             // Get clues
