@@ -344,6 +344,41 @@ function createClue() {
     bootstrap.Modal.getInstance(document.getElementById('new-clue')).hide();
 }
 
+/** Triggers the AJAX to create a clue from the new-clue modal */
+function editClue() {
+    alert('Not implemented!'); return;
+    // Populate vars
+    var row = $('#new-clue-row').val();
+    var col = $('#new-clue-col').val();
+    var answer = $('#new-clue-answer').val();
+    //var clue = $('#new-clue-clue').val();
+    //var explanation = $('#new-clue-explanation').val();
+
+    // Clear previous validation feedback
+    $('#new-clue').find('form').find('.is-invalid').removeClass('is-invalid');
+    $('#new-clue').find('form').find('.error-explain').remove();
+    // Perform new validation
+    if (!$.isNumeric(row)) { fieldProblem('#new-clue-row',"This field must be a number."); return; }
+    if (!$.isNumeric(col)) { fieldProblem('#new-clue-col',"This field must be a number."); return; }
+    if (answer.length == 0) { fieldProblem('#new-clue-answer',"This field must not be blank."); return; }
+    var pattern = getAnswerPattern(answer);
+    if (pattern === null) { fieldProblem('#new-clue-answer',"This field must not be blank."); return; }
+    $('#new-clue-pattern').val(pattern);
+
+    // Now fire off the request
+    var url = root_path + '/placed_clue/*/create/' + crossword_id + '?domain=ajax';
+    var formData = serializeForm('#new-clue form','new-clue-');
+    $.post({
+        url: url,
+        data: formData
+    })
+    .done(refreshAll)
+    .fail(displayAjaxError);
+
+    // If all else is fine, hide the modal
+    bootstrap.Modal.getInstance(document.getElementById('new-clue')).hide();
+}
+
 /**
  * Handles left-clicking a grid square:
  * If square is black, deselects everything
@@ -452,6 +487,15 @@ function gridSquareMenuClickHandler(eventObject) {
             $('#new-clue select#new-clue-orientation').val('down');
             new bootstrap.Modal('#new-clue').toggle();
             $('#new-clue #new-clue-answer').focus();
+            break;
+        case 'menu-grid-square-edit-clue-across':
+            // TODO - HIGH write this routinem including adding modal to page
+            alert('Not yet implemented!');
+            /*$('#new-clue input#new-clue-row').val( $('#context-menu-menu-grid-square').data('trigger-row') );
+            $('#new-clue input#new-clue-col').val( $('#context-menu-menu-grid-square').data('trigger-col') );
+            $('#new-clue select#new-clue-orientation').val('across');
+            new bootstrap.Modal('#new-clue').toggle();
+            $('#new-clue #new-clue-answer').focus();*/
             break;
         case 'menu-grid-square-clear-grid-square':
             // Get vars
