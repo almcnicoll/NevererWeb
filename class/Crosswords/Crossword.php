@@ -157,6 +157,7 @@ END_SQL;
                             $newLetter = substr($clue->getAnswerLetters(),$ii,1); if ($newLetter == '?') { $newLetter = ''; }
                             $squares[$y][$x]->black_square = false; // It's not a black square
                             $squares[$y][$x]->placed_clue_ids[] = $placedClue->id; // It is part of this clue
+                            $squares[$y][$x]->setIntersect(GridSquare::INTERSECTS_ACROSS); // It has an across clue intersecting it
                             if ($squares[$y][$x]->letter != '') {
                                 // Don't overwrite existing letter
                                 if (($newLetter != '') && ($squares[$y][$x]->letter != $newLetter)) {
@@ -178,6 +179,7 @@ END_SQL;
                             $newLetter = substr($clue->getAnswerLetters(),$ii,1); if ($newLetter == '?') { $newLetter = ''; }
                             $squares[$y][$x]->black_square = false; // It's not a black square
                             $squares[$y][$x]->placed_clue_ids[] = $placedClue->id; // It is part of this clue
+                            $squares[$y][$x]->setIntersect(GridSquare::INTERSECTS_DOWN); // It has a down clue intersecting it
                             if ($squares[$y][$x]->letter != '') {
                                 // Don't overwrite existing letter
                                 if (($newLetter != '') && ($squares[$y][$x]->letter != $newLetter)) {

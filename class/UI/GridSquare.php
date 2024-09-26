@@ -3,6 +3,16 @@
 namespace UI {
     use Basic\BaseClass;
     class GridSquare extends BaseClass {
+
+        public const FLAG_CONFLICT = 1;
+        public const FLAG_FEWMATCHES = 2;    
+        public const FLAG_NOMATCHES = 4;
+
+        public const INTERSECTS_NONE = 0;
+        public const INTERSECTS_ACROSS = 1;
+        public const INTERSECTS_DOWN = 2;
+        public const INTERSECTS_BOTH = 3;
+
         public int $x = 0;
         public int $y = 0;
         public bool $black_square = true;
@@ -10,12 +20,9 @@ namespace UI {
         public ?int $clue_number = null;
         public int $flags = 0;
         public mixed $placed_clue_ids = [];
+        public int $intersects = self::INTERSECTS_NONE;
 
-        public const FLAG_CONFLICT = 1;
-        public const FLAG_FEWMATCHES = 2;    
-        public const FLAG_NOMATCHES = 4;
-
-        public function __construct(int $x, int $y, bool $black_square, string $letter = '', ?int $clue_number = null, int $flags = 0, mixed $placed_clue_ids = []) {
+        public function __construct(int $x, int $y, bool $black_square, string $letter = '', ?int $clue_number = null, int $flags = 0, mixed $placed_clue_ids = [], int $intersects = self::INTERSECTS_NONE) {
             $this->x = $x;
             $this->y = $y;
             $this->black_square = $black_square;
@@ -23,6 +30,7 @@ namespace UI {
             $this->clue_number = $clue_number;
             $this->flags = $flags;
             $this->placed_clue_ids = $placed_clue_ids;
+            $this->intersects = $intersects;
         }
 
         public function toJson() {
@@ -44,6 +52,24 @@ namespace UI {
          */
         public function clearFlag(int $val) : GridSquare {
             $this->flags &= ~$val;
+            return $this;
+        }
+
+        /**
+         * Sets an intersect on the GridSquare, whether or not it was already set
+         * @return GridSquare returns the GridSquare to allow for method chaining
+         */
+        public function setIntersect(int $intersectType) : GridSquare {
+            $this->intersects |= $intersectType;
+            return $this;
+        }
+        
+        /**
+         * Clears an intersect on the GridSquare, whether or not it was already set
+         * @return GridSquare returns the GridSquare to allow for method chaining
+         */
+        public function clearIntersect(int $intersectType) : GridSquare {
+            $this->intersects &= ~$intersectType;
             return $this;
         }
     }
