@@ -2,6 +2,8 @@
 
 namespace UI {
     use Basic\BaseClass;
+    use InvalidArgumentException;
+
     class GridSquare extends BaseClass {
 
         public const FLAG_CONFLICT = 1;
@@ -54,12 +56,21 @@ namespace UI {
             $this->flags &= ~$val;
             return $this;
         }
+        
+        /**
+         * Checks a flag on the GridSquare
+         * @return bool returns whether or not the flag is set
+         */
+        public function hasFlag(int $val) : bool {
+            return (($this->flags & $val)>0);
+        }
 
         /**
          * Sets an intersect on the GridSquare, whether or not it was already set
          * @return GridSquare returns the GridSquare to allow for method chaining
          */
         public function setIntersect(int $intersectType) : GridSquare {
+            if (($intersectType < self::INTERSECTS_NONE) || ($intersectType >= self::INTERSECTS_BOTH)) { throw new InvalidArgumentException("Invalid intersect type passed."); }
             $this->intersects |= $intersectType;
             return $this;
         }
@@ -69,8 +80,18 @@ namespace UI {
          * @return GridSquare returns the GridSquare to allow for method chaining
          */
         public function clearIntersect(int $intersectType) : GridSquare {
+            if (($intersectType < self::INTERSECTS_NONE) || ($intersectType >= self::INTERSECTS_BOTH)) { throw new InvalidArgumentException("Invalid intersect type passed."); }
             $this->intersects &= ~$intersectType;
             return $this;
+        }
+        
+        /**
+         * Checks an intersect on the GridSquare
+         * @return bool returns whether or not the intersect is set
+         */
+        public function hasIntersect(int $intersectType) : bool {
+            if (($intersectType < self::INTERSECTS_NONE) || ($intersectType >= self::INTERSECTS_BOTH)) { throw new InvalidArgumentException("Invalid intersect type passed."); }
+            return (($this->intersects & $intersectType)>0);
         }
     }
 }
