@@ -16,7 +16,10 @@ function throw_error($errors) {
 }
 function populate_from_request($varnames) {
     foreach ($varnames as $varname) {
-        if (isset($_REQUEST[$varname])) { $$varname = $_REQUEST[$varname]; }
+        if (isset($_REQUEST[$varname])) { 
+            global $$varname;
+            $$varname = $_REQUEST[$varname]; 
+        }
     }
 }
 
@@ -52,6 +55,51 @@ switch ($action) {
         if (!$crossword->isOwnedBy($user->id)) { throw_error("Crossword with id {$crossword_id} does not belong to user #{$user->id}"); }
         //TODO - output clue serialized to JSON here
         die(json_encode($placedClue->expose()));
+    case 'find':
+        // Called as /ajax/placed_clue/*/find/[crossword-id]?orientation=across|down&x=[x]&y=[y]
+        // Specifies a cell and an orientation, and retrieves the matching PlacedClue
+        // TODO - check that this code works when two across clues are on the same row and when two down clues are on the same column
+        $crossword_id = array_shift($params);
+        $findCriteria = [];
+        populate_from_request(['orientation','x','y']);
+        switch (strtolower($orientation)) {
+            case 'across':
+                $findCriteria = [
+                                ['crossword_id','=',$crossword_id],
+                                ['orientation','=',strtolower($orientation)],
+                                ['x','<=',$x],
+                                ['y','=',$y]
+                ];
+                break;
+            case 'down':
+                $findCriteria = [
+                                ['crossword_id','=',$crossword_id],
+                                ['orientation','=',strtolower($orientation)],
+                                ['y','<=',$y],
+                                ['x','=',$x]
+                ];
+                break;
+            default:
+                throw new InvalidArgumentException("Invalid value {$orientation} passed to placed_clue/find");
+        }
+        $possibleMatches = PlacedClue::find($findCriteria);
+        foreach ($possibleMatches as $possibleMatch) {
+            /** @var PlacedClue $possibleMatch */
+            $clue = $possibleMatch->getClue();
+            switch ($possibleMatch->orientation) {
+                case 'across':
+                    if (($possibleMatch->x + strlen($clue->answer) - 1) >= $x) { die(json_encode($possibleMatch->expose())); }
+                    break;
+                case 'down':
+                    if (($possibleMatch->y + strlen($clue->answer) - 1) >= $y) { die(json_encode($possibleMatch->expose())); }
+                    break;
+                default:
+                    // Shouldn't happen
+                    break;
+            }
+        }
+        // No match
+        die(json_encode([]));
     case 'create':
         // Called as /ajax/placed_clue/*/create/[crossword_id]
         // TODO - Validation here

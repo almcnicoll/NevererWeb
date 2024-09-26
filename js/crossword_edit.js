@@ -48,6 +48,7 @@ $(document).ready(
 
         // Individual actions
         $('#new-clue-default').on('click',createClue);
+        $('#edit-clue-default').on('click',editClue);
         $('td.crossword-grid-square').on('click',toggleSelect);
         $('td.crossword-grid-square').on('contextmenu', gridSquareRightClickHandler);
         $('#context-menu-menu-grid-square .dropdown-item').on('click', gridSquareMenuClickHandler);
@@ -127,9 +128,10 @@ function updateGridSquares(json) {
             if (square.flags & FLAG_CONFLICT) { sq.addClass('conflict'); } else { sq.removeClass('conflict'); }
             if (square.flags & FLAG_FEWMATCHES) { sq.addClass('few-matches'); } else { sq.removeClass('few-matches'); }
             if (square.flags & FLAG_NOMATCHES) { sq.addClass('no-matches'); } else { sq.removeClass('no-matches'); }
-            sq.data('placed-clue-ids',square.placed_clue_ids.join(','));
-            sq.data('has-across-clue',(square.intersects & 1)>0);
-            sq.data('has-down-clue',(square.intersects & 2)>0);
+            // NB for the data() calls below, we want to set attr() too, so that we can use jQuery attribute selectors later
+            sq.data('placed-clue-ids',square.placed_clue_ids.join(',')).attr('data-placed-clue-ids',square.placed_clue_ids.join(','));
+            sq.data('has-across-clue',(square.intersects & 1)>0).attr('data-has-across-clue',(square.intersects & 1)>0);
+            sq.data('has-down-clue',(square.intersects & 2)>0).attr('data-has-down-clue',(square.intersects & 2)>0);
             var letter = (square.letter == '') ? '&nbsp;' : square.letter;
             sq.children('.letter-holder').html(letter);
         }
@@ -489,13 +491,34 @@ function gridSquareMenuClickHandler(eventObject) {
             $('#new-clue #new-clue-answer').focus();
             break;
         case 'menu-grid-square-edit-clue-across':
-            // TODO - HIGH write this routinem including adding modal to page
-            alert('Not yet implemented!');
-            /*$('#new-clue input#new-clue-row').val( $('#context-menu-menu-grid-square').data('trigger-row') );
-            $('#new-clue input#new-clue-col').val( $('#context-menu-menu-grid-square').data('trigger-col') );
-            $('#new-clue select#new-clue-orientation').val('across');
-            new bootstrap.Modal('#new-clue').toggle();
-            $('#new-clue #new-clue-answer').focus();*/
+            // TODO - HIGH write this routine
+            // TODO - Despite brave efforts to the contrary, I think we need a PHP / database call here
+            // Get vars
+            var y = $('#context-menu-menu-grid-square').data('trigger-row');
+            var x = $('#context-menu-menu-grid-square').data('trigger-col');
+            var url = root_path + '/placed_clue/*/find/' + crossword_id + '?domain=ajax&orientation=across&x='+x+'&y='+y;
+            $.post({
+                url: url
+            })
+            .done(function(data) {
+                // TODO - HIGH parse the returned PlacedClue
+                alert(data);
+            })
+            .fail(displayAjaxError);
+            break;
+            // Get vars
+            var placedClueId = 0; // TODO - HIGH - work out how to get this
+            var allClueSquares = $("[data-placed-clue-ids='"+placedClueId+"'],[data-placed-clue-ids^='"+placedClueId+",'],[data-placed-clue-ids$=',"+placedClueId+"']");
+            var topLeft = allClueSquares[0];
+            var idParts = topLeft.split('-'); // square-y-x
+            var y = idParts[1];
+            var x = idParts[2];
+            // Open modal
+            $('#edit-clue input#edit-clue-row').val( y );
+            $('#edit-clue input#edit-clue-col').val( x );
+            $('#edit-clue select#edit-clue-orientation').val('across');
+            new bootstrap.Modal('#edit-clue').toggle();
+            $('#edit-clue #edit-clue-answer').focus();
             break;
         case 'menu-grid-square-clear-grid-square':
             // Get vars

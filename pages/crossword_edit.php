@@ -81,6 +81,22 @@ if ($fatal_error) {
     ->setButtons("Save")
     ->setTrigger("+");
     echo $modal_new_clue->getMainHtml();
+    
+    $form_edit_clue = new UI\BootstrapForm('edit-clue');
+    $form_edit_clue->addHtml("<div class='' id='form-edit-clue-affected-clues-warning'>This may also affect: <span id='form-edit-clue-affected-clues-details'></span></div>");
+    $form_edit_clue->addField('id')->setType("hidden");
+    $form_edit_clue->addField('row')->setLabel('Starting row')->setType("number")->setDivClass('mb-3')->setClass('focussed-input border-secondary')->setStyle('max-width: 10em;')->setAdditionalAttributes(['min'=>1,'max'=>$crossword->rows])->setHelp("(starting at row 0)");
+    $form_edit_clue->addField('col')->setLabel('Starting column')->setType("number")->setDivClass('mb-3')->setClass('border-secondary')->setStyle('max-width: 10em;')->setAdditionalAttributes(['min'=>1,'max'=>$crossword->cols])->setHelp("(starting at column 0)");
+    $form_edit_clue->addField('orientation')->setLabel('Orientation')->setType('select')->setDivClass('border-bottom mb-3')->setClass('border-secondary')->setOptions([PlacedClue::ACROSS=>'Across',PlacedClue::DOWN=>'Down'])->setValue('Across'); /*->setHelp("Across or Down")*/
+    $form_edit_clue->addField('answer')->setLabel('Answer')->setDivClass('mb-3')->setClass('border-secondary')->setStyle("text-transform:uppercase"); /*->setHelp("The answer to the cryptic clue, including spaces, punctuation, etc.")*/
+    $form_edit_clue->addField('pattern')->setLabel('')->setType('hidden');
+    $form_edit_clue->addField('clue')->setLabel('Clue')->setDivClass('mb-3')->setClass('border-secondary'); /*->setHelp("The clue text")*/
+    $form_edit_clue->addField('explanation')->setLabel('Explanation')->setClass('border-secondary'); /*->setHelp("An explanation of the working of the clue (optional, will not show on crossword output)")*/
+    $modal_edit_clue = new UI\BootstrapModal('edit-clue');
+    $modal_edit_clue->setTitle('Add clue')
+    ->setBody($form_edit_clue->getHtml())
+    ->setButtons("Save");
+    echo $modal_edit_clue->getMainHtml();
 ?>
 
 <!-- CONTEXT MENUS -->
