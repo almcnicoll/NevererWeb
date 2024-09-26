@@ -130,7 +130,8 @@ function updateGridSquares(json) {
             sq.data('placed-clue-ids',square.placed_clue_ids.join(','));
             sq.data('has-across-clue',(square.intersects & 1)>0);
             sq.data('has-down-clue',(square.intersects & 2)>0);
-            sq.children('.letter-holder').text(square.letter);
+            var letter = (square.letter == '') ? '&nbsp;' : square.letter;
+            sq.children('.letter-holder').html(letter);
         }
     }
 }
@@ -412,8 +413,20 @@ function gridSquareRightClickHandler(eventObject) {
     // Check the validity of each item
     // TODO - change from visibility to enabled/disabled to prevent menu from being unfamiliar each time?
     if(eventObject.currentTarget.classList.contains('black-square')) { $('#menu-grid-square-clear-grid-square').hide(); } else { $('#menu-grid-square-clear-grid-square').show(); }
-    if($(eventObject.currentTarget).data('has-across-clue')) { $('#menu-grid-square-new-clue-across').hide(); } else { $('#menu-grid-square-new-clue-across').show(); }
-    if($(eventObject.currentTarget).data('has-down-clue')) { $('#menu-grid-square-new-clue-down').hide(); } else { $('#menu-grid-square-new-clue-down').show(); }
+    if($(eventObject.currentTarget).data('has-across-clue')) { 
+        $('#menu-grid-square-new-clue-across').hide(); 
+        $('#menu-grid-square-edit-clue-across').show(); 
+    } else {
+        $('#menu-grid-square-new-clue-across').show(); 
+        $('#menu-grid-square-edit-clue-across').hide(); 
+    }
+    if($(eventObject.currentTarget).data('has-down-clue')) { 
+        $('#menu-grid-square-new-clue-down').hide();
+        $('#menu-grid-square-edit-clue-down').show();  
+    } else { 
+        $('#menu-grid-square-new-clue-down').show(); 
+        $('#menu-grid-square-edit-clue-down').hide(); 
+    }
     // Move and show menu
     $('#context-menu-menu-grid-square').css('left',eventObject.pageX).css('top',eventObject.pageY).show();
 }
