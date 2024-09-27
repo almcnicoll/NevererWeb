@@ -503,6 +503,15 @@ function gridSquareMenuClickHandler(eventObject) {
             .done(function(data) {
                 // TODO - HIGH parse the returned PlacedClue
                 alert(data);
+                var pc = JSON.parse(data);
+                var c = data[clue];
+                $('#edit-clue input#edit-clue-id').val( pc.id );
+                $('#edit-clue input#edit-clue-row').val( pc.y );
+                $('#edit-clue input#edit-clue-col').val( pc.x );
+                $('#edit-clue select#edit-clue-orientation').val(pc.orientation);
+                $('#edit-clue select#edit-clue-answer').val(c.answer);
+                $('#edit-clue select#edit-clue-clue').val(c.question);
+                $('#edit-clue select#edit-clue-explanation').val(c.explanation);
             })
             .fail(displayAjaxError);
             break;
