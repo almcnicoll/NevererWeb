@@ -6,14 +6,13 @@ const FLAG_CONFLICT = 1;
 const FLAG_FEWMATCHES = 2;    
 const FLAG_NOMATCHES = 4;
 
-/*Array.prototype.removeByValue = function(val) {
-    var index = this.indexOf(val);
-    if (index > -1) {
-        this.splice(index,1);
-        return true; // We removed it
-    }
-    return false; // Nothing to remove
-}*/
+//#region Utility methods
+/**
+ * 
+ * @param {Array} arr the array to search
+ * @param {*} value the value to remove if found
+ * @returns {bool} whether the value was found and removed
+ */
 function removeFromArray(arr,value) {
     var index = arr.indexOf(value);
     if (index > -1) {
@@ -22,53 +21,6 @@ function removeFromArray(arr,value) {
     }
     return false; // Nothing to remove
 }
-
-$(document).ready(
-    /** On-load actions here */
-    function() {
-        // Set variables
-        rows = $('#crossword-edit tr').length;
-        cols = $('#crossword-edit tr').first().children('td').length;
-
-        // Set up modal events
-        $('div.modal').each(
-            function() {
-                if ($(this).find('.focussed-input').length > 0) {
-                    var div = $(this)[0];
-                    var inp = $(this).find('.focussed-input')[0];
-                    div.addEventListener('shown.bs.modal', function() {
-                        inp.focus();
-                    });
-                }
-            }
-        );
-        $('div.modal form').on('keypress', function(eventObject) { 
-            if (eventObject.which==13) { $(this).parents('div.modal').find(':submit').trigger('click'); eventObject.preventDefault=true; } 
-        })
-
-        // Individual actions
-        $('#new-clue-default').on('click',createClue);
-        $('#edit-clue-default').on('click',editClue);
-        $('td.crossword-grid-square').on('click',toggleSelect);
-        $('td.crossword-grid-square').on('contextmenu', gridSquareRightClickHandler);
-        $('#context-menu-menu-grid-square .dropdown-item').on('click', gridSquareMenuClickHandler);
-
-        // Refresh data
-        refreshGrid();
-        refreshClueList();
-    }
-);
-
-// Consider breaking out some of these into a separate JS file at some point?
-/**
- * Handles ajax errors, displaying them to the user
- * @param {string} json the error(s) to display, as JSON
- */
-function displayAjaxError(json) {
-    // Do nothing for the moment
-    // TODO - need code here - use Bootstrap Toasts methinks https://getbootstrap.com/docs/5.2/components/toasts/
-}
-
 /**
  * Retrieves data from the specified form(s) in a single object
  * @param {string} selector the selector of the form to serialize
@@ -104,9 +56,65 @@ function serializeForm(selector, stripPrefix = false) {
     }
     return data;
 }
+//#endregion
 
+//#region Ajax handling
+//TODO - HIGH add a generic function ("makeAjaxCall"?) which takes a call that needs to be made and the return function(s)
+// the idea is that it will add to a queue and manage a small UI indicator showing what calls are underway and whether they're returning
+// and it could also prompt an internet connection check if they're failing
 /**
- * 
+ * Handles ajax errors, displaying them to the user
+ * @param {string} json the error(s) to display, as JSON
+ */
+function displayAjaxError(json) {
+    // Do nothing for the moment
+    // TODO - need code here - use Bootstrap Toasts methinks https://getbootstrap.com/docs/5.2/components/toasts/
+}
+
+//#endregion
+
+
+//#region startup
+$(document).ready(
+    /** On-load actions here */
+    function() {
+        // Set variables
+        rows = $('#crossword-edit tr').length;
+        cols = $('#crossword-edit tr').first().children('td').length;
+
+        // Set up modal events
+        $('div.modal').each(
+            function() {
+                if ($(this).find('.focussed-input').length > 0) {
+                    var div = $(this)[0];
+                    var inp = $(this).find('.focussed-input')[0];
+                    div.addEventListener('shown.bs.modal', function() {
+                        inp.focus();
+                    });
+                }
+            }
+        );
+        $('div.modal form').on('keypress', function(eventObject) { 
+            if (eventObject.which==13) { $(this).parents('div.modal').find(':submit').trigger('click'); eventObject.preventDefault=true; } 
+        })
+
+        // Individual actions
+        $('#new-clue-default').on('click',createClue);
+        $('#edit-clue-default').on('click',editClue);
+        $('td.crossword-grid-square').on('click',toggleSelect);
+        $('td.crossword-grid-square').on('contextmenu', gridSquareRightClickHandler);
+        $('#context-menu-menu-grid-square .dropdown-item').on('click', gridSquareMenuClickHandler);
+
+        // Refresh data
+        refreshGrid();
+        refreshClueList();
+    }
+);
+//#endregion
+
+//#region page-refreshing
+/**
+ * Updates the UI grid with the supplied crossword data
  * @param {string} json the JSON string of GridSquare objects to refresh
  * @returns {void}
  */
@@ -137,7 +145,6 @@ function updateGridSquares(json) {
         }
     }
 }
-
 /**
  * Updates the clue list with the specified clues
  * @param {string} json the JSON string of PlacedClue objects to refresh
@@ -206,7 +213,6 @@ function updateClueList(json, removeMissing=true) {
         }
     }
 }
-
 /**
  * Updates the specified clues in the list, without altering any others
  * @param {string} json the JSON string of the PlacedClue object to refresh
@@ -214,7 +220,9 @@ function updateClueList(json, removeMissing=true) {
 function updateClues(json) {
     updateClueList(json,false);
 }
+//#endregion
 
+//#region request functions
 /**
  * Retrieves the latest contents of the grid within the specified (0-based) coordinates
  * @param {int} xMin the minimum column (inclusive) to retrieve
@@ -273,7 +281,10 @@ function refreshClue(id) {
     .done(updateClues)
     .fail(displayAjaxError);
 }
+//#endregion
 
+
+//#region unsorted
 /**
  * Flags an input as being problematic with a border highlight and an explanatory message
  * @param {string} selector the jQuery selector for the field(s) to highlight
@@ -548,3 +559,4 @@ function gridSquareMenuClickHandler(eventObject) {
     // Hide menu
     $('#context-menu-menu-grid-square').hide();
 }
+//#endregion
