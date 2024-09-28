@@ -312,6 +312,25 @@ function getAnswerPattern(answer) {
     return '('+pattern_parts.join(',')+')';
 }
 
+/**
+ * Takes the return from a placed_clue/find call and uses it to populate the edit form
+ * @param {string} data the JSON string returned by the ajax call
+ */
+function populateEditForm(data) {
+    // Put those variables into the modal form
+    var pc = JSON.parse(data);
+    var c = pc['clue'];
+    $('#edit-clue input#edit-clue-id').val( pc.id );
+    $('#edit-clue input#edit-clue-row').val( pc.y );
+    $('#edit-clue input#edit-clue-col').val( pc.x );
+    $('#edit-clue select#edit-clue-orientation').val(pc.orientation);
+    $('#edit-clue input#edit-clue-answer').val(c.answer);
+    $('#edit-clue input#edit-clue-clue').val(c.question);
+    $('#edit-clue input#edit-clue-explanation').val(c.explanation);
+    new bootstrap.Modal('#edit-clue').toggle();
+    $('#edit-clue #edit-clue-answer').focus();
+}
+
 /** Triggers the AJAX to create a clue from the new-clue modal */
 function createClue() {
     // Populate vars
@@ -491,43 +510,24 @@ function gridSquareMenuClickHandler(eventObject) {
             $('#new-clue #new-clue-answer').focus();
             break;
         case 'menu-grid-square-edit-clue-across':
-            // TODO - HIGH write this routine
-            // TODO - Despite brave efforts to the contrary, I think we need a PHP / database call here
+            // We need a database call to get PlacedClue from the square and orientation
             // Get vars
             var y = $('#context-menu-menu-grid-square').data('trigger-row');
             var x = $('#context-menu-menu-grid-square').data('trigger-col');
             var url = root_path + '/placed_clue/*/find/' + crossword_id + '?domain=ajax&orientation=across&x='+x+'&y='+y;
-            $.post({
-                url: url
-            })
-            .done(function(data) {
-                // TODO - HIGH parse the returned PlacedClue
-                alert(data);
-                var pc = JSON.parse(data);
-                var c = data[clue];
-                $('#edit-clue input#edit-clue-id').val( pc.id );
-                $('#edit-clue input#edit-clue-row').val( pc.y );
-                $('#edit-clue input#edit-clue-col').val( pc.x );
-                $('#edit-clue select#edit-clue-orientation').val(pc.orientation);
-                $('#edit-clue select#edit-clue-answer').val(c.answer);
-                $('#edit-clue select#edit-clue-clue').val(c.question);
-                $('#edit-clue select#edit-clue-explanation').val(c.explanation);
-            })
+            $.post({url: url})
+            .done(populateEditForm)
             .fail(displayAjaxError);
             break;
+        case 'menu-grid-square-edit-clue-down':
+            // We need a database call to get PlacedClue from the square and orientation
             // Get vars
-            var placedClueId = 0; // TODO - HIGH - work out how to get this
-            var allClueSquares = $("[data-placed-clue-ids='"+placedClueId+"'],[data-placed-clue-ids^='"+placedClueId+",'],[data-placed-clue-ids$=',"+placedClueId+"']");
-            var topLeft = allClueSquares[0];
-            var idParts = topLeft.split('-'); // square-y-x
-            var y = idParts[1];
-            var x = idParts[2];
-            // Open modal
-            $('#edit-clue input#edit-clue-row').val( y );
-            $('#edit-clue input#edit-clue-col').val( x );
-            $('#edit-clue select#edit-clue-orientation').val('across');
-            new bootstrap.Modal('#edit-clue').toggle();
-            $('#edit-clue #edit-clue-answer').focus();
+            var y = $('#context-menu-menu-grid-square').data('trigger-row');
+            var x = $('#context-menu-menu-grid-square').data('trigger-col');
+            var url = root_path + '/placed_clue/*/find/' + crossword_id + '?domain=ajax&orientation=down&x='+x+'&y='+y;
+            $.post({url: url})
+            .done(populateEditForm)
+            .fail(displayAjaxError);
             break;
         case 'menu-grid-square-clear-grid-square':
             // Get vars

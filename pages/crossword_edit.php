@@ -93,10 +93,11 @@ if ($fatal_error) {
     $form_edit_clue->addField('clue')->setLabel('Clue')->setDivClass('mb-3')->setClass('border-secondary'); /*->setHelp("The clue text")*/
     $form_edit_clue->addField('explanation')->setLabel('Explanation')->setClass('border-secondary'); /*->setHelp("An explanation of the working of the clue (optional, will not show on crossword output)")*/
     $modal_edit_clue = new UI\BootstrapModal('edit-clue');
-    $modal_edit_clue->setTitle('Add clue')
+    $modal_edit_clue->setTitle('Edit clue')
     ->setBody($form_edit_clue->getHtml())
     ->setButtons("Save");
     echo $modal_edit_clue->getMainHtml();
+    // TODO - HIGH code in .js file for handling edit-modal save button
 ?>
 
 <!-- CONTEXT MENUS -->

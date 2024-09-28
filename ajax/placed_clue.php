@@ -58,6 +58,7 @@ switch ($action) {
     case 'find':
         // Called as /ajax/placed_clue/*/find/[crossword-id]?orientation=across|down&x=[x]&y=[y]
         // Specifies a cell and an orientation, and retrieves the matching PlacedClue
+        // TODO - return symmetry_clues as an additional array index
         // TODO - check that this code works when two across clues are on the same row and when two down clues are on the same column
         $crossword_id = array_shift($params);
         $findCriteria = [];
