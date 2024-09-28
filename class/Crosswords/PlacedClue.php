@@ -230,5 +230,15 @@ namespace Crosswords {
           $clue->save();
         }
       }
+
+      /**
+       * Gets clues that are symmetry-linked to the current one
+       * @return PlacedClue_List the list of clues
+       */
+      function getSymmetryClues() : PlacedClue_List {
+        $symClues = new PlacedClue_List();
+        $crossword = $this->getCrossword();
+        return $crossword->getExistingSymmetryClues($this);
+      }
   }
 }

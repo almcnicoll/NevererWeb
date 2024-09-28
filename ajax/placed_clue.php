@@ -53,7 +53,6 @@ switch ($action) {
         $crossword = Crossword::findFirst(['id','=',$crossword_id]);
         if ($crossword === null) { throw_error("Cannot find crossword with id {$crossword_id}"); }
         if (!$crossword->isOwnedBy($user->id)) { throw_error("Crossword with id {$crossword_id} does not belong to user #{$user->id}"); }
-        //TODO - output clue serialized to JSON here
         die(json_encode($placedClue->expose()));
     case 'find':
         // Called as /ajax/placed_clue/*/find/[crossword-id]?orientation=across|down&x=[x]&y=[y]
@@ -101,6 +100,18 @@ switch ($action) {
         }
         // No match
         die(json_encode([]));
+    case 'symmetry_clues':
+        // Called as /ajax/placed_clue/*/symmetry_clues/[id]
+        $pc_id = array_shift($params);
+        /** @var PlacedClue $placedClue */
+        $placedClue = PlacedClue::findFirst('id','=',$pc_id);
+        if ($placedClue === null) { throw_error("Cannot find clue with id {$pc_id}"); }
+        $symmetryClues = $placedClue->getSymmetryClues();
+        $crossword_id = $placedClue->crossword_id;
+        $crossword = Crossword::findFirst(['id','=',$crossword_id]);
+        if ($crossword === null) { throw_error("Cannot find crossword with id {$crossword_id}"); }
+        if (!$crossword->isOwnedBy($user->id)) { throw_error("Crossword with id {$crossword_id} does not belong to user #{$user->id}"); }
+        die(json_encode($symmetryClues->expose()));
     case 'create':
         // Called as /ajax/placed_clue/*/create/[crossword_id]
         // TODO - Validation here
