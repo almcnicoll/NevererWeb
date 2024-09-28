@@ -1,7 +1,11 @@
+// Global variables
 var rows = 0;
 var cols = 0;
 var selectedClue = 0;
+var ajaxCallId = 0;
+var ajaxCalls = new Array();
 
+// Constants
 const FLAG_CONFLICT = 1;
 const FLAG_FEWMATCHES = 2;    
 const FLAG_NOMATCHES = 4;
@@ -62,6 +66,36 @@ function serializeForm(selector, stripPrefix = false) {
 //TODO - HIGH add a generic function ("makeAjaxCall"?) which takes a call that needs to be made and the return function(s)
 // the idea is that it will add to a queue and manage a small UI indicator showing what calls are underway and whether they're returning
 // and it could also prompt an internet connection check if they're failing
+
+
+function makeAjaxCall(method, url, data, success, done, fail) {
+    method = method.toLowerCase();
+    if ((method!='get') && (method!='post')) {
+        throw new Error("Invalid method specified");
+    }
+    // Assign an id
+    var aId = ++ajaxCallId;
+    // Add call to queue and make the call
+    switch (method) {
+        case 'get':
+            ajaxCalls[aId] = $.get({url: url, data: data}).success(success).done(done).fail(fail).always(always);
+            break;
+        case 'post':
+            ajaxCalls[aId] = $.post({url: url, data: data}).success(success).done(done).fail(fail).always(always);
+            break;
+    }
+    ajaxCalls[aId].aId = aId; // So we can handle the return
+}
+
+//function( data|jqXHR, textStatus, jqXHR|errorThrown ) { }
+function handleAjaxReturn(arg1, textStatus, arg3) {
+    // Assign vars
+    var jqXHR = (textStatus == 'success') ? arg3 : arg1;
+    var data = (textStatus == 'success') ? arg1 : null;
+    var errorThrown = (textStatus == 'success') ? null : arg3;
+    
+}
+
 /**
  * Handles ajax errors, displaying them to the user
  * @param {string} json the error(s) to display, as JSON
