@@ -45,6 +45,8 @@
 ?>
 </script>
 
+<!-- Ajax cue -->
+<div id="ajaxCue"><div id="ajaxCount"></div></div>
 <!-- Title etc -->
 <h2 class="text-center"><?= $crossword->title ?></h2>
 <?php

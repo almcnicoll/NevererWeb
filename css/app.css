@@ -224,6 +224,21 @@ ul.context-menu li:hover, ul.context-menu a:hover {
     background-color: #00a896;
 }
 
+/* AJAX cue */
+#ajaxCue {
+    min-height: 20px;
+    height: 20px;
+    max-height: 20px;
+    background-color: #fff;
+    border: #ccc 1px dotted;
+}
+#ajaxCount {
+    height: 100%;
+    background-color: #f78e69;
+    display: inline-block;
+    width: 0px;
+}
+
 /* Google signin bits */
 .g-signin2>div {
     margin:auto;

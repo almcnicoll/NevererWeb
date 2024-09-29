@@ -67,21 +67,35 @@ function serializeForm(selector, stripPrefix = false) {
 // the idea is that it will add to a queue and manage a small UI indicator showing what calls are underway and whether they're returning
 // and it could also prompt an internet connection check if they're failing
 
-
-function makeAjaxCall(method, url, data, success, done, fail) {
+/**
+ * 
+ * @param {string} method 'get' or 'post'
+ * @param {string} url the URL to call
+ * @param {*} data the data to pass
+ * @param {function} done the function to call on success
+ * @param {function} fail the function to call on failure
+ * @param {function} always the function to call on both success and failure
+ */
+function makeAjaxCall(method, url, data, done, fail, always) {
     method = method.toLowerCase();
     if ((method!='get') && (method!='post')) {
         throw new Error("Invalid method specified");
     }
     // Assign an id
     var aId = ++ajaxCallId;
+    // Add UI cue
+    $('#ajaxCount').css('width',(ajaxCalls.length + 1)*20);
+    // Manage any null args
+    if (always == null) { always = function(){}; }
+    if (done == null) { done = function(){}; }
+    if (fail == null) { fail = function(){}; }
     // Add call to queue and make the call
     switch (method) {
         case 'get':
-            ajaxCalls[aId] = $.get({url: url, data: data}).success(success).done(done).fail(fail).always(always);
+            ajaxCalls[aId] = $.get({url: url, data: data}).done(done).fail(fail).always(always).always(handleAjaxReturn);
             break;
         case 'post':
-            ajaxCalls[aId] = $.post({url: url, data: data}).success(success).done(done).fail(fail).always(always);
+            ajaxCalls[aId] = $.post({url: url, data: data}).done(done).fail(fail).always(always).always(handleAjaxReturn);
             break;
     }
     ajaxCalls[aId].aId = aId; // So we can handle the return
@@ -93,7 +107,10 @@ function handleAjaxReturn(arg1, textStatus, arg3) {
     var jqXHR = (textStatus == 'success') ? arg3 : arg1;
     var data = (textStatus == 'success') ? arg1 : null;
     var errorThrown = (textStatus == 'success') ? null : arg3;
-    
+    // Manage success/failure in UI
+    // Remove UI cue
+    delete ajaxCalls[jqXHR.aId]; // TODO - HIGH don't think this is correct
+    $('#ajaxCount').css('width',(ajaxCalls.length)*20);
 }
 
 /**
@@ -267,11 +284,12 @@ function updateClues(json) {
 function refreshPartialGrid(xMin, xMax, yMin, yMax) {
     // Make the request
     var url = root_path + '/grid/*/get/'+crossword_id+'?domain=ajax&xMin='+xMin+'&yMin='+yMin+'&xMax='+xMax+'&yMax='+yMax;
-    $.get({
+    makeAjaxCall('get', url, null, updateGridSquares, displayAjaxError, null);
+    /*$.get({
         url: url
     })
     .done(updateGridSquares)
-    .fail(displayAjaxError);
+    .fail(displayAjaxError);*/
 }
 
 /**
