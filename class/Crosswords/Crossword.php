@@ -312,6 +312,7 @@ END_SQL;
                         ($check->y === $template->y) &&
                         ($check->getLength() == $template->getLength())
                     ) {
+                        $check->__tag = $template->__tag; // Pass along the rotation information
                         $existingClues[] = $check;
                     }
                 }
