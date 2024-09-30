@@ -3,7 +3,7 @@ var rows = 0;
 var cols = 0;
 var selectedClue = 0;
 var ajaxCallId = 0;
-var ajaxCalls = new Array();
+var ajaxCalls = new Object();
 
 // Constants
 const FLAG_CONFLICT = 1;
@@ -109,7 +109,7 @@ function handleAjaxReturn(arg1, textStatus, arg3) {
     var errorThrown = (textStatus == 'success') ? null : arg3;
     // Manage success/failure in UI
     // Remove UI cue
-    delete ajaxCalls[jqXHR.aId]; // TODO - HIGH don't think this is correct
+    delete ajaxCalls[jqXHR.aId];
     $('#ajaxCount').css('width',(ajaxCalls.length)*20);
 }
 
