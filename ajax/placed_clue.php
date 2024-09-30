@@ -160,11 +160,17 @@ switch ($action) {
         $additionalClues = $placedClue->getSymmetryClues();
         if (count($additionalClues) > 0) {
             // Work out start and end row/col of original as these will be useful for mirroring
+            $startX = $placedClue->x;
+            $startY = $placedClue->y;
+            $endX = ($placedClue->orientation==PlacedClue::ACROSS) ? $startX + $placedClue->getLength() : $startX;
+            $endY = ($placedClue->orientation==PlacedClue::DOWN) ? $startY + $placedClue->getLength() : $startY;
+            // TODO - HIGH Now work out the changes based on rotation information, which is stored as degrees in $apc->__tag
         }
         foreach ($additionalClues as $apc) {
             // TODO - HIGH complex geometry here!
             // NB if orientation changes and position doesn't then position may need to change for rotated clues because the
             // original clue's endpoint is the _starting_ point for a rotated clue, and that _has_ changed
+            $rotation_type = ($apc->orientation == $placedClue->orientation) ? 90 : 180;
         }
 
         // Make changes and save

@@ -132,6 +132,7 @@ namespace Crosswords {
             $pcReflect0->x = $this->x;
             $pcReflect0->y = $this->y;
             $pcReflect0->setClue($this->getClue()->blankClone(),false);
+            $pcReflect0->__tag = 0;
             return $pcReflect0;
           case 90:
             $pcReflect90 = new PlacedClue();
@@ -140,6 +141,7 @@ namespace Crosswords {
             $pcReflect90->x = $this->y;
             $pcReflect90->y = $crossword->cols-$this->x;
             $pcReflect90->setClue($this->getClue()->blankClone(),false);
+            $pcReflect90->__tag = 90;
             // If it's a DOWN clue, this gives us the END of the new clue - we want the START
             if ($this->orientation == PlacedClue::DOWN) { $pcReflect90->x -= ($clueLength-1); }
             return $pcReflect90;
@@ -150,6 +152,7 @@ namespace Crosswords {
             $pcReflect180->x = $crossword->cols-$this->x-1;
             $pcReflect180->y = $crossword->rows-$this->y-1;
             $pcReflect180->setClue($this->getClue()->blankClone(),false);
+            $pcReflect180->__tag = 180;
             // This gives us the END of the new clue - we want the START
             if ($pcReflect180->orientation == PlacedClue::ACROSS) { $pcReflect180->x -= ($clueLength-1); } else { $pcReflect180->y -= ($clueLength-1); }
             return $pcReflect180;
@@ -161,6 +164,7 @@ namespace Crosswords {
             $pcReflect270->x = $crossword->rows-$this->y;
             $pcReflect270->y = $this->x;
             $pcReflect270->setClue($this->getClue()->blankClone(),false);
+            $pcReflect270->__tag = 270;
             // If it's an ACROSS clue, this gives us the END of the new clue - we want the START
             if ($this->orientation == PlacedClue::ACROSS) { $pcReflect270->y -= ($clueLength-1); }
             return $pcReflect270;
