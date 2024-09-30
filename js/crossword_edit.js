@@ -76,7 +76,7 @@ function serializeForm(selector, stripPrefix = false) {
  * @param {function} fail the function to call on failure
  * @param {function} always the function to call on both success and failure
  */
-function makeAjaxCall(method, url, data, done, fail, always) {
+function makeAjaxCall(method, url, data = null, done = null, fail = null, always = null) {
     method = method.toLowerCase();
     if ((method!='get') && (method!='post')) {
         throw new Error("Invalid method specified");
@@ -108,6 +108,11 @@ function handleAjaxReturn(arg1, textStatus, arg3) {
     var data = (textStatus == 'success') ? arg1 : null;
     var errorThrown = (textStatus == 'success') ? null : arg3;
     // Manage success/failure in UI
+    switch (textStatus) {
+        case 'failure':
+            // TODO - some kind of failure notification using or replacing displayAjaxError()
+            break;
+    }
     // Remove UI cue
     delete ajaxCalls[jqXHR.aId];
     $('#ajaxCount').css('width',(ajaxCalls.length)*20);
@@ -284,12 +289,7 @@ function updateClues(json) {
 function refreshPartialGrid(xMin, xMax, yMin, yMax) {
     // Make the request
     var url = root_path + '/grid/*/get/'+crossword_id+'?domain=ajax&xMin='+xMin+'&yMin='+yMin+'&xMax='+xMax+'&yMax='+yMax;
-    makeAjaxCall('get', url, null, updateGridSquares, displayAjaxError, null);
-    /*$.get({
-        url: url
-    })
-    .done(updateGridSquares)
-    .fail(displayAjaxError);*/
+    makeAjaxCall('get', url, null, updateGridSquares);
 }
 
 /**
@@ -306,11 +306,7 @@ function refreshGrid() {
 function refreshClueList() {
     // Make the request
     var url = root_path + '/placed_clue/*/list/'+crossword_id+'?domain=ajax';
-    $.get({
-        url: url
-    })
-    .done(updateClueList)
-    .fail(displayAjaxError);
+    makeAjaxCall('get', url, null, updateClueList);
 }
 
 /** Refreshes the clue list and grid */
@@ -327,16 +323,11 @@ function refreshAll() {
 function refreshClue(id) {
     // Make the request
     var url = root_path + '/placed_clue/*/get/'+id+'?domain=ajax';
-    $.get({
-        url: url
-    })
-    .done(updateClues)
-    .fail(displayAjaxError);
+    makeAjaxCall('get', url, null, updateClues);
 }
 //#endregion
 
-
-//#region unsorted
+//#region data-validation
 /**
  * Flags an input as being problematic with a border highlight and an explanatory message
  * @param {string} selector the jQuery selector for the field(s) to highlight
@@ -353,26 +344,6 @@ function fieldProblem(selector, message) {
             $(this).siblings('.error-explain').html(message);
         }
     );
-}
-
-/**
- * Gets the pattern for the supplied clue, in the form "(n)", "(n,p)", "(n-p)" etc.
- * @param {string} answer the answer to the cryptic clue
- * @returns {string} the pattern for the clue or null if the answer is blank or invalid
- */
-function getAnswerPattern(answer) {
-    var reRemoves = /[^A-Z\s\-\?]+/gi; // NB includes question mark here, as it's used for unknowns
-    var reSplitters = /[\s\-]+/gi;
-    var reSplittersOnly = /^[\s\-]+$/gi;
-    var working_answer = answer.replace(reRemoves,'');
-    if (working_answer.length == 0) { return null; } // No valid letters
-    if (reSplittersOnly.test(working_answer)) { return null; } // Only splitter characters
-    var answer_parts = working_answer.split(reSplitters);
-    var pattern_parts = new Array();
-    for (var i in answer_parts) {
-        pattern_parts[i] = answer_parts[i].length;
-    }
-    return '('+pattern_parts.join(',')+')';
 }
 
 /**
@@ -393,10 +364,9 @@ function populateEditForm(data) {
     new bootstrap.Modal('#edit-clue').toggle();
     $('#edit-clue #edit-clue-answer').focus();
 }
-
 /** Triggers the AJAX to create a clue from the new-clue modal */
 function createClue() {
-    // Populate vars
+    // Populate vars for validation (don't need them for saving as form is serialized)
     var row = $('#new-clue-row').val();
     var col = $('#new-clue-col').val();
     var answer = $('#new-clue-answer').val();
@@ -417,12 +387,7 @@ function createClue() {
     // Now fire off the request
     var url = root_path + '/placed_clue/*/create/' + crossword_id + '?domain=ajax';
     var formData = serializeForm('#new-clue form','new-clue-');
-    $.post({
-        url: url,
-        data: formData
-    })
-    .done(refreshAll)
-    .fail(displayAjaxError);
+    makeAjaxCall('post', url, formData, refreshAll);
 
     // If all else is fine, hide the modal
     bootstrap.Modal.getInstance(document.getElementById('new-clue')).hide();
@@ -430,39 +395,58 @@ function createClue() {
 
 /** Triggers the AJAX to create a clue from the new-clue modal */
 function editClue() {
-    alert('Not implemented!'); return;
-    // Populate vars
-    var row = $('#new-clue-row').val();
-    var col = $('#new-clue-col').val();
-    var answer = $('#new-clue-answer').val();
-    //var clue = $('#new-clue-clue').val();
-    //var explanation = $('#new-clue-explanation').val();
+    // Populate vars for validation (don't need them for saving as form is serialized)
+    var id = $('#edit-clue-id').val();
+    var row = $('#edit-clue-row').val();
+    var col = $('#edit-clue-col').val();
+    var answer = $('#edit-clue-answer').val();
+    //var clue = $('#edit-clue-clue').val();
+    //var explanation = $('#edit-clue-explanation').val();
 
     // Clear previous validation feedback
-    $('#new-clue').find('form').find('.is-invalid').removeClass('is-invalid');
-    $('#new-clue').find('form').find('.error-explain').remove();
-    // Perform new validation
-    if (!$.isNumeric(row)) { fieldProblem('#new-clue-row',"This field must be a number."); return; }
-    if (!$.isNumeric(col)) { fieldProblem('#new-clue-col',"This field must be a number."); return; }
-    if (answer.length == 0) { fieldProblem('#new-clue-answer',"This field must not be blank."); return; }
+    $('#edit-clue').find('form').find('.is-invalid').removeClass('is-invalid');
+    $('#edit-clue').find('form').find('.error-explain').remove();
+    // Perform edit validation
+    if (!$.isNumeric(row)) { fieldProblem('#edit-clue-row',"This field must be a number."); return; }
+    if (!$.isNumeric(col)) { fieldProblem('#edit-clue-col',"This field must be a number."); return; }
+    if (answer.length == 0) { fieldProblem('#edit-clue-answer',"This field must not be blank."); return; }
     var pattern = getAnswerPattern(answer);
-    if (pattern === null) { fieldProblem('#new-clue-answer',"This field must not be blank."); return; }
-    $('#new-clue-pattern').val(pattern);
+    if (pattern === null) { fieldProblem('#edit-clue-answer',"This field must not be blank."); return; }
+    $('#edit-clue-pattern').val(pattern);
 
     // Now fire off the request
-    var url = root_path + '/placed_clue/*/create/' + crossword_id + '?domain=ajax';
-    var formData = serializeForm('#new-clue form','new-clue-');
-    $.post({
-        url: url,
-        data: formData
-    })
-    .done(refreshAll)
-    .fail(displayAjaxError);
+    var url = root_path + '/placed_clue/*/update/' + id + '?domain=ajax';
+    var formData = serializeForm('#edit-clue form','edit-clue-');
+    makeAjaxCall('post', url, formData, refreshAll);
 
     // If all else is fine, hide the modal
-    bootstrap.Modal.getInstance(document.getElementById('new-clue')).hide();
+    bootstrap.Modal.getInstance(document.getElementById('edit-clue')).hide();
 }
+//#endregion
 
+//#region crossword functions
+/**
+ * Gets the pattern for the supplied clue, in the form "(n)", "(n,p)", "(n-p)" etc.
+ * @param {string} answer the answer to the cryptic clue
+ * @returns {string} the pattern for the clue or null if the answer is blank or invalid
+ */
+function getAnswerPattern(answer) {
+    var reRemoves = /[^A-Z\s\-\?]+/gi; // NB includes question mark here, as it's used for unknowns
+    var reSplitters = /[\s\-]+/gi;
+    var reSplittersOnly = /^[\s\-]+$/gi;
+    var working_answer = answer.replace(reRemoves,'');
+    if (working_answer.length == 0) { return null; } // No valid letters
+    if (reSplittersOnly.test(working_answer)) { return null; } // Only splitter characters
+    var answer_parts = working_answer.split(reSplitters);
+    var pattern_parts = new Array();
+    for (var i in answer_parts) {
+        pattern_parts[i] = answer_parts[i].length;
+    }
+    return '('+pattern_parts.join(',')+')';
+}
+//#endregion
+
+//#region UI-interaction
 /**
  * Handles left-clicking a grid square:
  * If square is black, deselects everything
