@@ -137,6 +137,52 @@ switch ($action) {
         }
         
         die(json_encode([])); // TODO - consider returning a success/fail, or perhaps the PlacedClue itself in JSON
+    case 'update':
+        // Called as /ajax/placed_clue/*/update/[id]
+        // TODO - Validation here
+        $id = array_shift($params);
+        // Populate and save the entities
+        $placedClue = PlacedClue::getById($id);
+        if ($placedClue === null) { throw_error("Cannot find PlacedClue with id {$id}"); }
+        $crossword_id = $placedClue->crossword_id;
+        $crossword = Crossword::findFirst(['id','=',$crossword_id]);
+        if ($crossword === null) { throw_error("Cannot find crossword with id {$crossword_id}"); }
+        if (!$crossword->isOwnedBy($user->id)) { throw_error("Crossword with id {$crossword_id} does not belong to user #{$user->id}"); }
+        
+        // Work out what's changed, for symmetry-clue-update purposes
+        $clue = $placedClue->getClue();
+        $orientation_change = ($placedClue->orientation != $_POST['orientation']);
+        $length_change = strlen($_POST['answer']) - strlen($clue->answer);
+        $x_change = $_POST['col'] - $placedClue->x;
+        $y_change = $_POST['row'] - $placedClue->y;
+
+        // Get symmetry clues
+        $additionalClues = $placedClue->getSymmetryClues();
+        if (count($additionalClues) > 0) {
+            // Work out start and end row/col of original as these will be useful for mirroring
+        }
+        foreach ($additionalClues as $apc) {
+            // TODO - HIGH complex geometry here!
+            // NB if orientation changes and position doesn't then position may need to change for rotated clues because the
+            // original clue's endpoint is the _starting_ point for a rotated clue, and that _has_ changed
+        }
+
+        // Make changes and save
+        $placedClue->x = $_POST['col'];
+        $placedClue->y = $_POST['row'];
+        $placedClue->orientation = $_POST['orientation'];
+        $clue->answer = $_POST['answer'];
+        $clue->pattern = $_POST['pattern'];
+        $clue->question = $_POST['clue'];
+        $clue->explanation = $_POST['explanation'];
+        $placedClue->save();
+
+        // Save symmetry clues
+        foreach ($additionalClues as $apc) {
+            $apc->save();
+        }
+        
+        die(json_encode([])); // TODO - consider returning a success/fail, or perhaps the PlacedClue itself in JSON
     default:
         $file = str_replace(__DIR__,'',__FILE__);
         throw_error("Invalid action {$action} passed to {$file}");
