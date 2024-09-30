@@ -84,7 +84,8 @@ function makeAjaxCall(method, url, data = null, done = null, fail = null, always
     // Assign an id
     var aId = ++ajaxCallId;
     // Add UI cue
-    $('#ajaxCount').css('width',(ajaxCalls.length + 1)*20);
+    //$('#ajaxCount').css('width',(ajaxCalls.length + 1)*20);
+    $('#ajaxCount').css('width',(Object.keys(ajaxCalls).length + 1)*20);
     // Manage any null args
     if (always == null) { always = function(){}; }
     if (done == null) { done = function(){}; }
@@ -115,7 +116,8 @@ function handleAjaxReturn(arg1, textStatus, arg3) {
     }
     // Remove UI cue
     delete ajaxCalls[jqXHR.aId];
-    $('#ajaxCount').css('width',(ajaxCalls.length)*20);
+    //$('#ajaxCount').css('width',(ajaxCalls.length)*20);
+    $('#ajaxCount').css('width',(Object.keys(ajaxCalls).length)*20);
 }
 
 /**
@@ -562,9 +564,7 @@ function gridSquareMenuClickHandler(eventObject) {
             var y = $('#context-menu-menu-grid-square').data('trigger-row');
             var x = $('#context-menu-menu-grid-square').data('trigger-col');
             var url = root_path + '/placed_clue/*/find/' + crossword_id + '?domain=ajax&orientation=across&x='+x+'&y='+y;
-            $.post({url: url})
-            .done(populateEditForm)
-            .fail(displayAjaxError);
+            makeAjaxCall('post', url, null, populateEditForm);
             break;
         case 'menu-grid-square-edit-clue-down':
             // We need a database call to get PlacedClue from the square and orientation
@@ -572,9 +572,7 @@ function gridSquareMenuClickHandler(eventObject) {
             var y = $('#context-menu-menu-grid-square').data('trigger-row');
             var x = $('#context-menu-menu-grid-square').data('trigger-col');
             var url = root_path + '/placed_clue/*/find/' + crossword_id + '?domain=ajax&orientation=down&x='+x+'&y='+y;
-            $.post({url: url})
-            .done(populateEditForm)
-            .fail(displayAjaxError);
+            makeAjaxCall('post', url, null, populateEditForm);
             break;
         case 'menu-grid-square-clear-grid-square':
             // Get vars
