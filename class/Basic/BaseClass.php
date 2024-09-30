@@ -13,5 +13,8 @@ namespace Basic {
         public function expose() : mixed {
             return get_object_vars($this);
         }
+
+        /** Used for temporary tagging of objects in a way that isn't persisted to the database */
+        public $__tag;
     }
 }
