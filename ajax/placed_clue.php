@@ -156,22 +156,8 @@ switch ($action) {
         $x_change = $_POST['col'] - $placedClue->x;
         $y_change = $_POST['row'] - $placedClue->y;
 
-        // Get symmetry clues
+        // Get symmetry clues - must do this before alterations are made to the original
         $additionalClues = $placedClue->getSymmetryClues();
-        if (count($additionalClues) > 0) {
-            // Work out start and end row/col of original as these will be useful for mirroring
-            $startX = $placedClue->x;
-            $startY = $placedClue->y;
-            $endX = ($placedClue->orientation==PlacedClue::ACROSS) ? $startX + $placedClue->getLength() : $startX;
-            $endY = ($placedClue->orientation==PlacedClue::DOWN) ? $startY + $placedClue->getLength() : $startY;
-            // TODO - HIGH Now work out the changes based on rotation information, which is stored as degrees in $apc->__tag
-        }
-        foreach ($additionalClues as $apc) {
-            // TODO - HIGH complex geometry here!
-            // NB if orientation changes and position doesn't then position may need to change for rotated clues because the
-            // original clue's endpoint is the _starting_ point for a rotated clue, and that _has_ changed
-            $rotation_type = ($apc->orientation == $placedClue->orientation) ? 90 : 180;
-        }
 
         // Make changes and save
         $placedClue->x = $_POST['col'];
@@ -183,8 +169,19 @@ switch ($action) {
         $clue->explanation = $_POST['explanation'];
         $placedClue->save();
 
-        // Save symmetry clues
+        // Alter and save symmetry clues
+        // TODO - test this
         foreach ($additionalClues as $apc) {
+            // Get a template clue by rotating the updated $placedClue
+            $template = $placedClue->getRotatedClue($apc->__tag);
+            $template_clue = $template->getClue();
+            $apc->x = $template->x; $apc->y = $template->y;
+            $apc->orientation = $template->orientation;
+            $ac = $apc->getClue();
+            // Trim if the clue has shortened
+            while ($ac->getLength() > $template_clue->getLength()) { $ac->answer = substr($ac->answer, 0, -1); }
+            // Pad if the clue has lengthened
+            while ($ac->getLength() < $template_clue->getLength()) { $ac->answer .= '?'; }
             $apc->save();
         }
         

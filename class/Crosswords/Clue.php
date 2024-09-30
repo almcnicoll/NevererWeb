@@ -36,6 +36,7 @@ namespace Crosswords {
          */
         public function save() : ?int {
             $this->ensureFieldSet('question')->ensureFieldSet('answer');
+            $this->answer = strtolower($this->answer);
             $this->pattern = Clue::getPattern($this->answer);
             $returnVal = parent::save(); // Call parent save logic
             return $returnVal;
@@ -53,6 +54,7 @@ namespace Crosswords {
                     return strlen($this->getAnswerLetters());
                 }
             } else {
+                $this->pattern = Clue::getPattern($this->answer);
                 $parts = explode(',',str_replace('(','',str_replace(')','',$this->pattern)));
                 $length = 0;
                 foreach ($parts as $part) { $length += (int)$part; }
