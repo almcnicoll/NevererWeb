@@ -63,9 +63,7 @@ function serializeForm(selector, stripPrefix = false) {
 //#endregion
 
 //#region Ajax handling
-//TODO - HIGH add a generic function ("makeAjaxCall"?) which takes a call that needs to be made and the return function(s)
-// the idea is that it will add to a queue and manage a small UI indicator showing what calls are underway and whether they're returning
-// and it could also prompt an internet connection check if they're failing
+// TODO - consider prompting an internet connection check if makeAjaxCall is regularly returning fails
 
 /**
  * 
@@ -353,9 +351,26 @@ function fieldProblem(selector, message) {
  * @param {string} data the JSON string returned by the ajax call
  */
 function populateEditForm(data) {
-    // Put those variables into the modal form
-    var pc = JSON.parse(data);
+    // Parse returned array
+    var arr = JSON.parse(data);
+    // Retrieve primary clue
+    var pc = arr['original'];
     var c = pc['clue'];
+    // Parse additional (symmetry) clues
+    var addClues = arr['additional'];
+    var symClues;
+    if ('_list' in addClues) {
+        symClues = arr['additional']['_list'];
+    } else {
+        symClues = Array();
+    }
+    var symClueTexts = new Array();
+    for (var i=0; i< symClues.length; i++) {
+        var symClue = symClues[i];
+        symClueTexts.push(symClue.place_number + ' ' + symClue.orientation);
+    }
+    var symClueText = symClueTexts.join(', ');
+    // Put those variables into the modal form
     $('#edit-clue input#edit-clue-id').val( pc.id );
     $('#edit-clue input#edit-clue-row').val( pc.y );
     $('#edit-clue input#edit-clue-col').val( pc.x );
@@ -363,6 +378,14 @@ function populateEditForm(data) {
     $('#edit-clue input#edit-clue-answer').val(c.answer);
     $('#edit-clue input#edit-clue-clue').val(c.question);
     $('#edit-clue input#edit-clue-explanation').val(c.explanation);
+    // Symmetry clues message
+    if (symClueTexts.length == 0) {
+        $('#form-edit-clue-affected-clues-warning').hide();
+        $('#form-edit-clue-affected-clues-details').text('');
+    } else {
+        $('#form-edit-clue-affected-clues-details').text(symClueText);
+        $('#form-edit-clue-affected-clues-warning').show();
+    }
     new bootstrap.Modal('#edit-clue').toggle();
     $('#edit-clue #edit-clue-answer').focus();
 }
