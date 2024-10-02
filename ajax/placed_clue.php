@@ -139,6 +139,7 @@ switch ($action) {
         die(json_encode([])); // TODO - consider returning a success/fail, or perhaps the PlacedClue itself in JSON
     case 'update':
         // Called as /ajax/placed_clue/*/update/[id]
+        // TODO - HIGH - this messes up symmetry clues if there are non-pattern characters (spaces, hyphens) in the updated clue
         // TODO - Validation here
         $id = array_shift($params);
         // Populate and save the entities
