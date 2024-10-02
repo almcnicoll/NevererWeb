@@ -57,11 +57,13 @@ switch ($action) {
     case 'find':
         // Called as /ajax/placed_clue/*/find/[crossword-id]?orientation=across|down&x=[x]&y=[y]
         // Specifies a cell and an orientation, and retrieves the matching PlacedClue
-        // TODO - return symmetry_clues as an additional array index
+        // Return is as array in the form ['original' => PlacedClue, 'additional' => PlacedClueList] where the 'additional' clues are symmetry clues
         // TODO - check that this code works when two across clues are on the same row and when two down clues are on the same column
+        // Retrieve variables
         $crossword_id = array_shift($params);
         $findCriteria = [];
         populate_from_request(['orientation','x','y']);
+        // Set criteria for finding clue
         switch (strtolower($orientation)) {
             case 'across':
                 $findCriteria = [
@@ -82,16 +84,25 @@ switch ($action) {
             default:
                 throw new InvalidArgumentException("Invalid value {$orientation} passed to placed_clue/find");
         }
+        // Loop through possible matches, checking position
         $possibleMatches = PlacedClue::find($findCriteria);
         foreach ($possibleMatches as $possibleMatch) {
             /** @var PlacedClue $possibleMatch */
             $clue = $possibleMatch->getClue();
             switch ($possibleMatch->orientation) {
                 case 'across':
-                    if (($possibleMatch->x + strlen($clue->answer) - 1) >= $x) { die(json_encode($possibleMatch->expose())); }
+                    if (($possibleMatch->x + strlen($clue->answer) - 1) >= $x) {
+                        $output = [ 'original' => $possibleMatch->expose(),
+                                    'additional' => $possibleMatch->getSymmetryClues()->expose()];
+                        die(json_encode($output));
+                    }
                     break;
                 case 'down':
-                    if (($possibleMatch->y + strlen($clue->answer) - 1) >= $y) { die(json_encode($possibleMatch->expose())); }
+                    if (($possibleMatch->y + strlen($clue->answer) - 1) >= $y) { 
+                        $output = [ 'original' => $possibleMatch->expose(),
+                                    'additional' => $possibleMatch->getSymmetryClues()->expose()];
+                        die(json_encode($output));
+                    }
                     break;
                 default:
                     // Shouldn't happen
