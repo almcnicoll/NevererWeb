@@ -115,6 +115,22 @@ END_SQL;
             }
         }
 
+        /** Returns the index of the last column of the crossword
+         * NB this is a utility method - it is always cols-1, but this makes other code more readable
+         * @return int the index of the last column
+         */
+        public function lastCol() : int {
+            return $this->cols - 1;
+        }
+
+        /** Returns the index of the last row of the crossword
+         * NB this is a utility method - it is always rows-1, but this makes other code more readable
+         * @return int the index of the last row
+         */
+        public function lastRow() : int {
+            return $this->rows - 1;
+        }
+
         /**
          * Gets the contents of the crossword as a Grid of GridSquares
          * @param int $xMin the minimum column to retrieve from (default: 0)

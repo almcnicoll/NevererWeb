@@ -122,7 +122,7 @@ namespace Crosswords {
         }
         // Retrieve variables
         $crossword = $this->getCrossword();
-        $clueLength = strlen($this->getClue()->answer);
+        $clueLength = $this->getLength();
         // Do rotation
         switch ($degrees) {
           case 0:
@@ -135,15 +135,26 @@ namespace Crosswords {
             $pcReflect0->__tag = 0;
             return $pcReflect0;
           case 90:
+            // TODO - HIGH this maths is sometimes wrong
+            // Calculate endpoints of the clue, ignoring the concept of start and end
+            $x1 = $x2 = $this->x;
+            $y1 = $y2 = $this->y;
+            if ($this->orientation == PlacedClue::ACROSS) { $x2 += $this->getLength()-1; } else { $y2 += $this->getLength()-1; }
+            // Rotate them
+            $rx1 = $crossword->lastRow()-$y1;
+            $ry1 = $x1;
+            $rx2 = $crossword->lastRow()-$y2;
+            $ry2 = $x2;
+
+            // Make the new clue
             $pcReflect90 = new PlacedClue();
             $pcReflect90->crossword_id = $this->crossword_id;
             $pcReflect90->orientation = PlacedClue::invertOrientation($this->orientation);
-            $pcReflect90->x = $this->y;
-            $pcReflect90->y = $crossword->cols-$this->x;
+            // Use the minimum value of each of the two x and y points because we want the START of the clue
+            $pcReflect90->x = min($rx1,$rx2);
+            $pcReflect90->y = min($ry1,$ry2);
             $pcReflect90->setClue($this->getClue()->blankClone(),false);
             $pcReflect90->__tag = 90;
-            // If it's a DOWN clue, this gives us the END of the new clue - we want the START
-            if ($this->orientation == PlacedClue::DOWN) { $pcReflect90->x -= ($clueLength-1); }
             return $pcReflect90;
           case 180:
             $pcReflect180 = new PlacedClue();
@@ -158,15 +169,26 @@ namespace Crosswords {
             return $pcReflect180;
             break;
           case 270:
+            // TODO - HIGH this maths is sometimes wrong
+            // Calculate endpoints of the clue, ignoring the concept of start and end
+            $x1 = $x2 = $this->x;
+            $y1 = $y2 = $this->y;
+            if ($this->orientation == PlacedClue::ACROSS) { $x2 += $this->getLength()-1; } else { $y2 += $this->getLength()-1; }
+            // Rotate them
+            $rx1 = $y1;
+            $ry1 = $crossword->lastCol()-$x1;
+            $rx2 = $y2;
+            $ry2 = $crossword->lastRow()-$x2;
+
+            // Make the new clue
             $pcReflect270 = new PlacedClue();
             $pcReflect270->crossword_id = $this->crossword_id;
             $pcReflect270->orientation = PlacedClue::invertOrientation($this->orientation);
-            $pcReflect270->x = $crossword->rows-$this->y;
-            $pcReflect270->y = $this->x;
+            // Use the minimum value of each of the two x and y points because we want the START of the clue
+            $pcReflect270->x = min($rx1,$rx2);
+            $pcReflect270->y = min($ry1,$ry2);
             $pcReflect270->setClue($this->getClue()->blankClone(),false);
             $pcReflect270->__tag = 270;
-            // If it's an ACROSS clue, this gives us the END of the new clue - we want the START
-            if ($this->orientation == PlacedClue::ACROSS) { $pcReflect270->y -= ($clueLength-1); }
             return $pcReflect270;
             break;
           default:

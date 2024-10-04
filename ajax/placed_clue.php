@@ -164,7 +164,7 @@ switch ($action) {
         // Work out what's changed, for symmetry-clue-update purposes
         $clue = $placedClue->getClue();
         $orientation_change = ($placedClue->orientation != $_POST['orientation']);
-        $length_change = strlen($_POST['answer']) - strlen($clue->answer);
+        $length_change = strlen(Clue::stripAnswerLetters($_POST['answer'])) - strlen($clue->answer); // Important to use stripAnswerLetters so we're using the "grid length" of the submitted answer
         $x_change = $_POST['col'] - $placedClue->x;
         $y_change = $_POST['row'] - $placedClue->y;
 
@@ -182,7 +182,7 @@ switch ($action) {
         $placedClue->save();
 
         // Alter and save symmetry clues
-        // TODO - test this
+        // TODO - test this with 4-fold symmetry
         foreach ($additionalClues as $apc) {
             // Get a template clue by rotating the updated $placedClue
             $template = $placedClue->getRotatedClue($apc->__tag);
@@ -191,9 +191,13 @@ switch ($action) {
             $apc->orientation = $template->orientation;
             $ac = $apc->getClue();
             // Trim if the clue has shortened
-            while ($ac->getLength() > $template_clue->getLength()) { $ac->answer = substr($ac->answer, 0, -1); }
+            while ($ac->getLength() > $template_clue->getLength()) { 
+                $ac->answer = substr($ac->answer, 0, -1); 
+            }
             // Pad if the clue has lengthened
-            while ($ac->getLength() < $template_clue->getLength()) { $ac->answer .= '?'; }
+            while ($ac->getLength() < $template_clue->getLength()) { 
+                $ac->answer .= '?'; 
+            }
             $apc->save();
         }
         
