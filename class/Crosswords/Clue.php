@@ -21,6 +21,7 @@ namespace Crosswords {
         public const PATTERN_SPLIT_CHARS = "/([\\s\\-]+)/i";
         public const PATTERN_ANSWER_CHARS = "/[A-Za-z9-0]+/i";
         public const PATTERN_WHITESPACE = "/\\s+/";
+        public const PATTERN_PATTERN_DELIMITERS =  "/[(),\\s]+/i";
 
         /**
          * Constructs the class, initialising some default values
@@ -55,10 +56,12 @@ namespace Crosswords {
                 }
             } else {
                 $this->pattern = Clue::getPattern($this->answer);
-                // TODO - HIGH use regex here
-                $parts = preg_split(Clue::PATTERN_SPLIT_CHARS, str_replace('(','',str_replace(')','',$this->pattern)));
+                // Parse the pattern and 
+                $parts = preg_split(Clue::PATTERN_PATTERN_DELIMITERS, $this->pattern,-1,PREG_SPLIT_NO_EMPTY);
                 $length = 0;
-                foreach ($parts as $part) { $length += (int)$part; }
+                foreach ($parts as $part) { 
+                    $length += (int)$part; 
+                }
                 return $length;
             }
         }
@@ -81,7 +84,7 @@ namespace Crosswords {
                 if ($parts[$i] === '') {
                     // If part is now blank, it was a whitespace delimiter and should be replaced with a comma
                     $parts[$i] = ',';
-                } elseif (preg_match(Clue::PATTERN_SPLIT_CHARS,$parts[$i].'$') === false) {
+                } elseif ((preg_match(Clue::PATTERN_SPLIT_CHARS,$parts[$i]) === false)||(preg_match(Clue::PATTERN_SPLIT_CHARS,$parts[$i]) === 0)) {
                     // Otherwise if it doesn't match a splitting character, it must be letters - replace them with their length
                     $parts[$i] = strlen($parts[$i]);
                 }
