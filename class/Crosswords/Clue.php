@@ -21,7 +21,7 @@ namespace Crosswords {
         public const PATTERN_SPLIT_CHARS = "/([\\s\\-]+)/i";
         public const PATTERN_ANSWER_CHARS = "/[A-Za-z9-0]+/i";
         public const PATTERN_WHITESPACE = "/\\s+/";
-        public const PATTERN_PATTERN_DELIMITERS =  "/[(),\\s]+/i";
+        public const PATTERN_PATTERN_DELIMITERS =  "/[(),\\s\\-]+/i";
 
         /**
          * Constructs the class, initialising some default values
