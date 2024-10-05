@@ -38,6 +38,7 @@
     }
 ?>
 <!-- Set vars -->
+<script type="text/javascript" src='../../js/dictionaries.js'></script>
 <script type="text/javascript">
 <?php
     echo "var root_path = \"{$config['root_path']}\";\n";
