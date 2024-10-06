@@ -134,3 +134,40 @@ ADD CONSTRAINT `FK_USER_ID` FOREIGN KEY (user_id) REFERENCES users (id)
 ALTER TABLE `clues`
 ADD COLUMN `explanation` VARCHAR(2000) DEFAULT NULL
 AFTER `pattern`;
+/* UPDATE */
+/* VERSION 10 */
+CREATE TABLE `sowpods` (
+  `word` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `ordered_word` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `a` tinyint(4) NOT NULL DEFAULT 0,
+  `b` tinyint(4) NOT NULL DEFAULT 0,
+  `c` tinyint(4) NOT NULL DEFAULT 0,
+  `d` tinyint(4) NOT NULL DEFAULT 0,
+  `e` tinyint(4) NOT NULL DEFAULT 0,
+  `f` tinyint(4) NOT NULL DEFAULT 0,
+  `g` tinyint(4) NOT NULL DEFAULT 0,
+  `h` tinyint(4) NOT NULL DEFAULT 0,
+  `i` tinyint(4) NOT NULL DEFAULT 0,
+  `j` tinyint(4) NOT NULL DEFAULT 0,
+  `k` tinyint(4) NOT NULL DEFAULT 0,
+  `l` tinyint(4) NOT NULL DEFAULT 0,
+  `m` tinyint(4) NOT NULL DEFAULT 0,
+  `n` tinyint(4) NOT NULL DEFAULT 0,
+  `o` tinyint(4) NOT NULL DEFAULT 0,
+  `p` tinyint(4) NOT NULL DEFAULT 0,
+  `q` tinyint(4) NOT NULL DEFAULT 0,
+  `r` tinyint(4) NOT NULL DEFAULT 0,
+  `s` tinyint(4) NOT NULL DEFAULT 0,
+  `t` tinyint(4) NOT NULL DEFAULT 0,
+  `u` tinyint(4) NOT NULL DEFAULT 0,
+  `v` tinyint(4) NOT NULL DEFAULT 0,
+  `w` tinyint(4) NOT NULL DEFAULT 0,
+  `x` tinyint(4) NOT NULL DEFAULT 0,
+  `y` tinyint(4) NOT NULL DEFAULT 0,
+  `z` tinyint(4) NOT NULL DEFAULT 0,
+  `len` tinyint(4) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`word`),
+  UNIQUE KEY `ordered_word_lookup` (`ordered_word`,`word`),
+  KEY `word_length` (`len`,`word`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+;
