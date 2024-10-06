@@ -21,6 +21,7 @@ namespace Crosswords {
         public const PATTERN_SPLIT_CHARS = "/([\\s\\-]+)/i";
         public const PATTERN_ANSWER_CHARS = "/[A-Za-z9-0]+/i";
         public const PATTERN_WHITESPACE = "/\\s+/";
+        public const PATTERN_PATTERN_DELIMITERS =  "/[(),\\s\\-]+/i";
 
         /**
          * Constructs the class, initialising some default values
@@ -55,9 +56,12 @@ namespace Crosswords {
                 }
             } else {
                 $this->pattern = Clue::getPattern($this->answer);
-                $parts = explode(',',str_replace('(','',str_replace(')','',$this->pattern)));
+                // Parse the pattern and 
+                $parts = preg_split(Clue::PATTERN_PATTERN_DELIMITERS, $this->pattern,-1,PREG_SPLIT_NO_EMPTY);
                 $length = 0;
-                foreach ($parts as $part) { $length += (int)$part; }
+                foreach ($parts as $part) { 
+                    $length += (int)$part; 
+                }
                 return $length;
             }
         }
@@ -80,7 +84,7 @@ namespace Crosswords {
                 if ($parts[$i] === '') {
                     // If part is now blank, it was a whitespace delimiter and should be replaced with a comma
                     $parts[$i] = ',';
-                } elseif (preg_match('^'.Clue::PATTERN_SPLIT_CHARS,$parts[$i].'$') === false) {
+                } elseif ((preg_match(Clue::PATTERN_SPLIT_CHARS,$parts[$i]) === false)||(preg_match(Clue::PATTERN_SPLIT_CHARS,$parts[$i]) === 0)) {
                     // Otherwise if it doesn't match a splitting character, it must be letters - replace them with their length
                     $parts[$i] = strlen($parts[$i]);
                 }
@@ -89,17 +93,26 @@ namespace Crosswords {
         }
 
         /**
-         * Get the letters that make up the answer, without any spaces or punctuation
+         * Get the letters that make up the answer, WITHOUT any spaces or punctuation
+         * @param string the input string to strip
+         * @return string the string with spaces and punctuation removed, in the form it would appear in a crossword grid
+         */
+        public static function stripAnswerLetters(string $input) : string {
+            return preg_replace(Clue::NON_PATTERN_CHARS,'',preg_replace(Clue::PATTERN_SPLIT_CHARS,'',$input));
+        }
+
+        /**
+         * Get the letters that make up the answer, WITHOUT any spaces or punctuation
          * @return string the letters as a string
          */
         public function getAnswerLetters() : string {
-            return preg_replace(Clue::NON_PATTERN_CHARS,'',preg_replace(Clue::PATTERN_SPLIT_CHARS,'',$this->answer));
+            return Clue::stripAnswerLetters($this->answer);
         }
 
         /** Returns a blank clone (same length, no specified letters) of the current clue */
         public function blankClone() : Clue {
             $clone = new Clue();
-            $clone->answer = str_repeat('?',strlen($this->answer));
+            $clone->answer = str_repeat('?',strlen($this->getAnswerLetters()));
             return $clone;
         }
     }

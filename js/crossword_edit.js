@@ -222,6 +222,7 @@ function updateClueList(json, removeMissing=true) {
     var unusedIds = $.map($(".clue-row"), function(n, i){
         return n.id;
     });
+    // TODO - HIGH clues are NOT currently returned in order!
     // Clues should be in order - all across and then all down
     for (var i in allClues) {
         var pClue = allClues[i];
@@ -263,6 +264,7 @@ function updateClueList(json, removeMissing=true) {
             }
         }
     }
+    // TODO - HIGH this seems to be removing too many items after clue-add
     if (removeMissing) {
         for(var i in unusedIds) {
             $('#'+unusedIds[i]).remove();
