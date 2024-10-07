@@ -156,5 +156,16 @@ if (isset($config['KOFI_SHOW']) && $config['KOFI_SHOW']):
 <?php
 endif;
 ?>
+<?php
+if (Security\Config::getValueOrDefault('debug_windows',false)) {
+    echo <<<END_HTML
+<footer class="footer mt-auto py-3 bg-light">
+  <div class="container">
+    <div id='debug-info'>&nbsp;</div>
+  </div>
+</footer>
+END_HTML;
+}
+?>
 </body>
 </html>

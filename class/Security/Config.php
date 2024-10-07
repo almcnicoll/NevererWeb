@@ -55,6 +55,21 @@ namespace Security {
         public static function get() {
             return self::$__config;
         }
+
+        /**
+         * Gets the value held in the specific key, returning
+         * the default value if the key does not exist
+         * @param string $key the key to look up
+         * @param mixed $defaultValue the value to return if the key does not exist
+         * @return mixed the value looked up, or the default value
+         */
+        public static function getValueOrDefault(string $key, mixed $defaultValue = null) {
+            if (array_key_exists($key, self::$__config)) {
+                return self::$__config[$key];
+            } else {
+                return $defaultValue;
+            }
+        }
     }
     Config::init();
 }
