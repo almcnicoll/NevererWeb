@@ -37,8 +37,9 @@
         $_SESSION['PAGE_LOADCOUNTS'][__FILE__] = 1;
     }
 ?>
-<!-- Set vars -->
+<!-- Dictionary mgmt -->
 <script type="text/javascript" src='../../js/dictionaries.js'></script>
+<!-- Set vars -->
 <script type="text/javascript">
 <?php
     echo "var root_path = \"{$config['root_path']}\";\n";
