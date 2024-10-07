@@ -97,10 +97,14 @@ if (!isset($_SESSION['PAGE_LOADCOUNTS'])) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
     <link href="<?= $config['root_path'] ?>/css/app.css" rel="stylesheet">
     <script type='text/javascript'>
-        <!-- Variables from PHP script -->
+        // Variables from PHP script
         <?php
         echo "\t\tvar root_path = \"{$config['root_path']}\";\n";
         ?>
+        // Stub for debug (stub functions so that code can call these without throwing exceptions)
+        let debugPane = {};
+        debugPane.print = function() {};
+        debugPane.clear = function() {};
     </script>
 </head>
 <body>
@@ -157,8 +161,9 @@ if (isset($config['KOFI_SHOW']) && $config['KOFI_SHOW']):
 endif;
 ?>
 <?php
-if (Security\Config::getValueOrDefault('debug_windows',false)) {
+if (Security\Config::getValueOrDefault('debug_pane',false)) {
     echo <<<END_HTML
+<script type='text/javascript' src="{$config['root_path']}/js/debug.js"></script>
 <footer class="footer mt-auto py-3 bg-light">
   <div class="container">
     <div id='debug-info'>&nbsp;</div>

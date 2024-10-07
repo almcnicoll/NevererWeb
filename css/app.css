@@ -243,3 +243,16 @@ ul.context-menu li:hover, ul.context-menu a:hover {
 .g-signin2>div {
     margin:auto;
 }
+
+/* Debug pane */
+#debug-info {
+    max-height: 10em;
+    overflow-y: auto;
+    text-wrap: wrap;
+}
+#debug-info .alert {
+    padding: 4px;
+    margin: 0px;
+    border-radius: 0px;
+    --webkit-border-radius: 0px;
+}
