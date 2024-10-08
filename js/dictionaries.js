@@ -1,7 +1,40 @@
+/**
+ * The Dexie.js namespace.
+ * @external "Dexie"
+ * @see {@link https://cdnjs.cloudflare.com/ajax/libs/dexie/4.0.8/dexie.js}
+ */
 let dictionary = {};
 
-//#region database
+//#region dexie_definitions
+dictionary.db = new Dexie('NevererWeb');
+dictionary.db.version(1).stores({
+    sowpods: 'word, lettercount'
+});
+//#endregion
 
+//#region data-load
+
+// Ensure we at least have SOWPODS loaded
+var sowpodsCount = dictionary.db.sowpods.count();
+$.get({url: root_path+'/files/sowpods.json'}).done(
+    function(data) {
+        //Long list of words returned
+        /** @type Array */
+        var sowpods = JSON.parse(data);
+        if(sowpods.length > sowpodsCount) {
+            // Need to load in more words
+            for(var i in sowpods) {
+                var obj = sowpods[i];
+                obj.lettercount = obj.word.length; //{word: sowpods[i], lettercount: sowpods[i].length};
+                dictionary.db.sowpods.put(obj);
+            }
+        }
+    }
+);
+//#endregion
+
+//#region database
+/*
 dictionary.init = function() {
     dictionary.openRequest = indexedDB.open('neverer', 1);
     
@@ -43,7 +76,7 @@ dictionary.init = function() {
         // see "Parallel update problem" on https://javascript.info/indexeddb
     }
 }
-
+*/
 //#endregion
 
 //#region functions
@@ -51,5 +84,5 @@ dictionary.init = function() {
 //#endregion
 
 //#region init
-$(document).ready(dictionary.init);
+//$(document).ready(dictionary.init);
 //#endregion
