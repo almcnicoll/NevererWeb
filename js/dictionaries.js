@@ -13,24 +13,49 @@ dictionary.db.version(1).stores({
 //#endregion
 
 //#region data-load
+/**
+ * Initialises dictionary and database functionality
+ */
+dictionary.init = async function() {
+    // Ensure we at least have SOWPODS loaded
+    dictionary.ensureSowpods();
+}
 
-// Ensure we at least have SOWPODS loaded
-var sowpodsCount = dictionary.db.sowpods.count();
-$.get({url: root_path+'/files/sowpods.json'}).done(
-    function(data) {
-        //Long list of words returned
-        /** @type Array */
-        var sowpods = JSON.parse(data);
-        if(sowpods.length > sowpodsCount) {
-            // Need to load in more words
-            for(var i in sowpods) {
-                var obj = sowpods[i];
-                obj.lettercount = obj.word.length; //{word: sowpods[i], lettercount: sowpods[i].length};
-                dictionary.db.sowpods.put(obj);
+/**
+ * Ensures that the SOWPODS dictionary is loaded into indexeddb
+ * @returns {void}
+ */
+dictionary.ensureSowpods = async function() {
+    // TODO - HIGH get this into a WebWorker thread - otherwise it blocks the UI for ages!
+    var sowpodsCount = await dictionary.db.sowpods.count();
+    debugPane.print("SOWPODS count: "+sowpodsCount);
+    // TODO - HIGH move this to using makeAjaxCall()
+    $.get({url: root_path+'/files/sowpods.json'}).done(
+        async function(data) {
+            //Long list of words returned
+            /** @type Array */
+            var sowpods;
+            if (typeof data == 'string') {
+                sowpods = JSON.parse(data);
+            } else {
+                sowpods = data;
+            }
+            if(sowpods.length > sowpodsCount) {
+                // Need to load in more words
+                debugPane.print("Loading words from file.");
+                for(var i in sowpods) {
+                    var obj = sowpods[i];
+                    obj.lettercount = obj.word.length; //{word: sowpods[i], lettercount: sowpods[i].length};
+                }
+                dictionary.db.sowpods.bulkPut(sowpods);
+                sowpodsCount = await dictionary.db.sowpods.count();
+                debugPane.print("New SOWPODS count: "+sowpodsCount);
             }
         }
-    }
-);
+    ).fail(function() {
+        // TODO - something here
+    });
+}
 //#endregion
 
 //#region database
@@ -84,5 +109,5 @@ dictionary.init = function() {
 //#endregion
 
 //#region init
-//$(document).ready(dictionary.init);
+$(document).ready(dictionary.init);
 //#endregion
