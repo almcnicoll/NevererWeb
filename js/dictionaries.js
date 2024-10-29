@@ -3,14 +3,48 @@
  * @external "Dexie"
  * @see {@link https://cdnjs.cloudflare.com/ajax/libs/dexie/4.0.8/dexie.js}
  */
-let dictionary = {};
 
-//#region dexie_definitions
-dictionary.db = new Dexie('NevererWeb');
-dictionary.db.version(1).stores({
-    sowpods: 'word, lettercount'
-});
-//#endregion
+class Dictionaries {
+    /*
+    * Tables:
+    * tomes: volumes of dictionary entries (e.g. sowpods)
+    * entries: words or phrases that form valid answers
+    * clues: possible questions (with or without explanations) which relate to a given word or phrase
+    */
+
+
+    /**
+     * References the local database
+     * @type {Dexie}
+     */
+    static db;
+
+    /**
+     * Contains all tomes that have been loaded
+     * @type {Array}
+     */
+    static tomes = [];
+
+    static init() {
+        //#region dexie_definitions
+        Dictionaries.db = new Dexie('NevererWeb');
+        Dictionaries.db.version(2).stores({
+            sowpods: 'word, lettercount',
+            tomes: '++id, name, source_type, remote_url, last_updated',
+            entries: '++id, tome_id, answer, answerletters, lettercount',
+            clues: '++id, answer, clue, explanation'
+        });
+        //#endregion
+    }
+
+    /**
+     * 
+     * @param {string} source the source URL to load from
+     */
+    static load(source) {
+        //
+    }
+}
 
 //#region data-load
 /**
@@ -20,6 +54,12 @@ dictionary.init = async function() {
     // Ensure we at least have SOWPODS loaded
     dictionary.ensureSowpods();
 }
+
+/*
+Structure of dictionaries object:
+dictionary.tomes - Array of Tome objects
+
+*/
 
 /**
  * Ensures that the SOWPODS dictionary is loaded into indexeddb
