@@ -30,7 +30,7 @@ class Dictionaries {
         Dictionaries.db = new Dexie('NevererWeb');
         Dictionaries.db.version(2).stores({
             sowpods: 'word, lettercount',
-            tomes: '++id, name, source_type, remote_url, last_updated',
+            tomes: '++id, name, source_type, source_format, source, writeable, last_updated',
             entries: '++id, tome_id, answer, answerletters, lettercount',
             clues: '++id, answer, clue, explanation'
         });
