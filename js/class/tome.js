@@ -74,6 +74,15 @@ class Tome {
      */
     static retrieveData(source_type, source) {
         // TODO - add code for retrieving the data
+        // TODO - HIGH create the success/failure functions, or find a way to handle them better than this (promises?)
+        switch (source_type.toLowerCase()) {
+            case 'url':
+                makeAjaxCall('get', source, null, this.retrievalSuccess, this.retrievalFailure);
+                break;
+            default:
+                throw new Error("Don't know how to retrieve data from source of type "+source_type);
+        }       
+        
     }
 
     /**
@@ -83,6 +92,33 @@ class Tome {
      */
     static parseData(source_format, data) {
         // TODO - add code for parsing the data
+
+        // SAMPLE CODE FROM ensureSowpods() - ignore the retrieval part
+        $.get({url: root_path+'/files/sowpods.json'}).done(
+            async function(data) {
+                //Long list of words returned
+                /** @type Array */
+                var sowpods;
+                if (typeof data == 'string') {
+                    sowpods = JSON.parse(data);
+                } else {
+                    sowpods = data;
+                }
+                if(sowpods.length > sowpodsCount) {
+                    // Need to load in more words
+                    debugPane.print("Loading words from file.");
+                    for(var i in sowpods) {
+                        var obj = sowpods[i];
+                        obj.lettercount = obj.word.length; //{word: sowpods[i], lettercount: sowpods[i].length};
+                    }
+                    dictionary.db.sowpods.bulkPut(sowpods);
+                    sowpodsCount = await dictionary.db.sowpods.count();
+                    debugPane.print("New SOWPODS count: "+sowpodsCount);
+                }
+            }
+        ).fail(function() {
+            // TODO - something here
+        });
     }
 
     /**
