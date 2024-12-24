@@ -214,6 +214,9 @@ tr.clue-orientation-header {
     position: absolute;
     margin-top: -8px;
 }
+span.letter-holder {
+    cursor: default;
+}
 
 /* Menus */
 ul.context-menu {
