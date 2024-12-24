@@ -72,12 +72,12 @@ class Tome {
      * @param {string} source the file or URL from which to load
      * @returns {any} the specified data
      */
-    static retrieveData(source_type, source) {
+    static async retrieveData(source_type, source) {
         // TODO - add code for retrieving the data
         // TODO - HIGH create the success/failure functions, or find a way to handle them better than this (promises?)
         switch (source_type.toLowerCase()) {
             case 'url':
-                makeAjaxCall('get', source, null, this.retrievalSuccess, this.retrievalFailure);
+                makeAjaxCall('get', source, null, this.parseData, this.retrievalFailure);
                 break;
             default:
                 throw new Error("Don't know how to retrieve data from source of type "+source_type);
@@ -86,39 +86,56 @@ class Tome {
     }
 
     /**
+     * Processes failure to load data
+     */
+    retrievalFailure() {
+        //
+    }
+
+    /**
      * Parses the provided data and populates a Tome object with metadata, entries and clues
      * @param {string} source_format the format of the source data (see source_format property for possible values)
      * @param any} data the retrieved data 
      */
-    static parseData(source_format, data) {
+    async parseData(source_format, data) {
         // TODO - add code for parsing the data
+        var dictObj;
+        if (typeof data == 'string') {
+            dictObj = JSON.parse(data);
+        } else {
+            dictObj = data;
+        }
+
+        this.id = dictObj.id;
+        this.name = dictObj.name;
+        this.source_type = dictObj.source_type;
+        this.source = dictObj.source;
+        this.writeable = dictObj.writeable;
+        this.last_updated = dictObj.last_updated;
+        this.entries = dictObj.entries;
+
+        // Add tome
+        //var tome_data = {id:Dictionaries.db.tomes.length+1, name: this.name, };
+        Dictionaries.db.tomes.add(dictObj);
+
+        // Add entries
+        for (var i in this.entries) {
+            if (typeof this.entries[i] == 'string') {
+                this.entries[i] = new TomeEntry(this.entries[i]);
+                this.entries[i].lettercount = this.entries[i].word.length;
+            }
+            this.entries[i].tome_id = 
+            Dictionaries.tomes[Dictionaries.tomes.length] 
+        }
 
         // SAMPLE CODE FROM ensureSowpods() - ignore the retrieval part
-        $.get({url: root_path+'/files/sowpods.json'}).done(
-            async function(data) {
-                //Long list of words returned
-                /** @type Array */
-                var sowpods;
-                if (typeof data == 'string') {
-                    sowpods = JSON.parse(data);
-                } else {
-                    sowpods = data;
-                }
                 if(sowpods.length > sowpodsCount) {
                     // Need to load in more words
-                    debugPane.print("Loading words from file.");
-                    for(var i in sowpods) {
-                        var obj = sowpods[i];
-                        obj.lettercount = obj.word.length; //{word: sowpods[i], lettercount: sowpods[i].length};
-                    }
                     dictionary.db.sowpods.bulkPut(sowpods);
                     sowpodsCount = await dictionary.db.sowpods.count();
                     debugPane.print("New SOWPODS count: "+sowpodsCount);
                 }
-            }
-        ).fail(function() {
-            // TODO - something here
-        });
+        
     }
 
     /**
@@ -129,20 +146,21 @@ class Tome {
      * @returns {Tome} the loaded Tome
      */
     static load(source_type, source_format, source) {
+        var t = new Tome();
+        t.source_format = source_format;
+        
         // TODO - loading code here, including populating entries and clues
-
-        // TODO - move this code to retrieveData function
-        // TODO - I believe we can then string the retrieval and parsing functions together with Promises
-        /// using  .then() and .catch()
-        // Retrieve data
+        // Pre-loading
         switch (source_type) {
-            case 'file':
-                break;
             case 'url':
                 break;
             default:
                 throw new Error("Source of source_type "+source_type+" not supported.");
         }
+        
+        t.retrieveData(source_type, source);
+        // TODO - I believe we can string the retrieval and parsing functions together with Promises
+        /// using  .then() and .catch()
     }
 }
 /**
