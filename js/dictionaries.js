@@ -25,6 +25,9 @@ class Dictionaries {
      */
     static tomes = [];
 
+    /**
+     * Initialises dictionary and database functionality
+     */
     static init() {
         //#region dexie_definitions
         Dictionaries.db = new Dexie('NevererWeb');
@@ -35,6 +38,7 @@ class Dictionaries {
             clues: '++id, answer, clue, explanation'
         });
         //#endregion
+        Dictionaries.ensureSowpods();
     }
 
     /**
@@ -44,59 +48,66 @@ class Dictionaries {
     static load(source) {
         //
     }
-}
 
-//#region data-load
-/**
- * Initialises dictionary and database functionality
- */
-dictionary.init = async function() {
-    // Ensure we at least have SOWPODS loaded
-    dictionary.ensureSowpods();
+    //#region data-load
+
+    /**
+     * Ensures that the SOWPODS dictionary is loaded into indexeddb
+     * @returns {void}
+     */
+    static async ensureSowpods() {
+        // TODO - HIGH get this into a WebWorker thread - otherwise it blocks the UI for ages!
+        var sowpodsDict;
+        var sowpodsCount;
+        var sowpodsDicts = await Dictionaries.db.tomes
+                                .where("name").equalsIgnoreCase("SOWPODS").toArray();
+        if (sowpodsDicts.length >= 1) {
+            // Loaded - output length
+            sowpodsDict = sowpodsDicts[0];
+            sowpodsCount = await Dictionaries.db.entries.where("tome_id").equals(sowpodsDict.tome_id).count();
+            debugPane.print("SOWPODS exists. Word count: "+sowpodsCount);
+        } else {
+            // Not loaded - load it now
+            debugPane.print("SOWPODS tome doesn't exist in db");
+            var tomeSowpods = Tome.load('url','JSON','../../files/sowpods.json');
+        }
+        
+        $.get({url: root_path+'/files/sowpods.json'}).done(
+            async function(data) {
+                //Long list of words returned
+                /** @type Array */
+                var sowpods;
+                if (typeof data == 'string') {
+                    sowpods = JSON.parse(data);
+                } else {
+                    sowpods = data;
+                }
+                if(sowpods.length > sowpodsCount) {
+                    // Need to load in more words
+                    debugPane.print("Loading words from file.");
+                    for(var i in sowpods) {
+                        var obj = sowpods[i];
+                        obj.lettercount = obj.word.length; //{word: sowpods[i], lettercount: sowpods[i].length};
+                    }
+                    Dictionaries.db.sowpods.bulkPut(sowpods);
+                    sowpodsCount = await Dictionaries.db.entries.where("tome_id").equals(sowpodsDict.tome_id).count();
+                    debugPane.print("New SOWPODS count: "+sowpodsCount);
+                }
+            }
+        ).fail(function() {
+            // TODO - something here
+        });
+    }
+    //#endregion
+
 }
 
 /*
 Structure of dictionaries object:
-dictionary.tomes - Array of Tome objects
+Dictionaries.tomes - Array of Tome objects
 
 */
 
-/**
- * Ensures that the SOWPODS dictionary is loaded into indexeddb
- * @returns {void}
- */
-dictionary.ensureSowpods = async function() {
-    // TODO - HIGH get this into a WebWorker thread - otherwise it blocks the UI for ages!
-    var sowpodsCount = await dictionary.db.sowpods.count();
-    debugPane.print("SOWPODS count: "+sowpodsCount);
-    // TODO - HIGH move this to using makeAjaxCall()
-    $.get({url: root_path+'/files/sowpods.json'}).done(
-        async function(data) {
-            //Long list of words returned
-            /** @type Array */
-            var sowpods;
-            if (typeof data == 'string') {
-                sowpods = JSON.parse(data);
-            } else {
-                sowpods = data;
-            }
-            if(sowpods.length > sowpodsCount) {
-                // Need to load in more words
-                debugPane.print("Loading words from file.");
-                for(var i in sowpods) {
-                    var obj = sowpods[i];
-                    obj.lettercount = obj.word.length; //{word: sowpods[i], lettercount: sowpods[i].length};
-                }
-                dictionary.db.sowpods.bulkPut(sowpods);
-                sowpodsCount = await dictionary.db.sowpods.count();
-                debugPane.print("New SOWPODS count: "+sowpodsCount);
-            }
-        }
-    ).fail(function() {
-        // TODO - something here
-    });
-}
-//#endregion
 
 //#region database
 /*
@@ -149,5 +160,5 @@ dictionary.init = function() {
 //#endregion
 
 //#region init
-$(document).ready(dictionary.init);
+$(document).ready(Dictionaries.init);
 //#endregion

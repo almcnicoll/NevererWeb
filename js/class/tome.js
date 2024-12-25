@@ -116,7 +116,7 @@ class Tome {
 
         // Add tome
         //var tome_data = {id:Dictionaries.db.tomes.length+1, name: this.name, };
-        Dictionaries.db.tomes.add(dictObj);
+        var newTomeId = await Dictionaries.db.tomes.add(dictObj);
 
         // Add entries
         for (var i in this.entries) {
@@ -124,17 +124,13 @@ class Tome {
                 this.entries[i] = new TomeEntry(this.entries[i]);
                 this.entries[i].lettercount = this.entries[i].word.length;
             }
-            this.entries[i].tome_id = 
-            Dictionaries.tomes[Dictionaries.tomes.length] 
+            this.entries[i].tome_id = newTomeId;
+            //Dictionaries.tomes[Dictionaries.tomes.length] 
         }
-
-        // SAMPLE CODE FROM ensureSowpods() - ignore the retrieval part
-                if(sowpods.length > sowpodsCount) {
-                    // Need to load in more words
-                    dictionary.db.sowpods.bulkPut(sowpods);
-                    sowpodsCount = await dictionary.db.sowpods.count();
-                    debugPane.print("New SOWPODS count: "+sowpodsCount);
-                }
+        dictionary.db.entries.bulkPut(this.entries);
+        var entryCount = await dictionary.db.entries.count();
+        
+        debugPane.print("New dictionary entry count: "+entryCount);
         
     }
 
@@ -159,6 +155,8 @@ class Tome {
         }
         
         t.retrieveData(source_type, source);
+
+        return t;
         // TODO - I believe we can string the retrieval and parsing functions together with Promises
         /// using  .then() and .catch()
     }
