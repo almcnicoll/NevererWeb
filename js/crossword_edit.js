@@ -372,6 +372,16 @@ function populateEditForm(data) {
         symClueTexts.push(symClue.place_number + ' ' + symClue.orientation);
     }
     var symClueText = symClueTexts.join(', ');
+    // TODO - do something with the clues in the "intersecting" sub-array, which should be used to replace any
+    //  blanks in the current clue's pattern
+    // Parse intersecting clues
+    var intCluesList = arr['intersecting'];
+    var intClues;
+    if ('_list' in intCluesList) {
+        intClues = arr['intersecting']['_list'];
+    } else {
+        intClues = Array();
+    }
     // Put those variables into the modal form
     $('#edit-clue input#edit-clue-id').val( pc.id );
     $('#edit-clue input#edit-clue-row').val( pc.y );

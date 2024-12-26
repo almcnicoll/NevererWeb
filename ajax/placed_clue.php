@@ -92,15 +92,47 @@ switch ($action) {
             switch ($possibleMatch->orientation) {
                 case 'across':
                     if (($possibleMatch->x + strlen($clue->answer) - 1) >= $x) {
+                        // Find intersecting clues crudely
+                        $intersections = PlacedClue::find([
+                            ['crossword_id','=',$crossword_id],
+                            ['orientation','!=',strtolower($orientation)],
+                            ['x','>=',$possibleMatch->x],
+                            ['x','<=',$possibleMatch->x + $possibleMatch->getLength()]
+                        ]);
+                        // Refine the list to actual intersectors
+                        for ($i=count($intersections)-1;$i>=0;$i--) {
+                            if (!$intersections[$i]->overlapsWith($possibleMatch)) {
+                                array_splice($intersections, $i, 1);
+                            }
+                        }
+                        // Now build the return array
                         $output = [ 'original' => $possibleMatch->expose(),
-                                    'additional' => $possibleMatch->getSymmetryClues()->expose()];
+                                    'additional' => $possibleMatch->getSymmetryClues()->expose(),
+                                    'intersecting' => $intersections,
+                                ];
                         die(json_encode($output));
                     }
                     break;
                 case 'down':
                     if (($possibleMatch->y + strlen($clue->answer) - 1) >= $y) { 
+                        // Find intersecting clues crudely
+                        $intersections = PlacedClue::find([
+                            ['crossword_id','=',$crossword_id],
+                            ['orientation','!=',strtolower($orientation)],
+                            ['y','>=',$possibleMatch->y],
+                            ['y','<=',$possibleMatch->y + $possibleMatch->getLength()]
+                        ]);
+                        // Refine the list to actual intersectors
+                        for ($i=count($intersections)-1;$i>=0;$i--) {
+                            if (!$intersections[$i]->overlapsWith($possibleMatch)) {
+                                array_splice($intersections, $i, 1);
+                            }
+                        }
+                        // Now build the return array
                         $output = [ 'original' => $possibleMatch->expose(),
-                                    'additional' => $possibleMatch->getSymmetryClues()->expose()];
+                                    'additional' => $possibleMatch->getSymmetryClues()->expose(),
+                                    'intersecting' => $intersections,
+                                ];
                         die(json_encode($output));
                     }
                     break;
