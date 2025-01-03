@@ -70,8 +70,10 @@ namespace Crosswords {
             $placedClues = $this->getPlacedClues();
             switch ($order) {
                 case Crossword::SORT_ORDER_AD:
+                    $placedClues->sortByAD();
                     break;
                 case Crossword::SORT_ORDER_PLACE_NUMBER:
+                    $placedClues->sortByNumber();
                     break;
                 default:
                     throw new InvalidArgumentException("Invalid sorting argument: {$order}");
