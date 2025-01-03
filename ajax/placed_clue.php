@@ -188,7 +188,6 @@ switch ($action) {
     case 'update':
         // Called as /ajax/placed_clue/*/update/[id]
         // TODO - HIGH - this messes up symmetry clues if there are non-pattern characters (spaces, hyphens) in the updated clue
-        // TODO - Validation here
         $id = array_shift($params);
         // Populate and save the entities
         $placedClue = PlacedClue::getById($id);
@@ -238,7 +237,7 @@ switch ($action) {
             $apc->save();
         }
         
-        die(json_encode([])); // TODO - consider returning a success/fail, or perhaps the PlacedClue itself in JSON
+        die(json_encode($pc));
     default:
         $file = str_replace(__DIR__,'',__FILE__);
         throw_error("Invalid action {$action} passed to {$file}");
