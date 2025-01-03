@@ -66,7 +66,6 @@ namespace Crosswords {
          * @param int $order specifies whether to return the clues in the form 1A,2D,3A,3D,4D,7A or 1A,3A,7A,2D,3D,4D
          */
         public function getSortedClueList(int $order = Crossword::SORT_ORDER_PLACE_NUMBER) : PlacedClue_List {
-            // TODO clue sorting not in place
             $placedClues = $this->getPlacedClues();
             switch ($order) {
                 case Crossword::SORT_ORDER_AD:
