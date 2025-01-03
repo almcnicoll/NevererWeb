@@ -61,6 +61,10 @@ switch ($action) {
         // TODO - check that this code works when two across clues are on the same row and when two down clues are on the same column
         // Retrieve variables
         $crossword_id = array_shift($params);
+        /** @var Crossword $crossword */
+        $crossword = Crossword::findFirst(['id','=',$crossword_id]);
+        if ($crossword === null) { throw_error("Cannot find crossword with id {$crossword_id}"); }
+        if (!$crossword->isOwnedBy($user->id)) { throw_error("Crossword with id {$crossword_id} does not belong to user #{$user->id}"); }
         $findCriteria = [];
         populate_from_request(['orientation','x','y']);
         // Set criteria for finding clue
@@ -157,8 +161,12 @@ switch ($action) {
         die(json_encode($symmetryClues->expose()));
     case 'create':
         // Called as /ajax/placed_clue/*/create/[crossword_id]
-        // TODO - Validation here
         $crossword_id = array_shift($params);
+        /** @var Crossword $crossword */
+        $crossword = Crossword::findFirst(['id','=',$crossword_id]);
+        if ($crossword === null) { throw_error("Cannot find crossword with id {$crossword_id}"); }
+        if (!$crossword->isOwnedBy($user->id)) { throw_error("Crossword with id {$crossword_id} does not belong to user #{$user->id}"); }
+
         // Populate and save the entities
         $pc = new PlacedClue();
         $pc->crossword_id = $crossword_id;
@@ -173,13 +181,10 @@ switch ($action) {
         $pc->save();
         
         // Work out if we need to create other new clues for symmetry
-        $crossword = $pc->getCrossword();
-        if ($crossword != null) {
-            $additionalClues = $crossword->getNewSymmetryClues($pc);
-            foreach($additionalClues as $apc) { $apc->save(); }
-        }
+        $additionalClues = $crossword->getNewSymmetryClues($pc);
+        foreach($additionalClues as $apc) { $apc->save(); }
         
-        die(json_encode([])); // TODO - consider returning a success/fail, or perhaps the PlacedClue itself in JSON
+        die(json_encode($pc));
     case 'update':
         // Called as /ajax/placed_clue/*/update/[id]
         // TODO - HIGH - this messes up symmetry clues if there are non-pattern characters (spaces, hyphens) in the updated clue
