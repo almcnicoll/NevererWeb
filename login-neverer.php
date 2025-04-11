@@ -1,12 +1,15 @@
 <?php
     // Class & session loading
     require_once('autoload.php');
-
+    use Misc\Path;
+    
     use Security\User, Security\AuthMethod;
     $discard = new User(); // To force autoloading of User class
     if (session_status() === PHP_SESSION_ACTIVE) {
         if (isset($_SESSION['USER'])) { $user = unserialize($_SESSION['USER']); }
-        $_SESSION['USER'] = serialize($user);
+        if (isset($user)) {
+            $_SESSION['USER'] = serialize($user);
+        }
     }
 ?>
 <!DOCTYPE html>
@@ -45,10 +48,16 @@
                     session_write_close();
                     //die();
                     if (isset($_SESSION['redirect_url_once'])) {
-                        header('Location: '.$config['root_path'].$_SESSION['redirect_url_once']);
+                        if (Path::isAbsoluteUrl($_SESSION['redirect_url_once'])) {
+                            // Absolute URLs go straight through unchanged
+                            header('Location: '.$_SESSION['redirect_url_once']);
+                        } else {
+                            // Relative URLs get appended to the root
+                            header('Location: '.Path::combine($config['root_path'],$_SESSION['redirect_url_once']));
+                        }
                         unset($_SESSION['redirect_url_once']);
                     } else {
-                        header('Location: '.$config['root_path'].'/');
+                        header('Location: '.Path::combine($config['root_path'],'/'));
                     }
                     die();
                     } else {
