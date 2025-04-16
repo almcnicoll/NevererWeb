@@ -55,10 +55,10 @@ namespace Crosswords {
     }
 
     public function sortByAD() {
-      usort($this->_list, "usortByAD");
+      usort($this->_list, "Crosswords\\PlacedClue_List::usortByAD");
     }
     public function sortByNumber() {
-      usort($this->_list, "usortByNumber");
+      usort($this->_list, "Crosswords\\PlacedClue_List::usortByNumber");
     }
   }
 }
