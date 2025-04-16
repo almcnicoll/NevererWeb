@@ -315,6 +315,7 @@ function refreshClueList() {
 function refreshAll() {
     refreshClueList();
     refreshGrid();
+    if (selectedClue != 0) { selectClue(lastEditId); }
 }
 
 /**
@@ -523,6 +524,7 @@ function toggleSelect() {
  * @returns void
  */
 function selectClue(id = 0) {
+    // TODO - data() attributes are cached in jQuery, so if grid is reloaded (e.g. after clue edit) then data remains stale. Need to switch to attr() or somehow flush the data() cache
     // Set variables
     selectedClue = id;
     var reSel = new RegExp('\\b'+id+'\\b'); // To allow for standalone numbers and comma-delimited ones, but not digits within larger numbers
