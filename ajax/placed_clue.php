@@ -187,7 +187,6 @@ switch ($action) {
         die(json_encode($pc));
     case 'update':
         // Called as /ajax/placed_clue/*/update/[id]
-        // TODO - MEDIUM - need to refresh clue highlighting after clue changes
         $id = array_shift($params);
         // Populate and save the entities
         $placedClue = PlacedClue::getById($id);
