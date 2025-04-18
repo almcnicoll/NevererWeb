@@ -148,8 +148,8 @@ END_SQL;
             //error_log("Clues in list: ".count($allPClues));
             if ($xMax == null) { $xMax = $this->cols-1; }
             if ($yMax == null) { $yMax = $this->rows-1; }
-            if ($xMax<$xMin) { return json_encode([]); }
-            if ($yMax<$yMin) { return json_encode([]); }
+            if ($xMax<$xMin) { return new Grid(); }
+            if ($yMax<$yMin) { return new Grid(); }
 
             $squares = new Grid();
 
