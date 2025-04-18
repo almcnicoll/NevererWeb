@@ -163,7 +163,7 @@ namespace Basic {
             $stmt->execute($params);
 
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            if ($result === false) { return null; }
+            if ($result === false) { return false; }
             return ($result['c']>0);
         }
 
@@ -193,7 +193,7 @@ namespace Basic {
          * Finds the first record that matches the specified criteria
          * @param array each criterion should be an array in the form [field,operator,value], and multiple criteria should be specified as an array of arrays
          * @param string $orderBy either an array of field names OR an array of arrays in the form ['field', 'asc|desc'] OR null to use default ordering
-         * @return an object of the class or subclass calling the function, or null if no record is found
+         * @return ?static an object of the class or subclass calling the function, or null if no record is found
          */
         public static function findFirst($criteria, $orderBy = null) : ?static {
             $values = static::find($criteria, $orderBy, 1);
