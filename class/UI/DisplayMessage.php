@@ -102,7 +102,7 @@ namespace UI {
             $messages = self::find([['id','IN',$params],['displayCount','>',0]]);
             /** @var DisplayMessage $message */
             foreach ($messages as $message) {
-                $message->displayCount -= 1; // Mark it shown another time
+                if ($message->displayCount > 0) { $message->displayCount -= 1; } // Mark it shown another time
                 $message->save();
             }
             return $messages;
@@ -119,7 +119,7 @@ namespace UI {
             $messages = self::find([['id','IN',$params],['displayCount','>',0]]);
             /** @var DisplayMessage $message */
             foreach ($messages as $message) {
-                $message->displayCount -= 1; // Mark it shown another time
+                if ($message->displayCount > 0) { $message->displayCount -= 1; } // Mark it shown another time
                 $message->save();
                 $colorClass = $message->getColorClass();
                 $html .= "<div class='{$colorClass}'>{$message->message}</div>\n";

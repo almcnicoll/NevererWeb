@@ -171,3 +171,14 @@ CREATE TABLE `sowpods` (
   KEY `word_length` (`len`,`word`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 ;
+/* UPDATE */
+/* VERSION 11 */
+CREATE TABLE `displaymessages` (
+  `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `level` SMALLINT(5) UNSIGNED NOT NULL,
+  `message` VARCHAR(2000) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `displayCount` SMALLINT(5) UNSIGNED NOT NULL,
+  `created` DATETIME DEFAULT NULL,
+  `modified` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
