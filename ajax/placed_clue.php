@@ -58,7 +58,6 @@ switch ($action) {
         // Called as /ajax/placed_clue/*/find/[crossword-id]?orientation=across|down&x=[x]&y=[y]
         // Specifies a cell and an orientation, and retrieves the matching PlacedClue
         // Return is as array in the form ['original' => PlacedClue, 'additional' => PlacedClueList] where the 'additional' clues are symmetry clues
-        // TODO - check that this code works when two across clues are on the same row and when two down clues are on the same column
         // Retrieve variables
         $crossword_id = array_shift($params);
         /** @var Crossword $crossword */
