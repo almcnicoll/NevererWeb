@@ -89,7 +89,7 @@ if (count($error_messages)>0) {
             <div class="form-text" id="rows-help">How many rows should the grid have?</div>
         </div>
         <div class="mb-3">
-            <label for="cols" class="form-label">number of columns</label>
+            <label for="cols" class="form-label">Number of columns</label>
             <input type="number" min="1" max="50" step="1" value="15" class="form-control" name="cols" id="cols" placeholder="" aria-describedby="cols-help">
             <div class="form-text" id="cols-help">How many columns should the grid have?</div>
         </div>
