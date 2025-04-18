@@ -216,7 +216,6 @@ switch ($action) {
         $placedClue->save();
 
         // Alter and save symmetry clues
-        // TODO - test this with 4-fold symmetry
         foreach ($additionalClues as $apc) {
             // Get a template clue by rotating the updated $placedClue
             $template = $placedClue->getRotatedClue($apc->__tag);

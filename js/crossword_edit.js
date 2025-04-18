@@ -586,14 +586,14 @@ function gridSquareMenuClickHandler(eventObject) {
             $('#new-clue input#new-clue-col').val( $('#context-menu-menu-grid-square').data('trigger-col') );
             $('#new-clue select#new-clue-orientation').val('across');
             new bootstrap.Modal('#new-clue').toggle();
-            $('#new-clue #new-clue-answer').focus();
+            $('#new-clue #new-clue-answer').trigger('focus').val('');
             break;
         case 'menu-grid-square-new-clue-down':
             $('#new-clue input#new-clue-row').val( $('#context-menu-menu-grid-square').data('trigger-row') );
             $('#new-clue input#new-clue-col').val( $('#context-menu-menu-grid-square').data('trigger-col') );
             $('#new-clue select#new-clue-orientation').val('down');
             new bootstrap.Modal('#new-clue').toggle();
-            $('#new-clue #new-clue-answer').focus();
+            $('#new-clue #new-clue-answer').trigger('focus').val('');
             break;
         case 'menu-grid-square-edit-clue-across':
             // We need a database call to get PlacedClue from the square and orientation
