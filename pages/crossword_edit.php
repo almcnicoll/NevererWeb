@@ -1,6 +1,7 @@
 <?php
     // TODO - HIGH some way of editing crossword-level settings (such as symmetry)
     use Crosswords\Crossword, Crosswords\PlacedClue;
+use UI\DisplayMessage;
 
     $fatal_error = false;
 
@@ -15,12 +16,14 @@
         $error_messages[] = "You need to choose which crossword to edit.";
         $fatal_error = true;
     } elseif (!is_numeric($params[0])) {
-        $error_messages[] = "{$params[0]} isn't a valid crossword id.";
+        //$error_messages[] = "{$params[0]} isn't a valid crossword id.";
+        DisplayMessage::add("{$params[0]} isn't a valid crossword id.", DisplayMessage::LVL_ERROR, 1);
         $fatal_error = true;
     } else {
         $crossword = Crossword::getById($params[0]);
         if ($crossword->user_id != $_SESSION['USER_ID']) {
-            $error_messages[] = "You can only edit crosswords that you created.";
+            //$error_messages[] = "You can only edit crosswords that you created.";
+            DisplayMessage::add("You can only edit crosswords that you created.", DisplayMessage::LVL_ERROR, 1);
             $fatal_error = true;
         }
     }

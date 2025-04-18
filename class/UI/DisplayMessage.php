@@ -12,8 +12,12 @@ namespace UI {
         public const LVL_VERBOSE = 5;
         public const LVL_SUCCESS = 6;
 
+        public const SESSION_KEY = 'displayMessageIds';
+
+        static string $tableName = "displaymessages";
+        static $fields = ['id','level','message','displayCount','created','modified'];
         /** Indicates which field to order by */
-        public $defaultOrderBy = 'created';
+        public static $defaultOrderBy = [['created','ASC'],['id','ASC']];
 
         /** Indicates the severity of the message */
         public $level = self::LVL_UNKNOWN;
@@ -30,11 +34,15 @@ namespace UI {
          * @param int $level the type of message
          * @param int $displayCount the number of times to show the message
          */
-        public function __construct(string $message, $level = self::LVL_INFORMATION, $displayCount = 1) {
-            $this->message = $message;
-            $this->level = $level;
-            $this->displayCount = $displayCount;
+        public static function create(string $message, $level = self::LVL_INFORMATION, $displayCount = 1) {
+            $new = new DisplayMessage();
+            $new->message = $message;
+            $new->level = $level;
+            $new->displayCount = $displayCount;
+            return $new;
         }
+        public function __construct()
+        {}
 
         /**
          * @param string $prefix the prefix to add to the color string
@@ -90,7 +98,12 @@ namespace UI {
         */
         public static function add(string $message, $level = self::LVL_INFORMATION, $displayCount = 1) : int {
             $msg = new DisplayMessage($message, $level, $displayCount);
-            return $msg->id;
+            $id = $msg->save();
+            if (!isset($_SESSION[self::SESSION_KEY])) {
+                $_SESSION[self::SESSION_KEY] = array();
+            }
+            $_SESSION[self::SESSION_KEY][] = $id;
+            return $id;
         }
 
         /**
@@ -112,11 +125,13 @@ namespace UI {
          * Retrieves the list of current messages as a formatted HTML string
          * @var mixed $params a DisplayMessage id, or an array of DisplayMessage ids
          */
-        public static function getFormattedList(...$params) : string {
+        public static function getFormattedList($ids) : string {
+            if (!is_array($ids)) { $ids = array($ids); }
             $html = '';
             // NB - don't abstract code to getList(), or we'll loop through the messages twice (decrement, display)
             // Retrieve messages
-            $messages = self::find([['id','IN',$params],['displayCount','>',0]]);
+            // TODO - this is retrieving blank DisplayMessage objects, which then overwrite message when code below runs
+            $messages = self::find([['id','IN',$ids],['displayCount','>',0]]);
             /** @var DisplayMessage $message */
             foreach ($messages as $message) {
                 if ($message->displayCount > 0) { $message->displayCount -= 1; } // Mark it shown another time
@@ -124,6 +139,7 @@ namespace UI {
                 $colorClass = $message->getColorClass();
                 $html .= "<div class='{$colorClass}'>{$message->message}</div>\n";
             }
+            if (count($messages) == 0) { return ''; }
             $html = "<div class='messages-container'>{$html}</div>";
             return $html;
         }
