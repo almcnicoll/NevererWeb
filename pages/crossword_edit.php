@@ -56,7 +56,12 @@
 <!-- Ajax cue -->
 <div id="ajaxCue"><div id="ajaxCount"></div></div>
 <!-- Title etc -->
-<h2 class="text-center"><?= $crossword->title ?></h2>
+<h2 class="text-center">
+    <?= $crossword->title ?>
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Settings">
+        <span class='bi bi-gear-fill' aria-hidden="true"></span>
+    </button>
+</h2>
 <?php
 if (count($error_messages)>0) {
     foreach($error_messages as $error_message) {
