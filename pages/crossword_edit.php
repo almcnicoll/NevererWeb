@@ -39,46 +39,6 @@
         $_SESSION['PAGE_LOADCOUNTS'][__FILE__] = 1;
     }
 ?>
-<!-- Dictionary mgmt -->
-<script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/dexie/4.0.8/dexie.min.js'></script>
-<!-- TODO - use ES6 modules so we don't have to include each js file -->
-<script type="text/javascript" src='../../js/dictionaries.js'></script>
-<script type="text/javascript" src='../../js/class/Tome.js'></script>
-<!-- Set vars -->
-<script type="text/javascript">
-<?php
-    echo "var root_path = \"{$config['root_path']}\";\n";
-    echo "var crossword_id = {$crossword->id};\n";
-    echo "var currentUser = {$user->id};\n";
-?>
-</script>
-
-<!-- Ajax cue -->
-<div id="ajaxCue"><div id="ajaxCount"></div></div>
-<!-- Title etc -->
-<h2 class="text-center">
-    <?= $crossword->title ?>
-    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Settings">
-        <span class='bi bi-gear-fill' aria-hidden="true"></span>
-    </button>
-</h2>
-<?php
-if (count($error_messages)>0) {
-    foreach($error_messages as $error_message) {
-?>
-<div class="row">
-    <div class="span12 alert alert-danger"><?= $error_message ?></div>
-</div>
-<?php
-    }
-}
-?>
-
-<?php
-if ($fatal_error) {
-    die();
-}
-?>
 
 <!-- MODALS -->
 <?php
@@ -112,6 +72,61 @@ if ($fatal_error) {
     ->setBody($form_edit_clue->getHtml())
     ->setButtons("Save");
     echo $modal_edit_clue->getMainHtml();
+    
+    $form_edit_settings = new UI\BootstrapForm('edit-settings');
+    //$form_edit_settings->addHtml("<div class='' id='form-edit-settings-affected-settingss-warning'>This may also affect: <span id='form-edit-settings-affected-settingss-details'></span></div>");
+    $form_edit_settings->addField('id')->setType("hidden")->setValue($crossword->id);
+    $form_edit_settings->addField('title')->setValue($crossword->title)->setLabel('Title')->setDivClass('mb-3')->setClass('focussed-input border-secondary'); /*->setHelp("The answer to the cryptic settings, including spaces, punctuation, etc.")*/
+    $form_edit_settings->addField('rows')->setValue($crossword->rows)->setLabel('Row count')->setType("number")->setDivClass('mb-3')->setClass('border-secondary')->setStyle('max-width: 10em;')->setAdditionalAttributes(['min'=>1,'max'=>$crossword->rows])->setHelp("(starting at row 0)");
+    $form_edit_settings->addField('cols')->setValue($crossword->cols)->setLabel('Column count')->setType("number")->setDivClass('mb-3')->setClass('border-secondary')->setStyle('max-width: 10em;')->setAdditionalAttributes(['min'=>1,'max'=>$crossword->cols])->setHelp("(starting at column 0)");
+    $form_edit_settings->addField('rotational-symmetry-order')->setLabel('Symmetry')->setType('select')->setDivClass('border-bottom mb-3')->setClass('border-secondary')->setOptions(['2'=>'2-fold','4'=>'4-fold'])->setValue($crossword->rotational_symmetry_order.'-fold'); /*->setHelp("Across or Down")*/
+    $modal_edit_settings = new UI\BootstrapModal('edit-settings');
+    $modal_edit_settings->setTitle('Edit settings')
+    ->setBody($form_edit_settings->getHtml())
+    ->setButtons("Save")
+    ->setTrigger("<span class='bi bi-gear-fill' aria-hidden='true'></span>");
+    echo $modal_edit_settings->getMainHtml();
+?>
+
+
+
+<!-- Dictionary mgmt -->
+<script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/dexie/4.0.8/dexie.min.js'></script>
+<!-- TODO - use ES6 modules so we don't have to include each js file -->
+<script type="text/javascript" src='../../js/dictionaries.js'></script>
+<script type="text/javascript" src='../../js/class/Tome.js'></script>
+<!-- Set vars -->
+<script type="text/javascript">
+<?php
+    echo "var root_path = \"{$config['root_path']}\";\n";
+    echo "var crossword_id = {$crossword->id};\n";
+    echo "var currentUser = {$user->id};\n";
+?>
+</script>
+
+<!-- Ajax cue -->
+<div id="ajaxCue"><div id="ajaxCount"></div></div>
+<!-- Title etc -->
+<h2 class="text-center">
+    <?= $crossword->title ?>
+    <?= $modal_edit_settings->getTriggerHtml(); ?>
+</h2>
+<?php
+if (count($error_messages)>0) {
+    foreach($error_messages as $error_message) {
+?>
+<div class="row">
+    <div class="span12 alert alert-danger"><?= $error_message ?></div>
+</div>
+<?php
+    }
+}
+?>
+
+<?php
+if ($fatal_error) {
+    die();
+}
 ?>
 
 <!-- CONTEXT MENUS -->
