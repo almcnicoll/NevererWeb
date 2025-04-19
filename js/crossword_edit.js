@@ -100,7 +100,13 @@ function makeAjaxCall(method, url, data = null, done = null, fail = null, always
     ajaxCalls[aId].aId = aId; // So we can handle the return
 }
 
-//function( data|jqXHR, textStatus, jqXHR|errorThrown ) { }
+/**
+ * handles the return of an ajax call: the argument order depends on whether the call was successful
+ * The signature is function( data|jqXHR, textStatus, jqXHR|errorThrown ) { }
+ * @param {mixed} arg1 the first argument - either the data returned or the jqXHR object 
+ * @param {string} textStatus the status message
+ * @param {mixed} arg3 the third argument - either the jqXHR object or the error thrown
+ */
 function handleAjaxReturn(arg1, textStatus, arg3) {
     // Assign vars
     var jqXHR = (textStatus == 'success') ? arg3 : arg1;

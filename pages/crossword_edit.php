@@ -107,7 +107,6 @@ if ($fatal_error) {
     ->setBody($form_edit_clue->getHtml())
     ->setButtons("Save");
     echo $modal_edit_clue->getMainHtml();
-    // TODO - HIGH code in .js file for handling edit-modal save button
 ?>
 
 <!-- CONTEXT MENUS -->
