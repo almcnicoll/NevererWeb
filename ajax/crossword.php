@@ -71,42 +71,44 @@ switch ($action) {
         $symmetry_change = ($crossword->rotational_symmetry_order != $rotational_symmetry_order);
         $change = $title_change | $size_change | $symmetry_change;
 
-        // Make changes and save
+        // Update title
         if ($title_change) { $crossword->title = $title; }
+
+        // Update size
+        // TODO - HIGH finish this part of the function (allowing for $rtrim and $ctrim)
+
+        // Update rotational symmetry
+        if ($symmetry_change) {
+            if ($rotational_symmetry_order > $crossword->rotational_symmetry_order) {
+                // We need to act - symmetry order has increased
+                $placedClues = $crossword->getPlacedClues();
+                foreach ($placedClues as $pc) {
+                    /** @var PlacedClue $pc */
+                    $existingClues = $crossword->getExistingSymmetryClues($pc, $rotational_symmetry_order);
+                    if (count($existingClues) !== ($rotational_symmetry_order-1)) {
+                        // We need to add some more
+                        $additionalClues = $crossword->getNewSymmetryClues($pc, $rotational_symmetry_order);
+                        foreach ($additionalClues as $ac) {
+                            $matched = false;
+                            foreach ($existingClues as $ec) {
+                                if ($ac->x == $ec->x && $ac->y == $ex->y) {
+                                    $matched = true; break; // There's a clue in the symmetry position already
+                                }
+                            }
+                            if (!$matched) {
+                                // There's currently no clue matching this for symmetry - so save the new one
+                                $ac->save();
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         // Save
         if ($change) { $crossword->save(); }
-
-        // TODO - HIGH finish this function
-
-        // Code after here not converted
-        $placedClue->y = $_POST['row'];
-        $placedClue->orientation = $_POST['orientation'];
-        $clue->answer = $_POST['answer'];
-        $clue->pattern = $_POST['pattern'];
-        $clue->question = $_POST['clue'];
-        $clue->explanation = $_POST['explanation'];
-
-        // Alter and save symmetry clues
-        foreach ($additionalClues as $apc) {
-            // Get a template clue by rotating the updated $placedClue
-            $template = $placedClue->getRotatedClue($apc->__tag);
-            $template_clue = $template->getClue();
-            $apc->x = $template->x; $apc->y = $template->y;
-            $apc->orientation = $template->orientation;
-            $ac = $apc->getClue();
-            // Trim if the clue has shortened
-            while ($ac->getLength() > $template_clue->getLength()) { 
-                $ac->answer = substr($ac->answer, 0, -1); 
-            }
-            // Pad if the clue has lengthened
-            while ($ac->getLength() < $template_clue->getLength()) { 
-                $ac->answer .= '?'; 
-            }
-            $apc->save();
-        }
         
-        die(json_encode($pc));
+        die(json_encode($crossword));
     default:
         $file = str_replace(__DIR__,'',__FILE__);
         throw_error("Invalid action {$action} passed to {$file}");

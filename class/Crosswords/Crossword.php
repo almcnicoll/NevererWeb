@@ -237,13 +237,20 @@ END_SQL;
         /**
          * Examines the supplied clue and the crossword's symmetry setting and then determines if any additional clues need adding at the same time
          * @param PlacedClue $newClue the clue being created
+         * @param ?int $overrideSymmetry the symmetry order to use, or null to use the crossword's current symmetry setting
          * @return PlacedClue_List the new clues to be created - returns an empty PlacedClue_List if none match
          * @throws IllegalClueOverlapException if the clues to be created would overlap illegally with an existing clue or each other (except if they would be exact duplicates)
          */
-        public function getNewSymmetryClues(PlacedClue $newClue) : PlacedClue_List {
+        public function getNewSymmetryClues(PlacedClue $newClue, ?int $overrideSymmetry = null) : PlacedClue_List {
+            /** @var int $useSymmetry */
+            if ($overrideSymmetry === null) {
+                $useSymmetry = $this->rotational_symmetry_order;
+            } else {
+                $useSymmetry = $overrideSymmetry;
+            }
             $newClues = new PlacedClue_List();
             $clueLength = strlen($newClue->getClue()->answer);
-            if ($this->rotational_symmetry_order > 1) { // Otherwise there's no symmetry, so return blank list
+            if ($useSymmetry > 1) { // Otherwise there's no symmetry, so return blank list
                 // Logic for 2-fold
                 $pcReflect180 = $newClue->getRotatedClue(180);
                 // Now check for clashes with existing clues
@@ -262,7 +269,7 @@ END_SQL;
                     // All good - just add it
                     $newClues[] = $pcReflect180;
                 }
-                if ($this->rotational_symmetry_order > 2) {
+                if ($useSymmetry > 2) {
                     // Logic for 4-fold
                     // Symmetry here shouldn't really result in bad overlaps, unless people manually mess with the symmetry of the puzzle - but we need to allow for that
                     $pcReflect90 = $newClue->getRotatedClue(90);
@@ -293,12 +300,19 @@ END_SQL;
         /**
          * Examines the supplied clue and the crossword's symmetry setting and then determines if there are existing clues that match symmetry rules
          * @param PlacedClue $placedClue the clue whose rotations are to be checked
+         * @param ?int $overrideSymmetry the symmetry order to use, or null to use the crossword's current symmetry setting
          * @return PlacedClue_List any clues that match the symmetry rules - returns an empty PlacedClue_List if none match
          */
-        public function getExistingSymmetryClues(PlacedClue $placedClue) : PlacedClue_List {
+        public function getExistingSymmetryClues(PlacedClue $placedClue, ?int $overrideSymmetry = null) : PlacedClue_List {
+            /** @var int $useSymmetry */
+            if ($overrideSymmetry === null) {
+                $useSymmetry = $this->rotational_symmetry_order;
+            } else {
+                $useSymmetry = $overrideSymmetry;
+            }
             $existingClues = new PlacedClue_List();
             // If there's no symmetry, there's no symmetry clues
-            if ($this->rotational_symmetry_order == 1) { return $existingClues; }
+            if ($useSymmetry == 1) { return $existingClues; }
             // Define the 180 rotation
             $templateClues = new PlacedClue_List();
             $pcReflect180 = $placedClue->getRotatedClue(180);
@@ -306,7 +320,7 @@ END_SQL;
             if (($pcReflect180->x != $placedClue->x) || ($pcReflect180->y != $placedClue->y)) {
                 $templateClues[] = $pcReflect180;
             }
-            if ($this->rotational_symmetry_order > 2) {
+            if ($useSymmetry > 2) {
                 // Define the 90 & 270 rotations
                 $pcReflect90 = $placedClue->getRotatedClue(90);
                 $pcReflect270 = $placedClue->getRotatedClue(270);
