@@ -264,5 +264,55 @@ namespace Crosswords {
         $crossword = $this->getCrossword();
         return $crossword->getExistingSymmetryClues($this);
       }
+
+      /**
+       * @param int $increaseLengthBy the amount (+ve or -ve) by which to increase the length
+       * @param bool $alterStart whether to alter the length by changing the start of the clue (if false, change the end instead)
+       * @param int $increaseLengthBy the amount (+ve or -ve) by which to increase the start position along the line of the clue
+       */
+      function alterLength(int $increaseLengthBy = 0, bool $alterStart = true, int $increaseStartPosBy = 0) : void {
+        // TODO - MEDIUM consider adding a way to move the clue orthogonally (ie 90 degrees to line of the clue)
+        $clue = $this->getClue();
+        // Handle length change
+        if ($increaseLengthBy > 0) {
+          if ($alterStart) {
+            $clue->answer = str_repeat('?', $increaseLengthBy) . $clue->answer;
+          } else {
+            $clue->answer .= str_repeat('?', $increaseLengthBy);
+          }
+        } elseif ($increaseLengthBy < 0) {
+          if ($alterStart) {
+            $clue->answer = substr($clue->answer, 0-$increaseLengthBy);
+          } else {
+            $clue->answer = substr($clue->answer, 0, $increaseLengthBy);
+          }
+        }
+        // Handle position change
+        if ($increaseStartPosBy != 0) {
+          $crossword = Crossword::getById($this->crossword_id);
+          switch($this->orientation) {
+            case PlacedClue::ACROSS:
+              $this->x += $increaseStartPosBy;
+              if ($this->x < 0) { throw new Exception("Cannot move clue outside the crossword (x < 0)"); }
+              if (($this->x + $clue->getLength()) > $crossword->cols) { throw new Exception("Cannot move clue outside the crossword (x > {$crossword->cols})"); }
+              break;
+            case PlacedClue::DOWN:
+              $this->y += $increaseStartPosBy;
+              if ($this->y < 0) { throw new Exception("Cannot move clue outside the crossword (y < 0)"); }
+              if (($this->y + $clue->getLength()) > $crossword->rows) { throw new Exception("Cannot move clue outside the crossword (y > {$crossword->rows})"); }
+              break;
+            default:
+              throw new Exception("Can't alter clue position because it hasn't had ACROSS/DOWN set as yet.");
+          }
+        }
+
+        // Now save as needed
+        if ($increaseLengthBy !== 0) {
+          $clue->save();
+        }
+        if ($increaseStartPosBy != 0) {
+          $this->save();
+        }
+      }
   }
 }
