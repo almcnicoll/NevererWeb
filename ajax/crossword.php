@@ -60,8 +60,11 @@ switch ($action) {
         /** @var string $title */
         /** @var int $rows */
         /** @var int $cols */
+        /** @var int $rtrim */
+        /** @var int $ctrim */
         /** @var int $rotational_symmetry_order */
-        populate_from_request('title','rows','cols','rotational-symmetry-order');
+        populate_from_request('title','rows','cols','rtrim','ctrim','rotational-symmetry-order');
+        // NB - rtrim and ctrim default to zero, but allow us to trim rows or cols from top or left instead of bottom / right
         
         $title_change = ($crossword->title != $title);
         $size_change = (($crossword->rows != $rows) || ($crossword->cols != $cols));
