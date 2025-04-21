@@ -10,9 +10,10 @@ use Crosswords\PlacedClue;
     }
     function populate_from_request($varnames) {
         foreach ($varnames as $varname) {
-            if (isset($_REQUEST[$varname])) {
-                global $$varname;
-                $$varname = $_REQUEST[$varname]; 
+            if (isset($_REQUEST[$varname])) { 
+                $safe_varname = str_replace('-','_',$varname);
+                global $$safe_varname;
+                $$safe_varname = $_REQUEST[$varname]; 
             }
         }
     }

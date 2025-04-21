@@ -163,6 +163,7 @@ $(document).ready(
         // Individual actions
         $('#new-clue-default').on('click',createClue);
         $('#edit-clue-default').on('click',editClue);
+        $('#edit-settings-default').on('click',editSettings);
         $('td.crossword-grid-square').on('click',toggleSelect);
         $('td.crossword-grid-square').on('contextmenu', gridSquareRightClickHandler);
         $('#context-menu-menu-grid-square .dropdown-item').on('click', gridSquareMenuClickHandler);
@@ -461,6 +462,31 @@ function editClue() {
 
     // Now fire off the request
     var url = root_path + '/placed_clue/*/update/' + id + '?domain=ajax';
+    var formData = serializeForm('#edit-clue form','edit-clue-');
+    makeAjaxCall('post', url, formData, refreshAll);
+
+    // If all else is fine, hide the modal
+    bootstrap.Modal.getInstance(document.getElementById('edit-clue')).hide();
+}
+
+/** Triggers the AJAX to create a clue from the new-clue modal */
+function editSettings() {
+    // Populate vars for validation (don't need them for saving as form is serialized)
+    var id = $('#edit-settings-id').val();
+    var rows = $('#edit-settings-rows').val();
+    var cols = $('#edit-settings-cols').val();
+    var title = $('#edit-settings-title').val();
+
+    // Clear previous validation feedback
+    $('#edit-settings').find('form').find('.is-invalid').removeClass('is-invalid');
+    $('#edit-settings').find('form').find('.error-explain').remove();
+    // Perform edit validation
+    if (!$.isNumeric(rows)) { fieldProblem('#edit-settings-rows',"This field must be a number."); return; }
+    if (!$.isNumeric(cols)) { fieldProblem('#edit-settings-cols',"This field must be a number."); return; }
+    if (title.length == 0) { fieldProblem('#edit-settings-title',"This field must not be blank."); return; }
+    
+    // Now fire off the request
+    var url = root_path + '/crossword/*/update/' + id + '?domain=ajax';
     var formData = serializeForm('#edit-clue form','edit-clue-');
     makeAjaxCall('post', url, formData, refreshAll);
 
