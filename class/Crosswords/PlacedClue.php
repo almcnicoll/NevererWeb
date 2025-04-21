@@ -135,7 +135,6 @@ namespace Crosswords {
             $pcReflect0->__tag = 0;
             return $pcReflect0;
           case 90:
-            // TODO - HIGH this maths is sometimes wrong
             // Calculate endpoints of the clue, ignoring the concept of start and end
             $x1 = $x2 = $this->x;
             $y1 = $y2 = $this->y;
@@ -169,7 +168,6 @@ namespace Crosswords {
             return $pcReflect180;
             break;
           case 270:
-            // TODO - HIGH this maths is sometimes wrong
             // Calculate endpoints of the clue, ignoring the concept of start and end
             $x1 = $x2 = $this->x;
             $y1 = $y2 = $this->y;
