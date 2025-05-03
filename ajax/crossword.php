@@ -60,11 +60,13 @@ switch ($action) {
         /** @var string $title */
         /** @var int $rows */
         /** @var int $cols */
-        /** @var int $rtrim */
-        /** @var int $ctrim */
+        /** @var int $trim_top */
+        /** @var int $trim_left */
+        /** @var int $trim_bottom */
+        /** @var int $trim_right */
         /** @var int $rotational_symmetry_order */
-        populate_from_request('title','rows','cols','rtrim','ctrim','rotational-symmetry-order');
-        // NB - rtrim and ctrim default to zero, but allow us to trim rows or cols from top or left instead of bottom / right
+        populate_from_request('title','rows','cols','trim_top','trim_bottom','rotational-symmetry-order');
+        // NB - trim_top and trim_left default to zero, but allow us to trim rows or cols from top or left instead of bottom / right
         
         $title_change = ($crossword->title != $title);
         $size_change = (($crossword->rows != $rows) || ($crossword->cols != $cols));
@@ -76,6 +78,44 @@ switch ($action) {
 
         // Update size
         // TODO - HIGH finish this part of the function (allowing for $rtrim and $ctrim)
+        if ($size_change) {
+            // Set the trims for the remaining dimensions
+            $trim_bottom = ($crossword->rows - $rows) - $trim_top;
+            $trim_right = ($crossword->cols - $cols) - $trim_left;
+            $pcs = $crossword->getPlacedClues();
+            foreach ($pcs as $pc) {
+                $altered = false;
+                // Check if the clue overlaps the trim areas
+                // TOP - clue co-ords are 0-based, so if y is smaller than trim_top then 
+                if ($pc->y < $trim_top) {
+                    $altered = true;
+                    if ($pc->orientation == PlacedClue::ACROSS) { 
+                        $pc->delete();
+                    } else {
+                        $pc->alterLength(0-$trim_top, $trim_top - $pc->y, $trim_top - $pc->y);
+                    }
+                }
+                // LEFT - clue co-ords are 0-based, so if x is smaller than trim_left then 
+                if ($pc->x < $trim_left) {
+                    $altered = true;
+                    if ($pc->orientation == PlacedClue::DOWN) { 
+                        $pc->delete();
+                    } else {
+                        $pc->alterLength(0-$trim_left, $trim_left - $pc->x, $trim_left - $pc->x);
+                    }
+                }
+                // TODO - HIGH do BOTTOM and RIGHT, then save any altered clues ()
+                // BOTTOM
+                //RIGHT
+
+                // NB - check if alterLength() refers to database entity at all - if so, we may need to save after each
+                //  of the above, in case a clue overlaps e.g. trim_top and trim_bottom
+
+                if ($altered) {
+                    $pc->save();
+                }
+            }
+        }
 
         // Update rotational symmetry
         if ($symmetry_change) {
