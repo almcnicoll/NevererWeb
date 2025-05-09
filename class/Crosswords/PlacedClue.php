@@ -72,7 +72,7 @@ namespace Crosswords {
       }
 
       /**
-       * Retrieves the length of the underlying clue
+       * Retrieves the length of the underlying clue in grid squares (i.e. ignoring punctuation and spaces)
        * @return int the length of the clue
        */
       public function getLength() : int {

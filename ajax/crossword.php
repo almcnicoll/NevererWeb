@@ -65,7 +65,7 @@ switch ($action) {
         /** @var int $trim_bottom */
         /** @var int $trim_right */
         /** @var int $rotational_symmetry_order */
-        populate_from_request('title','rows','cols','trim_top','trim_bottom','rotational-symmetry-order');
+        populate_from_request(['title','rows','cols','trim_top','trim_bottom','rotational-symmetry-order']);
         // NB - trim_top and trim_left default to zero, but allow us to trim rows or cols from top or left instead of bottom / right
         
         $title_change = ($crossword->title != $title);
@@ -77,12 +77,15 @@ switch ($action) {
         if ($title_change) { $crossword->title = $title; }
 
         // Update size
-        // TODO - HIGH finish this part of the function (allowing for $rtrim and $ctrim)
         if ($size_change) {
             // Set the trims for the remaining dimensions
             $trim_bottom = ($crossword->rows - $rows) - $trim_top;
             $trim_right = ($crossword->cols - $cols) - $trim_left;
             $pcs = $crossword->getPlacedClues();
+            // Now check each clue and update as needed
+            // NB - we DON'T need to save after each change, because although alterLength refers to the database by calling getClue(),
+            //  it caches the resulting Clue object, so subsequent changes will be made to that cached version. This means we don't
+            //  run into any issues if we need to trim start and end of the same clue.
             foreach ($pcs as $pc) {
                 $altered = false;
                 // Check if the clue overlaps the trim areas
@@ -92,7 +95,7 @@ switch ($action) {
                     if ($pc->orientation == PlacedClue::ACROSS) { 
                         $pc->delete();
                     } else {
-                        $pc->alterLength(0-$trim_top, $trim_top - $pc->y, $trim_top - $pc->y);
+                        $pc->alterLength(0-$trim_top, true, $trim_top - $pc->y);
                     }
                 }
                 // LEFT - clue co-ords are 0-based, so if x is smaller than trim_left then 
@@ -101,16 +104,31 @@ switch ($action) {
                     if ($pc->orientation == PlacedClue::DOWN) { 
                         $pc->delete();
                     } else {
-                        $pc->alterLength(0-$trim_left, $trim_left - $pc->x, $trim_left - $pc->x);
+                        $pc->alterLength(0-$trim_left, true, $trim_left - $pc->x);
                     }
                 }
-                // TODO - HIGH do BOTTOM and RIGHT, then save any altered clues ()
-                // BOTTOM
-                //RIGHT
+                // BOTTOM - clue co-ords are 0-based, so if y+length-1 is greater than new rows then
+                $clue_last_square = ($pc->y + $pc->getLength() - 1);
+                if ($crossword->rows > $clue_last_square) {
+                    $altered = true;
+                    if ($pc->orientation == PlacedClue::ACROSS) { 
+                        $pc->delete();
+                    } else {
+                        $pc->alterLength($crossword->rows-$clue_last_square, false);
+                    }
+                }
+                // RIGHT - clue co-ords are 0-based, so if y+length-1 is greater than new rows then
+                $clue_last_square = ($pc->x + $pc->getLength() - 1);
+                if ($crossword->cols > $clue_last_square) {
+                    $altered = true;
+                    if ($pc->orientation == PlacedClue::DOWN) { 
+                        $pc->delete();
+                    } else {
+                        $pc->alterLength($crossword->cols-$clue_last_square, false);
+                    }
+                }
 
-                // NB - check if alterLength() refers to database entity at all - if so, we may need to save after each
-                //  of the above, in case a clue overlaps e.g. trim_top and trim_bottom
-
+                // Now save if this clue has changed
                 if ($altered) {
                     $pc->save();
                 }

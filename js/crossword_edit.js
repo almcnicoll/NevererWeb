@@ -487,11 +487,11 @@ function editSettings() {
     
     // Now fire off the request
     var url = root_path + '/crossword/*/update/' + id + '?domain=ajax';
-    var formData = serializeForm('#edit-clue form','edit-clue-');
+    var formData = serializeForm('#edit-settings form','edit-settings-');
     makeAjaxCall('post', url, formData, refreshAll);
 
     // If all else is fine, hide the modal
-    bootstrap.Modal.getInstance(document.getElementById('edit-clue')).hide();
+    bootstrap.Modal.getInstance(document.getElementById('edit-settings')).hide();
 }
 //#endregion
 
