@@ -117,6 +117,10 @@ namespace UI {
             return $this;
         }
 
+        /**
+         * Retrieves the HTML of this form field
+         * @return string the HTML representing this field, including its label
+         */
         function getHtml() : string {
             $attributes = '';
             foreach ($this->tag_attributes as $k=>$v) {
