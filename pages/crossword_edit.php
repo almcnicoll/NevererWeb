@@ -77,8 +77,12 @@
     //$form_edit_settings->addHtml("<div class='' id='form-edit-settings-affected-settingss-warning'>This may also affect: <span id='form-edit-settings-affected-settingss-details'></span></div>");
     $form_edit_settings->addField('id')->setType("hidden")->setValue($crossword->id);
     $form_edit_settings->addField('title')->setValue($crossword->title)->setLabel('Title')->setDivClass('mb-3')->setClass('focussed-input border-secondary'); /*->setHelp("The answer to the cryptic settings, including spaces, punctuation, etc.")*/
-    $form_edit_settings->addField('rows')->setValue($crossword->rows)->setLabel('Row count')->setType("number")->setDivClass('mb-3')->setClass('border-secondary')->setStyle('max-width: 10em;')->setAdditionalAttributes(['min'=>1,'max'=>$crossword->rows])->setHelp("(starting at row 0)");
-    $form_edit_settings->addField('cols')->setValue($crossword->cols)->setLabel('Column count')->setType("number")->setDivClass('mb-3')->setClass('border-secondary')->setStyle('max-width: 10em;')->setAdditionalAttributes(['min'=>1,'max'=>$crossword->cols])->setHelp("(starting at column 0)");
+    $form_edit_settings->addField('rows')->setValue($crossword->rows)->setLabel('Row count')->setType("number")->setDivClass('mb-3')->setClass('border-secondary')->setStyle('max-width: 10em;')->setAdditionalAttributes(['min'=>1,'max'=>50])->setHelp("(will affect existing clues)");
+    $form_edit_settings->addField('cols')->setValue($crossword->cols)->setLabel('Column count')->setType("number")->setDivClass('mb-3')->setClass('border-secondary')->setStyle('max-width: 10em;')->setAdditionalAttributes(['min'=>1,'max'=>50])->setHelp("(will affect existing clues)");
+    $form_edit_settings->addField('trim_top')->setValue(0)->setLabel('Trim top')->setType("number")->setDivClass('mb-3')->setClass('border-secondary')->setStyle('max-width: 10em;')->setAdditionalAttributes(['min'=>1,'max'=>$crossword->rows])->setHelp("");
+    $form_edit_settings->addField('trim_left')->setValue(0)->setLabel('Trim left')->setType("number")->setDivClass('mb-3')->setClass('border-secondary')->setStyle('max-width: 10em;')->setAdditionalAttributes(['min'=>1,'max'=>$crossword->cols])->setHelp("");
+    $form_edit_settings->addField('trim_bottom')->setValue(0)->setLabel('Trim bottom')->setType("number")->setDivClass('mb-3')->setClass('border-secondary')->setStyle('max-width: 10em;')->setAdditionalAttributes(['readonly'=>'readonly'])->setHelp("");
+    $form_edit_settings->addField('trim_right')->setValue(0)->setLabel('Trim right')->setType("number")->setDivClass('mb-3')->setClass('border-secondary')->setStyle('max-width: 10em;')->setAdditionalAttributes(['readonly'=>'readonly'])->setHelp("");
     $form_edit_settings->addField('rotational-symmetry-order')->setLabel('Symmetry')->setType('select')->setDivClass('border-bottom mb-3')->setClass('border-secondary')->setOptions(['2'=>'2-fold','4'=>'4-fold'])->setValue($crossword->rotational_symmetry_order.'-fold'); /*->setHelp("Across or Down")*/
     $modal_edit_settings = new UI\BootstrapModal('edit-settings');
     $modal_edit_settings->setTitle('Edit settings')
@@ -107,9 +111,11 @@
 <!-- Ajax cue -->
 <div id="ajaxCue"><div id="ajaxCount"></div></div>
 <!-- Title etc -->
+<div style="float:right;">
+    <?= $modal_edit_settings->getTriggerHtml(); ?>
+</div>
 <h2 class="text-center">
     <?= $crossword->title ?>
-    <?= $modal_edit_settings->getTriggerHtml(); ?>
 </h2>
 <?php
 if (count($error_messages)>0) {

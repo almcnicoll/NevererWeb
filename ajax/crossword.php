@@ -133,6 +133,8 @@ switch ($action) {
                     $pc->save();
                 }
             }
+            $crossword->rows = $rows;
+            $crossword->cols = $cols;
         }
 
         // Update rotational symmetry
