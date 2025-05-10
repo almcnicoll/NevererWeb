@@ -469,6 +469,17 @@ function editClue() {
     bootstrap.Modal.getInstance(document.getElementById('edit-clue')).hide();
 }
 
+/** Updates the trim_... fields with the appropriate values, based on other values changing on the form */
+function updateTrims() {
+    // Calcs
+    var old_rows = $('#edit-settings-old_rows').val();
+    var new_rows = $('#edit-settings-rows').val();
+    var trim_top = $('#edit-settings-trim_top').val();
+    var row_increase = new_rows - old_rows;
+    trim_bottom = 0-
+    // Update fields
+}
+
 /** Triggers the AJAX to create a clue from the new-clue modal */
 function editSettings() {
     // Populate vars for validation (don't need them for saving as form is serialized)

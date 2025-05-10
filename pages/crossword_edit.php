@@ -78,6 +78,8 @@
     $form_edit_settings->setColumns(2);
     $form_edit_settings->addField('id')->setType("hidden")->setValue($crossword->id);
     $form_edit_settings->addField('title')->setValue($crossword->title)->setLabel('Title')->setDivClass('mb-3')->setClass('focussed-input border-secondary')->setStylePreset('floating');
+    $form_edit_settings->addField('old_rows')->setValue($crossword->rows)->setType("hidden")->setDivClass('')->setClass('')->setAdditionalAttributes(['disabled'=>'disabled']);
+    $form_edit_settings->addField('old_cols')->setValue($crossword->cols)->setType("hidden")->setDivClass('')->setClass('')->setAdditionalAttributes(['disabled'=>'disabled']);
     $form_edit_settings->addField('rows')->setValue($crossword->rows)->setLabel('Row count')->setColumn(1)->setType("number")->setDivClass('mb-3')->setClass('border-secondary')->setStylePreset('floating')->setStyle('max-width: 10em;')->setAdditionalAttributes(['min'=>1,'max'=>50])->setHelp("(will affect existing clues)");
     $form_edit_settings->addField('cols')->setValue($crossword->cols)->setLabel('Column count')->setColumn(2)->setType("number")->setDivClass('mb-3')->setClass('border-secondary')->setStylePreset('floating')->setStyle('max-width: 10em;')->setAdditionalAttributes(['min'=>1,'max'=>50])->setHelp("(will affect existing clues)");
     $form_edit_settings->addField('trim_top')->setValue(0)->setLabel('Trim top')->setType("number")->setColumn(1)->setDivClass('mb-3')->setClass('border-secondary')->setStylePreset('floating')->setStyle('max-width: 10em;')->setAdditionalAttributes(['min'=>1,'max'=>$crossword->rows])->setHelp("");
