@@ -14,6 +14,7 @@ namespace UI {
         public string $class = '';
         public string $style = '';
         public mixed $tag_attributes = [];
+        public string $style_preset = '';
 
         /**
          * Creates the field
@@ -101,6 +102,14 @@ namespace UI {
             $this->style = $style;
             return $this;
         }
+        /**
+         * Styles the field using a Bootstrap preset (e.g. 'floating')
+         * @return BootstrapFormField the object itself, for method chaining
+         */
+        function setStylePreset(string $style_preset) : BootstrapFormField {
+            $this->style_preset = strtolower($style_preset);
+            return $this;
+        }
 
         /**
          * Sets additional attributes for the <input> tag
@@ -126,7 +135,9 @@ namespace UI {
             foreach ($this->tag_attributes as $k=>$v) {
                 $attributes .= " {$k}=\"{$v}\" ";
             }
-            $div_start = "<div class=\"form-group {$this->div_class}\">";
+            $form_class_extra = '';
+            if ($this->style_preset == 'floating') { $form_class_extra.=" form-floating"; }
+            $div_start = "<div class=\"form-group {$this->div_class}{$form_class_extra}\">";
             $label_tag = '';
             if ($this->label != '') {
                 $label_tag = "<label for=\"{$this->id}\">{$this->label}</label>";
@@ -158,10 +169,15 @@ namespace UI {
             $help_text = "<small id=\"{$this->id}-help\" class=\"form-text text-muted\">{$this->help}</small>";
             $div_end = "</div>";
 
+            $labelled_input_tag = (
+                ($this->style_preset=='floating')
+                ? $input_tag . "\n            " . $label_tag
+                : $label_tag . "\n            " . $input_tag
+            );
+
             $html = <<<END_HTML
             $div_start
-            $label_tag
-            $input_tag
+            $labelled_input_tag
             $help_text
             $div_end
     END_HTML;
