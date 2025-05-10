@@ -10,6 +10,7 @@ namespace UI {
         public mixed $fields = [];
         public mixed $headerHtmls = [];
         public mixed $footerHtmls = [];
+        public int $columns = 1;
 
         /**
          * Creates the BootstrapForm object
@@ -38,9 +39,19 @@ namespace UI {
          * Creates a field with the specified id, prefixed by the form's id, and adds it to the form's collection
          */
         function addField(string $id) : BootstrapFormField {
-            $fld = new BootstrapFormField($this->id.'-'.$id);
+            $fld = new BootstrapFormField($this, $this->id.'-'.$id);
             $this->fields[] = $fld;
             return $fld;
+        }
+
+        /**
+         * Sets the number of columns in which form fields should be laid out
+         * @param int $columnCount the number of columns
+         * @return BootstrapForm the original object, for method chaining
+         */
+        function setColumns(int $columnCount) : BootstrapForm {
+            $this->columns = $columnCount;
+            return $this;
         }
 
         /**
@@ -50,8 +61,21 @@ namespace UI {
         function getHtml() : string {
             $html = "<form id='{$this->id}'>";
             $html .= implode(' ',$this->headerHtmls);
+            $lastColumn = 99;
+            $colOpen = false;
             foreach ($this->fields as $field) {
+                if ($this->columns > 1) {
+                    if ($field->column <= $lastColumn) {
+                        if ($colOpen) { $html .= "</div>\n"; }
+                        $html .= "<div class='row'>\n";
+                        $colOpen = true;
+                    }
+                    $lastColumn = $field->column;
+                }
                 $html .= $field->getHtml();
+            }
+            if ($this->columns > 1) {
+                $html .= "</div>\n";
             }
             $html .= implode(' ',$this->footerHtmls);
             $html .= "</form>";

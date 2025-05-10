@@ -3,6 +3,7 @@
 namespace UI {
     use Basic\BaseClass;
     class BootstrapFormField extends BaseClass {
+        private ?BootstrapForm $parent = null;
         public string $id = '';
         public string $label = '';
         public string $help = '';
@@ -15,13 +16,17 @@ namespace UI {
         public string $style = '';
         public mixed $tag_attributes = [];
         public string $style_preset = '';
+        public int $column = 1;
 
         /**
          * Creates the field
          * @constructor
+         * @param ?BootstrapForm $parent the parent form to which to attach the field (can be null for standalone)
+         * @param string $id the id of the form, to be prepended to form ids etc.
          */
-        function __construct(string $id)
+        function __construct(?BootstrapForm $parent, string $id)
         {
+            $this->parent = $parent;
             $this->id = $id;
         }
 
@@ -112,6 +117,15 @@ namespace UI {
         }
 
         /**
+         * Sets the column in which this field should appear
+         * @param int $column the column of the form in which the field should appear
+         */
+        function setColumn(int $column) : BootstrapFormField {
+            $this->column = $column;
+            return $this;
+        }
+
+        /**
          * Sets additional attributes for the <input> tag
          * @return BootstrapFormField the object itself, for method chaining
          */
@@ -135,9 +149,10 @@ namespace UI {
             foreach ($this->tag_attributes as $k=>$v) {
                 $attributes .= " {$k}=\"{$v}\" ";
             }
-            $form_class_extra = '';
-            if ($this->style_preset == 'floating') { $form_class_extra.=" form-floating"; }
-            $div_start = "<div class=\"form-group {$this->div_class}{$form_class_extra}\">";
+            $form_div_class_extra = '';
+            if ($this->style_preset == 'floating') { $form_div_class_extra.=" form-floating"; }
+            if ($this->parent->columns > 1) { $form_div_class_extra .= " col"; }
+            $div_start = "<div class=\"form-group {$this->div_class}{$form_div_class_extra}\">";
             $label_tag = '';
             if ($this->label != '') {
                 $label_tag = "<label for=\"{$this->id}\">{$this->label}</label>";
