@@ -167,6 +167,7 @@ $(document).ready(
         $('td.crossword-grid-square').on('click',toggleSelect);
         $('td.crossword-grid-square').on('contextmenu', gridSquareRightClickHandler);
         $('#context-menu-menu-grid-square .dropdown-item').on('click', gridSquareMenuClickHandler);
+        $('.alters-trim').on('change', updateTrims);
 
         // Refresh data
         refreshGrid();
@@ -476,8 +477,15 @@ function updateTrims() {
     var new_rows = $('#edit-settings-rows').val();
     var trim_top = $('#edit-settings-trim_top').val();
     var row_increase = new_rows - old_rows;
-    trim_bottom = 0-
+    trim_bottom = (0 - row_increase) - trim_top;
+    var old_cols = $('#edit-settings-old_cols').val();
+    var new_cols = $('#edit-settings-cols').val();
+    var trim_left = $('#edit-settings-trim_left').val();
+    var col_increase = new_cols - old_cols;
+    trim_right = (0 - col_increase) - trim_left;
     // Update fields
+    $('#edit-settings-trim_bottom').val(trim_bottom);
+    $('#edit-settings-trim_right').val(trim_right);
 }
 
 /** Triggers the AJAX to create a clue from the new-clue modal */
