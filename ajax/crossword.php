@@ -127,14 +127,14 @@ switch ($action) {
                         $pc->alterLength($crossword->cols-$clue_last_square, false);
                     }
                 }
-
-                // Now save if this clue has changed
-                if ($altered) {
-                    $pc->save();
-                }
             }
             $crossword->rows = $rows;
             $crossword->cols = $cols;
+
+            // Now save if this clue has changed
+            if ($altered) {
+                $pc->save();
+            }
         }
 
         // Update rotational symmetry
