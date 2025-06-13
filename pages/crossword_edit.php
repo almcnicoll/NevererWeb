@@ -144,8 +144,10 @@ if ($fatal_error) {
     $menu_grid_square->setItems( new UI\BootstrapMenuItem_List( [
         new UI\BootstrapMenuItem('new-clue-across',"New across clue"),
         new UI\BootstrapMenuItem('edit-clue-across',"Edit across clue"),
+        new UI\BootstrapMenuItem('delete-clue-across', "Delete across clue"),
         new UI\BootstrapMenuItem('new-clue-down', "New down clue"),
         new UI\BootstrapMenuItem('edit-clue-down', "Edit down clue"),
+        new UI\BootstrapMenuItem('delete-clue-down', "Delete down clue"),
         new UI\BootstrapMenuItem('clear-grid-square', "Clear this square"),
     ] ) );
     echo $menu_grid_square->getHtml();

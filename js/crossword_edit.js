@@ -470,6 +470,12 @@ function editClue() {
     bootstrap.Modal.getInstance(document.getElementById('edit-clue')).hide();
 }
 
+// TODO - HIGH add this function
+/** Deletes the clue */
+function deleteClue() {
+    //
+}
+
 /** Updates the trim_... fields with the appropriate values, based on other values changing on the form */
 function updateTrims() {
     // Calcs
@@ -492,8 +498,8 @@ function updateTrims() {
 function editSettings() {
     // Populate vars for validation (don't need them for saving as form is serialized)
     var id = $('#edit-settings-id').val();
-    var rows = $('#edit-settings-rows').val();
-    var cols = $('#edit-settings-cols').val();
+    rows = $('#edit-settings-rows').val();
+    cols = $('#edit-settings-cols').val();
     var title = $('#edit-settings-title').val();
 
     // Clear previous validation feedback
@@ -609,16 +615,20 @@ function gridSquareRightClickHandler(eventObject) {
     if($(eventObject.currentTarget).data('has-across-clue')) { 
         $('#menu-grid-square-new-clue-across').hide(); 
         $('#menu-grid-square-edit-clue-across').show(); 
+        $('#menu-grid-square-delete-clue-across').show(); 
     } else {
         $('#menu-grid-square-new-clue-across').show(); 
         $('#menu-grid-square-edit-clue-across').hide(); 
+        $('#menu-grid-square-delete-clue-across').hide(); 
     }
     if($(eventObject.currentTarget).data('has-down-clue')) { 
         $('#menu-grid-square-new-clue-down').hide();
-        $('#menu-grid-square-edit-clue-down').show();  
+        $('#menu-grid-square-edit-clue-down').show();
+        $('#menu-grid-square-delete-clue-down').show(); 
     } else { 
         $('#menu-grid-square-new-clue-down').show(); 
-        $('#menu-grid-square-edit-clue-down').hide(); 
+        $('#menu-grid-square-edit-clue-down').hide();
+        $('#menu-grid-square-delete-clue-down').hide();
     }
     // Move and show menu
     $('#context-menu-menu-grid-square').css('left',eventObject.pageX).css('top',eventObject.pageY).show();
