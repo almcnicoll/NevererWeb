@@ -236,6 +236,17 @@ switch ($action) {
         }
         
         die(json_encode($pc));
+    case 'delete':
+        populate_from_request(['crossword_id','x','y','orientation']);
+        $crossword = Crossword::findFirst(['id','=',$crossword_id]);
+        if ($crossword === null) { throw_error("Cannot find crossword with id {$crossword_id}"); }
+        if (!$crossword->isOwnedBy($user->id)) { throw_error("Crossword with id {$crossword_id} does not belong to user #{$user->id}"); }
+        //@var ?PlacedClue $pc
+        $pc = $crossword->findClueFromXY($x,$y,$orientation);
+        if ($pc === null) { throw_error("No {$orientation} clue found at ({$x},{$y})"); }
+        $pc->delete();
+
+        die('OK');
     default:
         $file = str_replace(__DIR__,'',__FILE__);
         throw_error("Invalid action {$action} passed to {$file}");

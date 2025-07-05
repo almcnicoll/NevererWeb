@@ -378,5 +378,49 @@ END_SQL;
             $html .= "</table>\n";
             return $html;
         }
+
+        /**
+         * @param int $x the x coordinate of the square to search
+         * @param int $y the y coordinate of the square to search
+         * @param string $orientation the type of clue to look for ('across'/'down')
+         * @return ?PlacedClue the clue, if one is found, otherwise null
+         */
+        public function findClueFromXY(int $x, int $y, string $orientation) : ?PlacedClue {
+            // Check values
+            if ($x < 0) { throw_error("x value ({$x}) is too small"); }
+            if ($y < 0) { throw_error("y value ({$y}) is too small"); }
+            if ($x >= $this->cols) { throw_error("x value ({$x}) is too big"); }
+            if ($y >= $this->rows) { throw_error("y value ({$y}) is too big"); }
+            $orientation = strtolower($orientation);
+
+            $criteria = [['crossword_id','=',$this->id],];
+            if ($orientation == 'down') {
+                $criteria[] = ['orientation','=','down'];
+                $criteria[] = ['x','=',$x];
+                $criteria[] = ['y','>=',$y];
+            } else {
+                $criteria[] = ['orientation','=','across'];
+                $criteria[] = ['y','=',$y];
+                $criteria[] = ['x','>=',$x];
+            }
+            $allPossibleClues = new PlacedClue_List(
+                PlacedClue::find($criteria)
+            );
+            if (count($allPossibleClues) == 0) { return null; }
+            //@var ?PlacedClue $pc
+            foreach ($allPossibleClues as $pc) {
+                // Check if this clue meets the remaining criterion (max on the dimension in which it runs)
+                $l = $pc->getLength();
+                if ($orientation == 'down') {
+                    // Check max y
+                    if ($y <= $pc->y + $l) { return $pc; }
+                } else {
+                    // Check max x
+                    if ($x <= $pc->x + $l) { return $pc; }
+                }
+            }
+            // No matches
+            return null;
+        }
     }
 }
