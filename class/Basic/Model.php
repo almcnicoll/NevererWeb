@@ -459,7 +459,23 @@ namespace Basic {
         /**
          * Returns the parent object
          */
-        public function getParent() : Model {
+        public function getParent() : ?Model {
+            // TODO - work out if there's some of this that can be abstracted to a function that gets the parent relationship (rather than tying that to retrieving the parent object)
+
+            // If there's no parent specified, throw an error
+            if ($this->belongsTo == null) { throw new Exception("Class ".get_class($this). " does not have a defined parent relationship."); }
+
+            // Ensure the relavent class exists and is loaded
+            if (!class_exists($this->belongsTo)) { throw new Exception("Class ".$this->belongsTo." is specified as the parent of ".get_class($this). " but the class does not exist."); }
+
+            // Work out our link field ([parentclass]_id)
+            $linkField = strtolower($this->belongsTo).'_id';
+
+            // Check we have the link field
+            if(!property_exists($this->belongsTo, $linkField)) { throw new Exception("Class ".$this->belongsTo." is specified as the parent of ".get_class($this). " but there is no link field ".$linkField."."); }
+
+            // TODO - now do the actual lookup!
+
             return new Model();
         }
     }
