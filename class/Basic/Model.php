@@ -1,6 +1,6 @@
 <?php
 namespace Basic {
-    // TODO - LOW consider adding table relationships so we can do cascading deletes etc.
+    // TODO - LOW consider adding table relationships so we can do cascading deletes etc. (started below)
     use InvalidArgumentException;
     use PDO,Exception,DateTime;
     class Model extends BaseClass {
@@ -13,6 +13,11 @@ namespace Basic {
         
         static string $tableName;
         static $fields = ['id','created','modified'];
+
+        // Relationships
+        static $hasOne = null; // Single child object
+        static $hasMany = []; // Multiple child objects
+        static $belongsTo = null; // Single parent object
 
         /** Contains a unique identifier for when a PlacedClue has not yet been saved - retrieved only by getUniqueId() */
         protected ?string $__uniqueID = null;
@@ -449,6 +454,13 @@ namespace Basic {
             }
             // Return the original object
             return $this;
+        }
+
+        /**
+         * Returns the parent object
+         */
+        public function getParent() : Model {
+            return new Model();
         }
     }
 }
