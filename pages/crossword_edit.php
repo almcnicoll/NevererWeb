@@ -1,5 +1,4 @@
 <?php
-    // TODO - HIGH some way of editing crossword-level settings (such as symmetry)
     use Crosswords\Crossword, Crosswords\PlacedClue, UI\DisplayMessage;
 
     $fatal_error = false;
