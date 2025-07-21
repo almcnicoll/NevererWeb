@@ -1,6 +1,7 @@
 <?php
 namespace Security {
     use Basic\Model;
+    use Crosswords\Crossword;
     use Exception;
 
     class User extends Model {
@@ -17,6 +18,9 @@ namespace Security {
             ['created','DESC'],
             ['display_name','ASC'],
         ];
+
+        // Relationships
+        public static $hasMany = Crossword::class;
 
         public function setAuthmethod_id($id) {
             $this->authmethod_id = $id;

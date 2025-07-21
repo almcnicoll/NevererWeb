@@ -1,6 +1,6 @@
 <?php
 namespace Basic {
-    // TODO - LOW consider adding table relationships so we can do cascading deletes etc. (started below)
+    // TODO - expand use of table relationships so we can do cascading deletes etc. (started below)
     use InvalidArgumentException;
     use PDO,Exception,DateTime;
     class Model extends BaseClass {
@@ -14,7 +14,7 @@ namespace Basic {
         static string $tableName;
         static $fields = ['id','created','modified'];
 
-        // Relationships
+        // Relationships - note that class names must be namespaced, so should be in the form SomeClass::class
         static $hasOne = null; // Single child object
         static $hasMany = []; // Multiple child objects
         static $belongsTo = null; // Single parent object
@@ -457,26 +457,49 @@ namespace Basic {
         }
 
         /**
+         * Returns the parent's fully-qualified class name, loading the class if needed
+         * @return ?string the parent class name, which should include any namespace prefix, or null if there is no parent class specified
+         * @throws Will throw an exception if the parent class does not exist (autoloading if needed)
+         */
+        public function getParentClassName() : ?string {
+            // Check if there's a parent class
+            if ($this->belongsTo === null) { return null; }
+            // Ensure the relevant class exists and is loaded
+            if (!class_exists($this->belongsTo)) { throw new Exception("Class ".$this->belongsTo." is specified as the parent of ".get_class($this). " but the class does not exist."); }
+            return $this->belongsTo;
+        }
+
+        /**
          * Returns the parent object
+         * @return ?Model the parent object, or null if there is none
+         * @throws Will throw an exception if there is no parent relationship defined
+         * @throws Will throw an exception (in getParentClassName function) if the parent class does not exist
+         * @throws Will throw an exception (in getParentClassName function) if the parent class does not inherit from Model
+         * @throws Will throw an exception if the current class does not contain a link field in the format parentclass_id
          */
         public function getParent() : ?Model {
-            // TODO - work out if there's some of this that can be abstracted to a function that gets the parent relationship (rather than tying that to retrieving the parent object)
+            // Retrieve parent class name (and load class if needed)
+            $parentClassName = $this->getParentClassName();
 
             // If there's no parent specified, throw an error
-            if ($this->belongsTo == null) { throw new Exception("Class ".get_class($this). " does not have a defined parent relationship."); }
+            if ($parentClassName) { throw new Exception("Class ".get_class($this). " does not have a defined parent relationship."); }
 
-            // Ensure the relavent class exists and is loaded
-            if (!class_exists($this->belongsTo)) { throw new Exception("Class ".$this->belongsTo." is specified as the parent of ".get_class($this). " but the class does not exist."); }
+            // If the parent class doesn't inherit from Basic\Model, throw an error
+            if (!is_subclass_of($parentClassName,Model::class,true)) { throw new Exception("Parent class ".$parentClassName." does not inherit from ".Model::class.". This function can only be called on subclasses of ".Model::class."."); }
 
             // Work out our link field ([parentclass]_id)
-            $linkField = strtolower($this->belongsTo).'_id';
+            $reflect = new \ReflectionClass($parentClassName);
+            $parentShortName = $reflect->getShortName(); // Needed for link field name
+            $linkField = strtolower($parentShortName).'_id';
 
             // Check we have the link field
-            if(!property_exists($this->belongsTo, $linkField)) { throw new Exception("Class ".$this->belongsTo." is specified as the parent of ".get_class($this). " but there is no link field ".$linkField."."); }
+            if(!property_exists($this->belongsTo, $linkField)) { throw new Exception("Class ".$parentClassName." is specified as the parent of ".get_class($this). " but there is no link field ".$linkField."."); }
 
-            // TODO - now do the actual lookup!
+            // Now do the actual lookup
+            $parent = call_user_func($parentClassName.'::getById', $this->{$linkField});
 
-            return new Model();
+            // Return the result
+            return $parent;
         }
     }
 }

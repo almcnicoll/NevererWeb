@@ -20,6 +20,10 @@ namespace Crosswords {
 
         public static $defaultOrderBy = [['modified','DESC'],['id','DESC']];
 
+        // Relationships
+        public static $belongsTo = User::class;
+        public static $hasMany = PlacedClue::class;
+
         public function getUser() : User {
             /** @var User $uTmp */
             $uTmp = User::findFirst(['id','=',$this->user_id]);

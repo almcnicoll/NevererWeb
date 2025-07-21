@@ -17,6 +17,10 @@ namespace Crosswords {
 
       public static $defaultOrderBy = ['y','x','orientation'];
 
+      // Relationships
+      public static $belongsTo = Crossword::class;
+      public static $hasOne = Clue::class;
+
       public const ACROSS = 'across';
       public const DOWN = 'down';
 
