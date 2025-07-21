@@ -463,10 +463,10 @@ namespace Basic {
          */
         public function getParentClassName() : ?string {
             // Check if there's a parent class
-            if ($this->belongsTo === null) { return null; }
+            if (static::$belongsTo === null) { return null; }
             // Ensure the relevant class exists and is loaded
-            if (!class_exists($this->belongsTo)) { throw new Exception("Class ".$this->belongsTo." is specified as the parent of ".get_class($this). " but the class does not exist."); }
-            return $this->belongsTo;
+            if (!class_exists(static::$belongsTo)) { throw new Exception("Class ".static::$belongsTo." is specified as the parent of ".get_class($this). " but the class does not exist."); }
+            return static::$belongsTo;
         }
 
         /**
@@ -482,7 +482,7 @@ namespace Basic {
             $parentClassName = $this->getParentClassName();
 
             // If there's no parent specified, throw an error
-            if ($parentClassName) { throw new Exception("Class ".get_class($this). " does not have a defined parent relationship."); }
+            if ($parentClassName === null) { throw new Exception("Class ".get_class($this). " does not have a defined parent relationship."); }
 
             // If the parent class doesn't inherit from Basic\Model, throw an error
             if (!is_subclass_of($parentClassName,Model::class,true)) { throw new Exception("Parent class ".$parentClassName." does not inherit from ".Model::class.". This function can only be called on subclasses of ".Model::class."."); }
@@ -493,7 +493,7 @@ namespace Basic {
             $linkField = strtolower($parentShortName).'_id';
 
             // Check we have the link field
-            if(!property_exists($this->belongsTo, $linkField)) { throw new Exception("Class ".$parentClassName." is specified as the parent of ".get_class($this). " but there is no link field ".$linkField."."); }
+            if(!property_exists(static::class, $linkField)) { throw new Exception("Class ".$parentClassName." is specified as the parent of ".get_class($this). " but there is no link field ".$linkField."."); }
 
             // Now do the actual lookup
             $parent = call_user_func($parentClassName.'::getById', $this->{$linkField});

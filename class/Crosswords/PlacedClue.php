@@ -54,7 +54,7 @@ namespace Crosswords {
        */
       public function getCrossword() : Crossword {
           /** @var Crossword $cTmp */  
-          $cTmp = Crossword::findFirst(['id','=',$this->crossword_id]);
+          $cTmp = $this->getParent();
           if ($cTmp == null) { throw new Exception("No matching crossword for this clue"); }
           return $cTmp;
       }
