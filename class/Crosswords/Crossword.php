@@ -401,11 +401,11 @@ END_SQL;
             if ($orientation == 'down') {
                 $criteria[] = ['orientation','=','down'];
                 $criteria[] = ['x','=',$x];
-                $criteria[] = ['y','>=',$y];
+                $criteria[] = ['y','<=',$y];
             } else {
                 $criteria[] = ['orientation','=','across'];
                 $criteria[] = ['y','=',$y];
-                $criteria[] = ['x','>=',$x];
+                $criteria[] = ['x','<=',$x];
             }
             $allPossibleClues = new PlacedClue_List(
                 PlacedClue::find($criteria)
@@ -417,10 +417,10 @@ END_SQL;
                 $l = $pc->getLength();
                 if ($orientation == 'down') {
                     // Check max y
-                    if ($y <= $pc->y + $l) { return $pc; }
+                    if ($y < $pc->y + $l) { return $pc; }
                 } else {
                     // Check max x
-                    if ($x <= $pc->x + $l) { return $pc; }
+                    if ($x < $pc->x + $l) { return $pc; }
                 }
             }
             // No matches

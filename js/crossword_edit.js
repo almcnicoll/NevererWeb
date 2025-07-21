@@ -685,7 +685,7 @@ function gridSquareMenuClickHandler(eventObject) {
             var y = $('#context-menu-menu-grid-square').data('trigger-row');
             var x = $('#context-menu-menu-grid-square').data('trigger-col');
             // Now fire off the request
-            var url = root_path + '/placed_clue/*/delete/?domain=ajax*crossword_id=' + crossword_id + '&orientation=across&x='+x+'&y='+y;
+            var url = root_path + '/placed_clue/*/delete/?domain=ajax&crossword_id=' + crossword_id + '&orientation=across&x='+x+'&y='+y;
             makeAjaxCall('post', url, null, refreshGrid, displayAjaxError);
             break;
         case 'menu-grid-square-delete-clue-down':
@@ -693,7 +693,7 @@ function gridSquareMenuClickHandler(eventObject) {
             var y = $('#context-menu-menu-grid-square').data('trigger-row');
             var x = $('#context-menu-menu-grid-square').data('trigger-col');
             // Now fire off the request
-            var url = root_path + '/placed_clue/*/delete/?domain=ajax*crossword_id=' + crossword_id + '&orientation=down&x='+x+'&y='+y;
+            var url = root_path + '/placed_clue/*/delete/?domain=ajax&crossword_id=' + crossword_id + '&orientation=down&x='+x+'&y='+y;
             makeAjaxCall('post', url, null, refreshGrid, displayAjaxError);
             break;
         default:

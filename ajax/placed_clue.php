@@ -244,8 +244,12 @@ switch ($action) {
         //@var ?PlacedClue $pc
         $pc = $crossword->findClueFromXY($x,$y,$orientation);
         if ($pc === null) { throw_error("No {$orientation} clue found at ({$x},{$y})"); }
-        $pc->delete();
-
+        // Also delete any symmetry clues
+        $cluesToDelete = $pc->getSymmetryClues();
+        $cluesToDelete[] = $pc;
+        foreach ($cluesToDelete as $clueToDelete) {
+            $clueToDelete->delete();
+        }
         die('OK');
     default:
         $file = str_replace(__DIR__,'',__FILE__);
