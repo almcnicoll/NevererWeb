@@ -22,7 +22,7 @@ namespace Crosswords {
 
         // Relationships
         public static $belongsTo = User::class;
-        public static $hasMany = PlacedClue::class;
+        public static $hasMany = [PlacedClue::class];
 
         public function getUser() : User {
             /** @var User $uTmp */

@@ -15,8 +15,8 @@ namespace Basic {
         static $fields = ['id','created','modified'];
 
         // Relationships - note that class names must be namespaced, so should be in the form SomeClass::class
-        static $hasOne = null; // Single child object
-        static $hasMany = []; // Multiple child objects
+        static $hasOne = []; // Single child object of these types
+        static $hasMany = []; // Multiple child objects of these types
         static $belongsTo = null; // Single parent object
 
         /** Contains a unique identifier for when a PlacedClue has not yet been saved - retrieved only by getUniqueId() */
@@ -470,11 +470,26 @@ namespace Basic {
         }
 
         /**
+         * Returns the fully-qualified class names of any child objects, loading the classes if needed
+         * @return string[] the parent class name, which should include any namespace prefix, or null if there is no parent class specified
+         * @throws Will throw an exception if the parent class does not exist (autoloading if needed)
+         */
+        public function getChildClassNames() : array {
+            // Check if there are child classes
+            $childClasses = array_merge(static::$hasOne,static::$hasMany);
+            foreach ($childClasses as $childClass) {
+                // Ensure the relevant class exists and is loaded
+                if (!class_exists($childClass)) { throw new Exception("Class ".static::$belongsTo." is specified as a child of ".get_class($this). " but the class does not exist."); }
+            }
+            return $childClasses;
+        }
+
+        /**
          * Returns the parent object
          * @return ?Model the parent object, or null if there is none
          * @throws Will throw an exception if there is no parent relationship defined
          * @throws Will throw an exception (in getParentClassName function) if the parent class does not exist
-         * @throws Will throw an exception (in getParentClassName function) if the parent class does not inherit from Model
+         * @throws Will throw an exception if the parent class does not inherit from Model
          * @throws Will throw an exception if the current class does not contain a link field in the format parentclass_id
          */
         public function getParent() : ?Model {
@@ -500,6 +515,55 @@ namespace Basic {
 
             // Return the result
             return $parent;
+        }
+
+        /**
+         * Returns child objects
+         * @param ?string $type the type (fully-qualified, including namespace) of child to return
+         * @return Model[] the parent object, or null if there is none
+         * @throws Will throw an exception if there is no child relationship defined
+         * @throws Will throw an exception (in getParentClassName function) if a child class does not exist
+         * @throws Will throw an exception if a child class does not inherit from Model
+         * @throws Will throw an exception if the child class does not contain a link field in the format thisclass_id
+         */
+        public function getChildren(?string $type = null) : array {
+            // Retrieve child class names (and load classes if needed)
+            $childClassNames = $this->getChildClassNames();
+
+            // If there's no children specified, throw an error
+            if (count($childClassNames) == 0) { throw new Exception("Class ".get_class($this). " does not have any defined child relationships."); }
+
+            // Get own short name
+            $classReflect = new \ReflectionClass(static::class);
+            $classShortName = $classReflect->getShortName(); // Needed for link field name
+
+            $children = [];
+            /** @var ?string $returnKey */
+            $returnKey = null;
+
+            foreach ($childClassNames as $childClassName) {
+                if (($type !== null) && ($type != $childClassName)) { continue; } // If $type specified, only return children of that type
+                // If the child class doesn't inherit from Basic\Model, throw an error
+                if (!is_subclass_of($childClassName,Model::class,true)) { throw new Exception("Child class ".$childClassName." does not inherit from ".Model::class.". This function can only be called on subclasses of ".Model::class."."); }
+                // Work out our link field ([thisclass]_id)
+                $linkField = strtolower($classShortName).'_id';
+                // Check we have the link field
+                if(!property_exists($childClassName, $linkField)) { throw new Exception("Class ".$childClassName." is specified as a child of ".get_class($this). " but there is no link field ".$linkField."."); }
+                
+                // Now do the actual lookup
+                $childReflect = new \ReflectionClass($childClassName);
+                $childShortName = $childReflect->getShortName(); // Needed for array index
+                if ($type !== null) { $returnKey = $childShortName; } // Needed to return simplified array where $type specified
+                $criteria = [$linkField,'=',$this->id]; // Specify criteria (linkfield of child object equals id of this object)
+                $children[$childShortName] = call_user_func($childClassName.'::find', $criteria);
+            }
+
+            // Return the result
+            if ($type===null || $returnKey===null) {
+                return $children;
+            } else {
+                return $children[$returnKey];
+            }
         }
     }
 }

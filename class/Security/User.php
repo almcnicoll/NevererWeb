@@ -20,7 +20,7 @@ namespace Security {
         ];
 
         // Relationships
-        public static $hasMany = Crossword::class;
+        public static $hasMany = [Crossword::class];
 
         public function setAuthmethod_id($id) {
             $this->authmethod_id = $id;

@@ -19,7 +19,7 @@ namespace Crosswords {
 
       // Relationships
       public static $belongsTo = Crossword::class;
-      public static $hasOne = Clue::class;
+      public static $hasOne = [Clue::class];
 
       public const ACROSS = 'across';
       public const DOWN = 'down';
