@@ -218,7 +218,10 @@ function updateGridSquares(json) {
  * @returns {void}
  */
 function updateClueList(json, removeMissing=true) {
-    // TODO - HIGH test this code
+    // TODO - HIGH - display something if clue has no question (answer in italics?)
+    // TODO - HIGH - order of returned PlacedClues so sorting code works
+    // TODO - HIGH - doesn't currently remove clues after a clue-delete
+    
     // Loop through the list of PlacedClues, updating as we go
     // NB - json comes in as a multidimensional array ([row][col])
     allClues = JSON.parse(json);
@@ -229,7 +232,9 @@ function updateClueList(json, removeMissing=true) {
     }
     var lastOrientation = '';
     var lastClueNumber = 0;
-    var unusedIds = $.map($(".clue-row"), function(n, i){
+    // unusedIds stores ids of rows which haven't been created/updated, and which should therefore be deleted
+    // speciifying in #clue-list table is KEY, otherwise template rows are removed!
+    var unusedIds = $.map($("#clue-list .clue-row"), function(n, i){
         return n.id;
     });
     // TODO - HIGH clues are NOT currently returned in order!
