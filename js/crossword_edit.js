@@ -220,7 +220,7 @@ function updateGridSquares(json) {
 function updateClueList(json, removeMissing=true) {
     // TODO - HIGH - display something if clue has no question (answer in italics?)
     // TODO - HIGH - doesn't correctly update clue list after adding a clue
-    // TODO - HIGH - doesn't currently remove clues after a clue-delete
+    // TODO - HIGH - doesn't currently remove clues after a clue-delete (code doesn't even seem to call this function)
     
     // Loop through the list of PlacedClues, updating as we go
     // NB - json comes in as a multidimensional array ([row][col])
@@ -248,7 +248,11 @@ function updateClueList(json, removeMissing=true) {
         if (clueRow.length > 0) {
             // We have this clue already - update it
             clueRow.find('.clue-number').text(num); // Update number
-            clueRow.find('.clue-question').text(pClue.clue.question); // Update question
+            if (pClue.clue.question == '') {
+                clueRow.find('.clue-question').html('<i>'+pClue.clue.answer+'</i>'); // Update question text with answer in italics
+            } else {
+                clueRow.find('.clue-question').text(pClue.clue.question); // Update question text
+            }
             //unusedIds.removeByValue(id); // And remove it from unused list
             removeFromArray(unusedIds,id);
         } else {
@@ -268,7 +272,11 @@ function updateClueList(json, removeMissing=true) {
             // Create the row
             var newRow = $('tr#clue-row-template').clone().attr('id',id).data('clue-orientation',ori).data('clue-number',num);
             newRow.find('.clue-number').text(num);
-            newRow.find('.clue-question').text(pClue.clue.question);
+            if (pClue.clue.question == '') {
+                newRow.find('.clue-question').html('<i>'+pClue.clue.answer+'</i>'); // Update question text with answer in italics
+            } else {
+                newRow.find('.clue-question').text(pClue.clue.question); // Update question text
+            }
             if (insertBefore === false) {
                 // No clues to put before, so add it at the end
                 tbody_container.append(newRow);
@@ -278,7 +286,6 @@ function updateClueList(json, removeMissing=true) {
             }
         }
     }
-    // TODO - HIGH this seems to be removing too many items after clue-add
     if (removeMissing) {
         for(var i in unusedIds) {
             $('#'+unusedIds[i]).remove();

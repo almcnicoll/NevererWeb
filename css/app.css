@@ -218,6 +218,21 @@ span.letter-holder {
     cursor: default;
 }
 
+/* Clue List */
+#clue-list tr.clue-row {
+    border-top: #000 1px solid;
+}
+#clue-list td.clue-number {
+    width: 3em;
+    text-align: right;
+    padding-right: 0.5em;
+    border-right: #000 1px dotted;
+}
+#clue-list td.clue-question {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+}
+
 /* Menus */
 ul.context-menu {
     box-shadow: 5px 5px 10px 1px #000000;
