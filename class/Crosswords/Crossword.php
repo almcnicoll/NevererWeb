@@ -46,9 +46,24 @@ namespace Crosswords {
             return ($user_id == $this->user_id);
         }
 
-        public function getPlacedClues() : PlacedClue_List {
+        /**
+         * Returns all PlacedClue objects associated with the crossword
+         * @param int $sortOrder The order in which to return the clues (default is PlacedClue::ORDER_PLACENUMBER)
+         */
+        public function getPlacedClues(int $sortOrder = PlacedClue::ORDER_PLACENUMBER) : PlacedClue_List {
             $criteria = ['crossword_id','=',$this->id];
-            $orderBy = [['place_number','asc'],['orientation','asc']];
+            switch ($sortOrder) {
+                case PlacedClue::ORDER_PLACENUMBER:
+                    $orderBy = [['place_number','asc'],['orientation','asc']];
+                    break;
+                case PlacedClue::ORDER_AD:
+                    $orderBy = [['orientation','asc'],['place_number','asc']];
+                    break;
+                default:
+                    $orderBy = null;
+                    break;
+            }
+            
             $allClues = new PlacedClue_List(
                 PlacedClue::find($criteria, $orderBy)
             );

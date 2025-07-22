@@ -219,7 +219,7 @@ function updateGridSquares(json) {
  */
 function updateClueList(json, removeMissing=true) {
     // TODO - HIGH - display something if clue has no question (answer in italics?)
-    // TODO - HIGH - order of returned PlacedClues so sorting code works
+    // TODO - HIGH - doesn't correctly update clue list after adding a clue
     // TODO - HIGH - doesn't currently remove clues after a clue-delete
     
     // Loop through the list of PlacedClues, updating as we go

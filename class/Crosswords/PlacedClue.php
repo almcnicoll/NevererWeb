@@ -23,6 +23,8 @@ namespace Crosswords {
 
       public const ACROSS = 'across';
       public const DOWN = 'down';
+      public const ORDER_PLACENUMBER = 0;
+      public const ORDER_AD = 1;
 
       /** Contains a Clue object for when a PlacedClue is being created from scratch */
       protected ?Clue $__captiveClue = null;
