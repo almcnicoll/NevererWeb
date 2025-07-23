@@ -99,6 +99,7 @@ class Tome {
      */
     async parseData(source_format, data) {
         // TODO - add code for parsing the data
+        // TODO - HIGH we are apparently trying to store promise objects (or possibly other complex objects) in IndexedDB, which points to `data` being overly nested/structured. Check this.
         var dictObj;
         if (typeof data == 'string') {
             dictObj = JSON.parse(data);
@@ -154,7 +155,8 @@ class Tome {
                 throw new Error("Source of source_type "+source_type+" not supported.");
         }
         
-        t.retrieveData(source_type, source);
+        var data = Tome.retrieveData(source_type, source);
+        t.parseData(t.source_format, data);
 
         return t;
         // TODO - I believe we can string the retrieval and parsing functions together with Promises
