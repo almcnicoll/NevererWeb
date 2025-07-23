@@ -1,6 +1,14 @@
 /**
  * Represents a collection of entries, each representing a word or phrase
  */
+/*
+REVISED STRATEGY:
+* Use dexie for local word list
+* If no local word list, populate with sowpods
+* Maintain clue lists on server, with words linked to multiple clues
+* Local word list contains word, wordlist_id, cache of number of clues for that word and list
+* Pattern-matching for possible words done locally
+*/
 class Tome {
     /**
      * The database id of this object
@@ -113,7 +121,7 @@ class Tome {
         this.source = dictObj.source;
         this.writeable = dictObj.writeable;
         this.last_updated = dictObj.last_updated;
-        this.entries = dictObj.entries;
+        //this.entries = dictObj.entries;
 
         // Add tome
         //var tome_data = {id:Dictionaries.db.tomes.length+1, name: this.name, };
