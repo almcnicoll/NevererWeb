@@ -172,6 +172,10 @@ $(document).ready(
         // Refresh data
         refreshGrid();
         refreshClueList();
+
+        // Start dictionary loading
+        const worker = new Worker('js/dict_worker.js');
+        worker.postMessage({ type: 'startSync' });
     }
 );
 //#endregion

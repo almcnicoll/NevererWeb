@@ -99,8 +99,10 @@
 <!-- Dictionary mgmt -->
 <script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/dexie/4.0.8/dexie.min.js'></script>
 <!-- TODO - use ES6 modules so we don't have to include each js file -->
-<script type="text/javascript" src='../../js/dictionaries.js'></script>
 <script type="text/javascript" src='../../js/class/Tome.js'></script>
+<script type="text/javascript" src='../../js/class/TomeEntry.js'></script>
+<script type="text/javascript" src='../../js/dict_master.js'></script>
+
 <!-- Set vars -->
 <script type="text/javascript">
 <?php
