@@ -217,10 +217,7 @@ function updateGridSquares(json) {
  * @param {boolean} removeMissing whether to remove any clues that aren't in the list (desirable when updating entire list)
  * @returns {void}
  */
-function updateClueList(json, removeMissing=true) {
-    // TODO - HIGH - display something if clue has no question (answer in italics?)
-    // TODO - HIGH - doesn't currently remove clues after a clue-delete (code doesn't even seem to call this function)
-    
+function updateClueList(json, removeMissing=true) {    
     // Loop through the list of PlacedClues, updating as we go
     // NB - json comes in as a multidimensional array ([row][col])
     allClues = JSON.parse(json);
