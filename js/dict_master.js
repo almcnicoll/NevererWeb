@@ -5,7 +5,7 @@
  * Listens to worker messages and performs AJAX using makeAjaxCall()
  */
 
-const worker = new Worker("js/dict_worker.js");
+const worker = new Worker(root_path+"/js/dict_worker.js");
 
 worker.onmessage = function (e) {
     const msg = e.data;
@@ -34,3 +34,5 @@ worker.onmessage = function (e) {
         );
     }
 };
+
+worker.postMessage({ type: 'startSync', root_path: root_path });

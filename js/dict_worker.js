@@ -1,8 +1,9 @@
 // js/dict_worker.js
+//debugger;
+
+self.librariesLoaded = false;
 
 importScripts('https://cdn.jsdelivr.net/npm/dexie@3/dist/dexie.min.js');
-importScripts('class/Tome.js');
-importScripts('class/TomeEntry.js');
 
 // IndexedDB setup
 /** @type {Dexie} */
@@ -44,6 +45,12 @@ function fetchFromServer(method, data, callback) {
 self.onmessage = function (e) {
   const msg = e.data;
   if (msg.type === 'startSync') {
+    self.root_path = msg.root_path;
+    if (!self.librariesLoaded) {
+        importScripts(self.root_path+'/js/class/Tome.js');
+        importScripts(self.root_path+'/js/class/TomeEntry.js');
+        self.librariesLoaded = true;
+    }
     startSync();
   }
 };
