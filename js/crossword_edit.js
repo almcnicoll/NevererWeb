@@ -247,7 +247,7 @@ function updateClueList(json, removeMissing=true) {
         if (clueRow.length > 0) {
             // We have this clue already - update it
             clueRow.find('.clue-number').text(num); // Update number
-            if (pClue.clue.question == '') {
+            if ((pClue.clue.question == null)||(pClue.clue.question == '')) {
                 clueRow.find('.clue-question').html('<i>'+pClue.clue.answer+'</i>'); // Update question text with answer in italics
             } else {
                 clueRow.find('.clue-question').text(pClue.clue.question); // Update question text
@@ -271,7 +271,7 @@ function updateClueList(json, removeMissing=true) {
             // Create the row
             var newRow = $('tr#clue-row-template').clone().attr('id',id).data('clue-orientation',ori).data('clue-number',num);
             newRow.find('.clue-number').text(num);
-            if (pClue.clue.question == '') {
+            if ((pClue.clue.question == null)||(pClue.clue.question == '')) {
                 newRow.find('.clue-question').html('<i>'+pClue.clue.answer+'</i>'); // Update question text with answer in italics
             } else {
                 newRow.find('.clue-question').text(pClue.clue.question); // Update question text
@@ -480,12 +480,6 @@ function editClue() {
     bootstrap.Modal.getInstance(document.getElementById('edit-clue')).hide();
 }
 
-// TODO - HIGH add this function
-/** Deletes the clue */
-function deleteClue() {
-    //
-}
-
 /** Updates the trim_... fields with the appropriate values, based on other values changing on the form */
 function updateTrims() {
     // Calcs
@@ -688,7 +682,7 @@ function gridSquareMenuClickHandler(eventObject) {
             var x = $('#context-menu-menu-grid-square').data('trigger-col');
             // Now fire off the request
             var url = root_path + '/grid/*/clear/' + crossword_id + '?domain=ajax&xMin='+x+'&xMax='+x+'&yMin='+y+'&yMax='+y;
-            makeAjaxCall('post', url, null, refreshGrid, displayAjaxError);
+            makeAjaxCall('post', url, null, refreshAll, displayAjaxError);
             break;
         case 'menu-grid-square-delete-clue-across':
             // Get vars
@@ -696,7 +690,7 @@ function gridSquareMenuClickHandler(eventObject) {
             var x = $('#context-menu-menu-grid-square').data('trigger-col');
             // Now fire off the request
             var url = root_path + '/placed_clue/*/delete/?domain=ajax&crossword_id=' + crossword_id + '&orientation=across&x='+x+'&y='+y;
-            makeAjaxCall('post', url, null, refreshGrid, displayAjaxError);
+            makeAjaxCall('post', url, null, refreshAll, displayAjaxError);
             break;
         case 'menu-grid-square-delete-clue-down':
             // Get vars
@@ -704,7 +698,7 @@ function gridSquareMenuClickHandler(eventObject) {
             var x = $('#context-menu-menu-grid-square').data('trigger-col');
             // Now fire off the request
             var url = root_path + '/placed_clue/*/delete/?domain=ajax&crossword_id=' + crossword_id + '&orientation=down&x='+x+'&y='+y;
-            makeAjaxCall('post', url, null, refreshGrid, displayAjaxError);
+            makeAjaxCall('post', url, null, refreshAll, displayAjaxError);
             break;
         default:
             alert('Not yet implemented!');

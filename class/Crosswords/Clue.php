@@ -69,6 +69,17 @@ namespace Crosswords {
             }
         }
 
+        public function setLength(int $length, string $padCharacter = '?') : void {
+            // Deal with $answer == null
+            if ($this->answer == null) { $this->answer = ''; }
+            // Shrink answer if too long - by at least the difference between current string length and target length
+            $this->answer = substr($this->answer, 0, strlen($this->answer)-$length);
+            // Allowing for some characters not "counting" by comparing with getLength()
+            while ($this->getLength() > $length) { $this->answer = substr($this->answer, 0, -1); }
+            // Extend answer if too short
+            $this->answer = $this->answer . str_repeat($padCharacter, $length-$this->getLength());
+        }
+
         /**
          * Get the pattern for a clue, based on the specified answer text
          */

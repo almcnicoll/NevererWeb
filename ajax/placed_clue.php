@@ -182,7 +182,11 @@ switch ($action) {
         
         // Work out if we need to create other new clues for symmetry
         $additionalClues = $crossword->getNewSymmetryClues($pc);
-        foreach($additionalClues as $apc) { $apc->save(); }
+        foreach($additionalClues as $apc) { 
+            // Create Clue object and set it to all blanks
+            $apc->getClue()->setLength($pc->getLength());
+            $apc->save(); 
+        }
         
         die(json_encode($pc));
     case 'update':
