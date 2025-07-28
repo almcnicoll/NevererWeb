@@ -108,9 +108,9 @@
 <!-- Dictionary mgmt -->
 <script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/dexie/4.0.8/dexie.min.js'></script>
 <!-- TODO - consider using ES6 modules so we don't have to include each js file -->
-<script type="text/javascript" src='../../js/class/Tome.js'></script>
-<script type="text/javascript" src='../../js/class/TomeEntry.js'></script>
-<script type="text/javascript" src='../../js/dict_master.js'></script>
+<script type="text/javascript" src='<?= $config['root_path'] ?>/js/class/Tome.js'></script>
+<script type="text/javascript" src='<?= $config['root_path'] ?>/js/class/TomeEntry.js'></script>
+<script type="text/javascript" src='<?= $config['root_path'] ?>/js/dict_master.js'></script>
 
 <!-- Ajax cue -->
 <div id="ajaxCue"><div id="ajaxCount"></div></div>

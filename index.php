@@ -12,10 +12,10 @@ if (session_status() === PHP_SESSION_ACTIVE) {
             $user = unserialize($_SESSION['USER']);
             $_SESSION['USER'] = serialize($user);
         } catch (\Exception $ex) {
-            LoggedError::log('warning',1,__FILE__,__LINE__,"Invalid USER value in session: ".$ex->getMessage());
+            LoggedError::log(LoggedError::TYPE_PHP,1,__FILE__,__LINE__,"Invalid USER value in session: ".$ex->getMessage());
             unset($_SESSION['USER']);
         } catch (\Error $err) {
-            LoggedError::log('warning',1,__FILE__,__LINE__,"Invalid USER value in session: ".$err->getMessage());
+            LoggedError::log(LoggedError::TYPE_PHP,1,__FILE__,__LINE__,"Invalid USER value in session: ".$err->getMessage());
             unset($_SESSION['USER']);
         }
     }
@@ -27,6 +27,8 @@ if(isset($_GET['params'])) {
     $page_parts = [];
 }
 $params = [];
+//LoggedError::log(LoggedError::TYPE_PHP, 2, __FILE__, __LINE__, "");
+error_log($_SERVER['REQUEST_URI'].' ==> '.$_SERVER['QUERY_STRING']);
 
 // Parse URL into a page with optional params
 if (count($page_parts)==0 || (empty($page_parts[0]))) {

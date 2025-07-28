@@ -5,7 +5,16 @@
  * Listens to worker messages and performs AJAX using makeAjaxCall()
  */
 
-const worker = new Worker(root_path+"/js/dict_worker.js");
+// TODO - HIGH fix the path issues here (NB index.php current logging all requests to error_log to debug)
+// dict_worker.js is beingh requested from server as /neverer-web/crossword/edit/js/dict_worker.js
+// which clearly doesn't work
+var curr_path = window.location.href;
+var sub_path = curr_path.replace(root_path,"");
+var levels = (sub_path.match(/\//g) || []).length;
+var up_level = "../";
+var up_levels = up_level.repeat(levels);
+var worker_path = up_level.repeat(levels)+"js/dict_worker.js";
+const worker = new Worker(worker_path);
 
 worker.onmessage = function (e) {
     const msg = e.data;
