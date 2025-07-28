@@ -1,14 +1,23 @@
 <?php
 require_once('autoload.php');
 
+use Logging\LoggedError;
 use Security\User, Security\PageInfo;
 
 User::ensureLoaded(); // To force autoloading of User class
 // For clarity, $user contains the user object and $_SESSION['USER'] contains the serialized version
 if (session_status() === PHP_SESSION_ACTIVE) {
     if (isset($_SESSION['USER'])) {
-        $user = unserialize($_SESSION['USER']);
-        $_SESSION['USER'] = serialize($user);
+        try {
+            $user = unserialize($_SESSION['USER']);
+            $_SESSION['USER'] = serialize($user);
+        } catch (\Exception $ex) {
+            LoggedError::log('warning',1,__FILE__,__LINE__,"Invalid USER value in session: ".$ex->getMessage());
+            unset($_SESSION['USER']);
+        } catch (\Error $err) {
+            LoggedError::log('warning',1,__FILE__,__LINE__,"Invalid USER value in session: ".$err->getMessage());
+            unset($_SESSION['USER']);
+        }
     }
 }
 
