@@ -6,6 +6,7 @@ namespace Logging {
 
         const TYPE_PHP          =   'php';
         const TYPE_CURL         =   'curl';
+        const TYPE_DEBUG        =   'debug';
         const TYPE_OTHER        =   'other';
 
         public string $type;

@@ -47,8 +47,8 @@ self.onmessage = function (e) {
   if (msg.type === 'startSync') {
     self.root_path = msg.root_path;
     if (!self.librariesLoaded) {
-        importScripts(self.root_path+'/js/class/Tome.js');
-        importScripts(self.root_path+'/js/class/TomeEntry.js');
+        importScripts('~ROOT~/js/class/Tome.js');
+        importScripts('~ROOT~/js/class/TomeEntry.js');
         self.librariesLoaded = true;
     }
     startSync();
@@ -59,7 +59,9 @@ self.onmessage = function (e) {
  * Starts the sync process
  */
 function startSync() {
-  fetchFromServer('get', null, async (success, payload) => {
+  data = {};
+  data.url = "tome/*/list";
+  fetchFromServer('get', data, async (success, payload) => {
     if (!success) return;
 
     const serverTomes = payload;

@@ -1,8 +1,36 @@
 <?php
+
 require_once('autoload.php');
 
 use Logging\LoggedError;
 use Security\User, Security\PageInfo;
+
+// Do some resolving of requests relative to root before any other routing
+$root_marker = '~ROOT~';
+$root_pos = strpos($_SERVER['REQUEST_URI'],$root_marker);
+if ($root_pos !== false) {
+    $redirect = $config['root_path'] . substr($_SERVER['REQUEST_URI'], $root_pos + strlen($root_marker));
+    $extension = null;
+    if (strpos($redirect,'.') !== false) {
+        $parts = explode('.',$redirect);
+        $extension = array_pop($parts);
+    }
+    switch ($extension) {
+        case 'map':
+        case 'css':
+        case 'js':
+            // These can be served directly with no security issue
+            LoggedError::log(LoggedError::TYPE_DEBUG, 0, __FILE__, __LINE__, "Serving {$_SERVER['REQUEST_URI']} from {$redirect}");
+            $relative_path = substr($_SERVER['REQUEST_URI'], $root_pos + strlen($root_marker) + 1);
+            $file = @file_get_contents($relative_path);
+            die($file);
+            break;
+        default:
+            LoggedError::log(LoggedError::TYPE_DEBUG, 0, __FILE__, __LINE__, "Redirecting {$_SERVER['REQUEST_URI']} to {$redirect}");
+            header("Location: {$redirect}");
+            break;
+    }
+}
 
 User::ensureLoaded(); // To force autoloading of User class
 // For clarity, $user contains the user object and $_SESSION['USER'] contains the serialized version
