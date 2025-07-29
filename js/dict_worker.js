@@ -65,21 +65,24 @@ function startSync() {
     if (!success) return;
 
     const serverTomes = payload;
+    if (serverTomes instanceof Array) {
+      const localTomeIds = new Set((await db.tomes.toArray()).map(t => t.id));
+      const serverTomeIds = new Set(serverTomes.map(t => t.id));
 
-    const localTomeIds = new Set((await db.tomes.toArray()).map(t => t.id));
-    const serverTomeIds = new Set(serverTomes.map(t => t.id));
-
-    await db.transaction('rw', db.tomes, db.entries, async () => {
-      for (const tome of serverTomes) {
-        await db.tomes.put(tome);
-      }
-      for (const localId of localTomeIds) {
-        if (!serverTomeIds.has(localId)) {
-          await db.tomes.delete(localId);
-          await db.entries.where('tome_id').equals(localId).delete();
+      await db.transaction('rw', db.tomes, db.entries, async () => {
+        for (const tome of serverTomes) {
+          await db.tomes.put(tome);
         }
-      }
-    });
+        for (const localId of localTomeIds) {
+          if (!serverTomeIds.has(localId)) {
+            await db.tomes.delete(localId);
+            await db.entries.where('tome_id').equals(localId).delete();
+          }
+        }
+      });
+    } else {
+      // No tomes
+    }
 
     const lastSync = (await db.sync_meta.get('entries'))?.last_sync ?? '1970-01-01T00:00:00Z';
 
