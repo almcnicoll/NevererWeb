@@ -111,6 +111,7 @@ namespace Basic {
          * @return ?DateTime the created date
          */
         public function getCreated():?DateTime {
+            // TODO - HIGH - needs casting, surely?
             return $this->created;
         }
         /**
@@ -118,6 +119,7 @@ namespace Basic {
          * @return ?DateTime the modified date
          */
         public function getModified():?DateTime {
+            // TODO - HIGH - needs casting, surely?
             return $this->modified;
         }
 

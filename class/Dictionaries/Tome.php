@@ -16,7 +16,7 @@ namespace Dictionaries {
         public int $readable = 0;
         public int $writeable = 0;
         public int $user_id;
-        public ?DateTime $last_updated = null;
+        public ?string $last_updated = null;
 
         static string $tableName = "tomes";
         static $fields = ['id','name','source','source_type','source_format','readable','writeable','user_id','last_modified','created','modified'];
@@ -60,6 +60,15 @@ namespace Dictionaries {
             $tomes_readable = Tome::find([['user_id','!=',$user_id],['readable','=',Tome::PERMISSION_PUBLIC]]);
             $tomes_all = array_merge($tomes_owned,$tomes_readable);
             return $tomes_all;
+        }
+
+        /**
+         * Retrieves the last_modified field as a nullable DateTime
+         * @return ?DateTime the last_modified date
+         */
+        public function getLastUpdated():?DateTime {
+            // TODO - HIGH - needs casting, surely?
+            return $this->last_updated;
         }
 
         /**
