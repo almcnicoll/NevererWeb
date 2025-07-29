@@ -105,6 +105,19 @@ if (file_exists('sql/db-updates.sql')) {
     foreach (array_keys($updates) as $v) {
         if ($v <= $current_version) { continue; }
         $sql = $updates[$v];
+        // Now check for any includes (other SQL files referenced)
+        $listIncludes = array();
+        $matchCount = preg_match_all("|/\\*include\\s([\\w_\\-]+?\\.sql)\\*/|i", $sql, $listIncludes, PREG_SET_ORDER);
+        if ($matchCount !== false && $matchCount !== 0) {
+            error_log(print_r($listIncludes,true));
+            foreach ($listIncludes as $include) {
+                $matchString = $include[0];
+                $includePath = 'sql/'.$include[1];
+                if (!file_exists($includePath)) { pre_die("Bad SQL update file - cannot find included file {$includePath}");}
+                $sql = str_replace($matchString, file_get_contents($includePath),$sql);
+            }
+        }
+        // Now run transaction
         if (!$pdo->beginTransaction()) {
             pre_die("Unable to start a transaction at version #{$v}.");
         }

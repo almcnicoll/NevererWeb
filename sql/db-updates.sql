@@ -232,3 +232,6 @@ CREATE INDEX user_readable
 ON `tomes` (user_id,readable,id);
 CREATE UNIQUE INDEX by_entry
 ON `tome_clues` (tomeentry_id, cryptic, question);
+/* UPDATE */
+/* VERSION 16 */
+/*include 16_sowpods_tome.sql*/
