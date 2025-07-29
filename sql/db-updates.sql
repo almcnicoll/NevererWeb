@@ -187,3 +187,40 @@ CREATE TABLE `displaymessages` (
 INSERT INTO `errors` (`type`,`number`,`message`,`file`,`line`,`created`,`modified`)
 VALUES ('sys',0,"Testing Git post-deployment script on remote server",'',0,NOW(),NOW())
 ;
+/* UPDATE */
+/* VERSION 13 */
+CREATE TABLE `tomes` (
+  `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(400) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'New Tome',
+  `source` VARCHAR(2000) COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  `source_type` VARCHAR(20) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'url',
+  `source_format` VARCHAR(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `readable` SMALLINT(5) UNSIGNED NOT NULL,
+  `writeable` SMALLINT(5) UNSIGNED NOT NULL,
+  `user_id` INT(10) UNSIGNED NOT NULL,
+  `last_updated` DATETIME DEFAULT NULL,
+  `created` DATETIME DEFAULT NULL,
+  `modified` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/* UPDATE */
+/* VERSION 14 */
+CREATE TABLE `tome_entries` (
+  `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `tome_id` INT(10) UNSIGNED NOT NULL,
+  `word` VARCHAR(400) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `bare_letters` VARCHAR(400) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created` DATETIME DEFAULT NULL,
+  `modified` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`id`)
+);
+CREATE TABLE `tome_clues` (
+  `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `tomeentry_id` INT(10) UNSIGNED NOT NULL,
+  `user_id` INT(10) UNSIGNED NOT NULL,
+  `question` VARCHAR(2000) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `cryptic` BOOLEAN NOT NULL DEFAULT TRUE,
+  `created` DATETIME DEFAULT NULL,
+  `modified` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`id`)
+);

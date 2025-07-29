@@ -46,11 +46,11 @@ self.onmessage = function (e) {
   const msg = e.data;
   if (msg.type === 'startSync') {
     self.root_path = msg.root_path;
-    if (!self.librariesLoaded) {
+    /*if (!self.librariesLoaded) {
         importScripts('~ROOT~/js/class/Tome.js');
         importScripts('~ROOT~/js/class/TomeEntry.js');
         self.librariesLoaded = true;
-    }
+    }*/
     startSync();
   }
 };
