@@ -224,3 +224,11 @@ CREATE TABLE `tome_clues` (
   `modified` DATETIME DEFAULT NULL,
   PRIMARY KEY (`id`)
 );
+/* UPDATE */
+/* VERSION 15 */
+CREATE UNIQUE INDEX alphabetical
+ON `tome_entries` (tome_id, bare_letters, word);
+CREATE INDEX user_readable
+ON `tomes` (user_id,readable,id);
+CREATE UNIQUE INDEX by_entry
+ON `tome_clues` (tomeentry_id, cryptic, question);
