@@ -182,3 +182,8 @@ CREATE TABLE `displaymessages` (
   `modified` DATETIME DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/* UPDATE */
+/* VERSION 12 */
+INSERT INTO `errors` (`type`,`number`,`message`,`file`,`line`,`created`,`modified`)
+VALUES ('sys',0,"Testing Git post-deployment script on remote server",'',0,NOW(),NOW())
+;
