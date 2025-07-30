@@ -5,8 +5,11 @@
  */
 namespace Dictionaries {
     use Basic\Model;
+    use Basic\db;
     use DateTime;
+    use Exception;
     use Security\User;
+    use PDO;
 
     class Tome extends Model {
         public string $name;
@@ -77,6 +80,35 @@ namespace Dictionaries {
          */
         public function updateLastModified() {
             // TODO - implement this - should be easy SQL
+        }
+
+        /**
+         * Returns whether the specified tome can be read by the specified user
+         * @param int $tome_id the id of the tome
+         * @param int $user_id the id of the user to check
+         * @return bool true if the tome is readable by that user; false if not
+         */
+        public static function readableBy(int $tome_id, int $user_id) : bool {
+            // Check values
+            if (!is_integer($tome_id)) { throw new Exception("Supplied tome_id {$tome_id} is not an integer."); }
+            if (!is_integer($user_id)) { throw new Exception("Supplied user_id {$user_id} is not an integer."); }
+            // Construct SQL
+            $owner_readable = self::PERMISSION_OWNER;
+            $public_readable = self::PERMISSION_PUBLIC;
+            $sql = <<<END_SQL
+SELECT COUNT(id)>0 AS readable
+FROM tomes t
+WHERE t.id=?
+AND ((t.user_id = ? AND readable = {$owner_readable}) OR readable = {$public_readable})
+END_SQL;
+            $pdo = db::getPDO();
+            $stmt = $pdo->prepare($sql);
+            $criteria_values = [$tome_id,$user_id];
+            $stmt->execute($criteria_values);
+
+            $stmt->setFetchMode(PDO::FETCH_COLUMN);
+            $readable = $stmt->fetch();
+            return ($readable == 1);
         }
 
     }
