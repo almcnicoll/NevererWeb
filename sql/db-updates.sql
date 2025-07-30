@@ -208,8 +208,8 @@ CREATE TABLE `tomes` (
 CREATE TABLE `tome_entries` (
   `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
   `tome_id` INT(10) UNSIGNED NOT NULL,
-  `word` VARCHAR(400) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `bare_letters` VARCHAR(400) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `word` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `bare_letters` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `created` DATETIME DEFAULT NULL,
   `modified` DATETIME DEFAULT NULL,
   PRIMARY KEY (`id`)
@@ -218,7 +218,7 @@ CREATE TABLE `tome_clues` (
   `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
   `tomeentry_id` INT(10) UNSIGNED NOT NULL,
   `user_id` INT(10) UNSIGNED NOT NULL,
-  `question` VARCHAR(2000) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `question` VARCHAR(500) COLLATE utf8mb4_unicode_ci NOT NULL,
   `cryptic` BOOLEAN NOT NULL DEFAULT TRUE,
   `created` DATETIME DEFAULT NULL,
   `modified` DATETIME DEFAULT NULL,
@@ -235,3 +235,12 @@ ON `tome_clues` (tomeentry_id, cryptic, question);
 /* UPDATE */
 /* VERSION 16 */
 /*include 16_sowpods_tome.sql*/
+/* UPDATE */
+/* VERSION 17 */
+ALTER TABLE `tome_entries`
+  MODIFY COLUMN `word` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  MODIFY COLUMN `bare_letters` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL
+;
+ALTER TABLE `tome_clues` 
+  MODIFY `question` VARCHAR(500) COLLATE utf8mb4_unicode_ci NOT NULL
+;
