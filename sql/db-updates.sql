@@ -244,3 +244,7 @@ ALTER TABLE `tome_entries`
 ALTER TABLE `tome_clues` 
   MODIFY `question` VARCHAR(500) COLLATE utf8mb4_unicode_ci NOT NULL
 ;
+/* UPDATE */
+/* VERSION 18 */
+CREATE INDEX `filter`
+ON `tome_entries` (tome_id, modified);
