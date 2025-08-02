@@ -20,13 +20,13 @@ if ($root_pos !== false) {
         case 'css':
         case 'js':
             // These can be served directly with no security issue
-            LoggedError::log(LoggedError::TYPE_DEBUG, 0, __FILE__, __LINE__, "Serving {$_SERVER['REQUEST_URI']} from {$redirect}");
+            //LoggedError::log(LoggedError::TYPE_DEBUG, 0, __FILE__, __LINE__, "Serving {$_SERVER['REQUEST_URI']} from {$redirect}");
             $relative_path = substr($_SERVER['REQUEST_URI'], $root_pos + strlen($root_marker) + 1);
             $file = @file_get_contents($relative_path);
             die($file);
             break;
         default:
-            LoggedError::log(LoggedError::TYPE_DEBUG, 0, __FILE__, __LINE__, "Redirecting {$_SERVER['REQUEST_URI']} to {$redirect}");
+            //LoggedError::log(LoggedError::TYPE_DEBUG, 0, __FILE__, __LINE__, "Redirecting {$_SERVER['REQUEST_URI']} to {$redirect}");
             header("Location: {$redirect}");
             break;
     }
