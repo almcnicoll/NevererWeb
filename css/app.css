@@ -244,11 +244,11 @@ ul.context-menu li:hover, ul.context-menu a:hover {
 
 /* AJAX cue */
 #ajaxCue {
-    min-height: 20px;
-    height: 20px;
-    max-height: 20px;
+    min-height: 4px;
+    height: 4px;
+    max-height: 4px;
     background-color: #fff;
-    border: #ccc 1px dotted;
+    border: none; /*#ccc 1px dotted;*/
 }
 #ajaxCount {
     height: 100%;
