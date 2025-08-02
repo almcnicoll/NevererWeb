@@ -12,7 +12,7 @@ namespace Dictionaries {
         public string $word = '';
         public string $bare_letters = '';
 
-        static string $tableName = "clues";
+        static string $tableName = "tome_entries";
         static $fields = ['id','tome_id','word','bare_letters','created','modified'];
 
         public static $defaultOrderBy = ['bare_letters','id'];

@@ -83,10 +83,12 @@ function startSync() {
 
     const lastSync = (await db.sync_meta.get('entries'))?.last_sync ?? '1970-01-01T00:00:00Z';
 
-    fetchFromServer('get', {
+    data = {
       tome_ids: [...serverTomeIds],
       since: lastSync
-    }, async (success, payload) => {
+    };
+    data.url = "tome_entry/*/list";
+    fetchFromServer('get', data, async (success, payload) => {
       if (!success) return;
 
       const newEntries = payload;

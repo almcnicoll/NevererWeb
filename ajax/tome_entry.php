@@ -41,7 +41,8 @@ switch ($action) {
         $permissions_checked = false;
         // Called as /ajax/tome/*/list?tome_ids=[m,n]&limit=p&offset=q
         // If tome_id is not supplied, retrieve for all user-accessible dictionaries
-        populate_from_request('tome_ids','limit','offset');
+        populate_from_request('tome_ids','since','limit','offset');
+        if (!isset($since)) { $since = new DateTime('1970-01-01 00:00:00'); }
         if (!isset($tome_ids)) {
             // Not supplied - retrieve all accessible dictionaries
             $tomes = Tome::getAllForUser($user->id);
@@ -67,6 +68,7 @@ switch ($action) {
         
         $criteria = [];
         $criteria[] = ['tome_id','IN',$tome_ids];
+        $criteria[] = ['modified','>=',$since];
         if (!isset($limit)) { $limit = null; }
         if (!isset($offset)) { $offset = null; }
         $tome_entries = TomeEntry::find($criteria, ['tome_id','bare_letters','word'], $limit, $offset);

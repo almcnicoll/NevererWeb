@@ -14,7 +14,7 @@ namespace Dictionaries {
         public ?string $question = null;
         public bool $cryptic = true;
 
-        static string $tableName = "clues";
+        static string $tableName = "tome_clues";
         static $fields = ['id','tomeentry_id','user_id','question','cryptic','created','modified'];
 
         public static $defaultOrderBy = ['id'];
