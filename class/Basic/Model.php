@@ -275,6 +275,7 @@ namespace Basic {
                     }
                 } else {
                     $criteria_strings[] = "`{$field}` {$operator} ?";
+                    if ($value instanceof DateTime) { $value = $value->format('Y-m-d H:i:s'); } // Can't pass in as DateTime apparently
                     $criteria_values[] = $value;
                 }
             }
