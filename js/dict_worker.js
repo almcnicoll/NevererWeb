@@ -17,6 +17,17 @@ db.version(1).stores({
   entries: '++id, tome_id, word, user_id, date_added',
   sync_meta: 'key, last_sync'
 });
+db.version(2).stores({
+  tomes: 'id, name, source_type, source_format, writeable, user_id, last_updated',
+  entries: '++id, tome_id, word, bare_letters, user_id, date_added',
+  sync_meta: 'key, last_sync'
+}).upgrade(tx => {
+  return tx.table('entries').toCollection().modify(entry => {
+    if (entry.bare_letters === undefined) {
+      entry.bare_letters = TomeEntry.computeBareLetters(word); // Calculate bare_letters from word
+    }
+  });
+});
 
 // --- Utility Functions ---
 
@@ -75,17 +86,17 @@ self.onmessage = function (e) {
 
     startSync();
   } else if (msg.type === "lookupByRegex") {
-    const { regex, flags } = msg;
+    const { regex, flags, offset = 0, limit = Infinity } = msg;
 
     const pattern = new RegExp(regex, flags);
 
-    getAllMatchingEntries(pattern).then(matches => {
+    getAllMatchingEntries(pattern, offset, limit).then(matches => {
         self.postMessage({
             type: "regexResults",
             results: matches
         });
     });
-  }
+}
 };
 
 // --- Sync Process ---
@@ -179,6 +190,51 @@ async function getAllMatchingEntries(pattern) {
                 const entry = cursor.value;
                 if (pattern.test(entry.word)) {
                     results.push(entry);
+                }
+                cursor.continue();
+            } else {
+                resolve(results);
+            }
+        };
+
+        request.onerror = function (event) {
+            reject(event.target.error);
+        };
+    });
+}
+
+/**
+ * Queries all entries and filters them by regex on the 'word' field.
+ * Supports optional pagination.
+ * 
+ * @param {RegExp} pattern - Compiled regex to match against each word.
+ * @param {number} [offset=0] - Number of matching results to skip.
+ * @param {number} [limit=Infinity] - Maximum number of matching results to return.
+ * @returns {Promise<Array<Object>>} Matching entries.
+ */
+async function getAllMatchingEntries(pattern, offset = 0, limit = Infinity) {
+    /** @type {IDBObjectStore} */
+    const store = await getObjectStore("entries", "readonly");
+
+    return new Promise((resolve, reject) => {
+        const results = [];
+        let matchedCount = 0;
+
+        const request = store.openCursor();
+
+        request.onsuccess = function (event) {
+            const cursor = event.target.result;
+            if (cursor) {
+                const entry = cursor.value;
+                if (pattern.test(entry.word)) {
+                    if (matchedCount >= offset && results.length < limit) {
+                        results.push(entry);
+                    }
+                    matchedCount++;
+                    // Early exit if we've collected enough
+                    if (results.length >= limit) {
+                        return resolve(results);
+                    }
                 }
                 cursor.continue();
             } else {
