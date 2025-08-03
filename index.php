@@ -56,7 +56,7 @@ if(isset($_GET['params'])) {
 }
 $params = [];
 //LoggedError::log(LoggedError::TYPE_PHP, 2, __FILE__, __LINE__, "");
-error_log($_SERVER['REQUEST_URI'].' ==> '.$_SERVER['QUERY_STRING']);
+//error_log($_SERVER['REQUEST_URI'].' ==> '.$_SERVER['QUERY_STRING']);
 
 // Parse URL into a page with optional params
 if (count($page_parts)==0 || (empty($page_parts[0]))) {
