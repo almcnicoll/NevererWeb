@@ -74,6 +74,17 @@ self.onmessage = function (e) {
     */
 
     startSync();
+  } else if (msg.type === "lookupByRegex") {
+    const { regex, flags } = msg;
+
+    const pattern = new RegExp(regex, flags);
+
+    getAllMatchingEntries(pattern).then(matches => {
+        self.postMessage({
+            type: "regexResults",
+            results: matches
+        });
+    });
   }
 };
 
@@ -93,7 +104,7 @@ function startSync() {
     if (!success) return;
 
     /** @type {Array<Object>} */
-    const serverTomes = JSON.parse(payload);
+    const serverTomes = JSON.parse(payload); // TODO - allow for parse failures if e.g. error returned
     if (!(serverTomes instanceof Array || serverTomes instanceof Object)) { return; } // No Tomes
 	// Get all local tome IDs
     const localTomeIds = new Set((await db.tomes.toArray()).map(t => t.id));
@@ -126,7 +137,7 @@ function startSync() {
       if (!success) return;
 
       /** @type {Array<Object>} */
-      const newEntries = payload;
+      const newEntries = JSON.parse(payload); // TODO - allow for parse failures if e.g. error returned
 
       // Insert new/updated entries and record new sync time
       await db.transaction('rw', db.entries, db.sync_meta, async () => {
@@ -146,4 +157,37 @@ function startSync() {
       });
     });
   });
+}
+
+/**
+ * Queries all entries and filters them by regex on the 'word' field.
+ * 
+ * @param {RegExp} pattern - Compiled regex to match against each word.
+ * @returns {Promise<Array<Object>>} Matching entries.
+ */
+async function getAllMatchingEntries(pattern) {
+    /** @type {IDBObjectStore} */
+    const store = await getObjectStore("entries", "readonly");
+
+    return new Promise((resolve, reject) => {
+        const results = [];
+        const request = store.openCursor();
+
+        request.onsuccess = function (event) {
+            const cursor = event.target.result;
+            if (cursor) {
+                const entry = cursor.value;
+                if (pattern.test(entry.word)) {
+                    results.push(entry);
+                }
+                cursor.continue();
+            } else {
+                resolve(results);
+            }
+        };
+
+        request.onerror = function (event) {
+            reject(event.target.error);
+        };
+    });
 }
