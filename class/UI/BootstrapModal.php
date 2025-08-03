@@ -11,6 +11,7 @@ namespace UI {
         public mixed $footerButtons = [];
         public string $triggerType = 'button';
         public string $triggerHtml = '';
+        public ?string $sidebarHtml = null;
 
         /**
          * Creates the BootstrapModal object
@@ -71,6 +72,16 @@ namespace UI {
         }
 
         /**
+         * Sets the sidebar HTML for the modal
+         * @param string $sidebarHtml the HTML code (excluding containing tags, which will be set per the $triggerType field)
+         * @return BootstrapModal the object itself, to allow for chaining
+         */
+        function setSidebar(string $sidebarHtml) : BootstrapModal {
+            $this->sidebarHtml = $sidebarHtml;
+            return $this;
+        }
+
+        /**
          * Gets the HTML for the modal itself
          * @return string the HTML with correct substitutions made
          */
@@ -85,26 +96,59 @@ namespace UI {
                     $buttons .= "<button type='{$button['type']}' class='btn {$button['class']}' id='{$button_id}'>{$button['text']}</button>\n";
                 }
             }
+
+            if ($this->sidebarHtml == null) {
+                // Modal with no sidebar
             $html = <<<END_HTML
-        <div class="modal" id="{$this->id}" tabindex="-1" role="dialog" aria-labelledby="{$this->id}Label" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                <h5 class="modal-title" id="{$this->id}Label">{$this->titleHtml}</h5>
-                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-                </div>
-                <div class="modal-body">
-                    {$this->bodyHtml}
-                </div>
-                <div class="modal-footer">
-                    {$buttons}
-                </div>
+    <div class="modal" id="{$this->id}" tabindex="-1" role="dialog" aria-labelledby="{$this->id}Label" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="{$this->id}Label">{$this->titleHtml}</h5>
+            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
             </div>
+            <div class="modal-body">
+                {$this->bodyHtml}
+            </div>
+            <div class="modal-footer">
+                {$buttons}
             </div>
         </div>
-    END_HTML;
+        </div>
+    </div>
+END_HTML;
+            } else {
+                // Output modal with a sidebar
+            $html = <<<END_HTML
+    <div class="modal" id="{$this->id}" tabindex="-1" role="dialog" aria-labelledby="{$this->id}Label" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="{$this->id}Label">{$this->titleHtml}</h5>
+            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        {$this->bodyHtml}
+                    </div>
+                    <div class="col-md-8">
+                        {$this->sidebarHtml}
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                {$buttons}
+            </div>
+        </div>
+        </div>
+    </div>
+END_HTML;
+            }
             return $html;
         }
 

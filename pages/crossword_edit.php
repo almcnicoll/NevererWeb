@@ -69,7 +69,8 @@
     $modal_edit_clue = new UI\BootstrapModal('edit-clue');
     $modal_edit_clue->setTitle('Edit clue')
     ->setBody($form_edit_clue->getHtml())
-    ->setButtons("Save");
+    ->setButtons("Save")
+    ->setSidebar("<h3>TEST SIDEBAR</h3>");
     echo $modal_edit_clue->getMainHtml();
     
     $form_edit_settings = new UI\BootstrapForm('edit-settings');
