@@ -177,7 +177,7 @@ td.crossword-grid-square {
     padding: 4px;
     text-align: center;
     vertical-align: middle;
-    text-transform: capitalize;
+    text-transform: uppercase;
     font-weight: bold;
 }
 td.crossword-grid-square.ui-select {
@@ -216,6 +216,17 @@ tr.clue-orientation-header {
 }
 span.letter-holder {
     cursor: default;
+}
+
+/* Candidate word list */
+table.word-list {
+    text-transform: uppercase;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 125%;
+    text-align: center;
+}
+table.word-list td {
+    cursor: pointer;
 }
 
 /* Clue List */

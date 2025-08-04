@@ -123,7 +123,7 @@ END_HTML;
                 // Output modal with a sidebar
             $html = <<<END_HTML
     <div class="modal" id="{$this->id}" tabindex="-1" role="dialog" aria-labelledby="{$this->id}Label" aria-hidden="true">
-        <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
             <h5 class="modal-title" id="{$this->id}Label">{$this->titleHtml}</h5>
@@ -133,10 +133,10 @@ END_HTML;
             </div>
             <div class="modal-body">
                 <div class="row">
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         {$this->bodyHtml}
                     </div>
-                    <div class="col-md-8">
+                    <div class="col-md-6">
                         {$this->sidebarHtml}
                     </div>
                 </div>

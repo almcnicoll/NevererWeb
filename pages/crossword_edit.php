@@ -66,11 +66,80 @@
     $form_edit_clue->addField('pattern')->setLabel('')->setType('hidden');
     $form_edit_clue->addField('clue')->setLabel('Clue')->setDivClass('mb-3')->setClass('border-secondary'); /*->setHelp("The clue text")*/
     $form_edit_clue->addField('explanation')->setLabel('Explanation')->setClass('border-secondary'); /*->setHelp("An explanation of the working of the clue (optional, will not show on crossword output)")*/
+    $edit_clue_sidebar = <<<END_HTML
+<div class="container">
+<div class="row">
+<table class="table table-hover word-list">
+    <thead>
+        <tr class='table-dark'>
+            <th scope='col'>?O?S?M?????????</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>consimilarities</td>
+        </tr>
+        <tr>
+            <td>consumptiveness</td>
+        </tr>
+        <tr>
+            <td>consumptivities</td>
+        </tr>
+        <tr>
+            <td>housemistresses</td>
+        </tr>
+        <tr>
+            <td>nonsimultaneous</td>
+        </tr>
+        <tr>
+            <td>toastmistresses</td>
+        </tr>
+        <tr>
+            <td>consimilarities</td>
+        </tr>
+        <tr>
+            <td>consumptiveness</td>
+        </tr>
+        <tr>
+            <td>consumptivities</td>
+        </tr>
+        <tr>
+            <td>housemistresses</td>
+        </tr>
+        <tr>
+            <td>nonsimultaneous</td>
+        </tr>
+        <tr>
+            <td>toastmistresses</td>
+        </tr>
+        <tr>
+            <td>consimilarities</td>
+        </tr>
+        <tr>
+            <td>consumptiveness</td>
+        </tr>
+        <tr>
+            <td>consumptivities</td>
+        </tr>
+        <tr>
+            <td>housemistresses</td>
+        </tr>
+        <tr>
+            <td>nonsimultaneous</td>
+        </tr>
+        <tr>
+            <td>toastmistresses</td>
+        </tr>
+    </tbody>
+</table>
+</div>
+</div>
+END_HTML;
     $modal_edit_clue = new UI\BootstrapModal('edit-clue');
     $modal_edit_clue->setTitle('Edit clue')
     ->setBody($form_edit_clue->getHtml())
     ->setButtons("Save")
-    ->setSidebar("<h3>TEST SIDEBAR</h3>");
+    ->setSidebar($edit_clue_sidebar);
     echo $modal_edit_clue->getMainHtml();
     
     $form_edit_settings = new UI\BootstrapForm('edit-settings');
