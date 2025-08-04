@@ -72,65 +72,10 @@
 <table class="table table-hover word-list">
     <thead>
         <tr class='table-dark'>
-            <th scope='col'>?O?S?M?????????</th>
+            <th scope='col' id='edit-clue-suggested-words-pattern'></th>
         </tr>
     </thead>
-    <tbody>
-        <tr>
-            <td>consimilarities</td>
-        </tr>
-        <tr>
-            <td>consumptiveness</td>
-        </tr>
-        <tr>
-            <td>consumptivities</td>
-        </tr>
-        <tr>
-            <td>housemistresses</td>
-        </tr>
-        <tr>
-            <td>nonsimultaneous</td>
-        </tr>
-        <tr>
-            <td>toastmistresses</td>
-        </tr>
-        <tr>
-            <td>consimilarities</td>
-        </tr>
-        <tr>
-            <td>consumptiveness</td>
-        </tr>
-        <tr>
-            <td>consumptivities</td>
-        </tr>
-        <tr>
-            <td>housemistresses</td>
-        </tr>
-        <tr>
-            <td>nonsimultaneous</td>
-        </tr>
-        <tr>
-            <td>toastmistresses</td>
-        </tr>
-        <tr>
-            <td>consimilarities</td>
-        </tr>
-        <tr>
-            <td>consumptiveness</td>
-        </tr>
-        <tr>
-            <td>consumptivities</td>
-        </tr>
-        <tr>
-            <td>housemistresses</td>
-        </tr>
-        <tr>
-            <td>nonsimultaneous</td>
-        </tr>
-        <tr>
-            <td>toastmistresses</td>
-        </tr>
-    </tbody>
+    <tbody id='edit-clue-suggested-words-tbody'></tbody>
 </table>
 </div>
 </div>

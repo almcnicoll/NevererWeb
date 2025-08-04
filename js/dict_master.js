@@ -49,40 +49,52 @@ worker.onmessage = function (e) {
                 });
             }
         );
-    }
-};
-
-/**
- * Requests a list of words from the worker whose `word` property matches a given regex.
- * 
- * @param {RegExp} regex - Regular expression to match against the 'word' field.
- */
-function lookupWordsByRegex(regex) {
-    worker.postMessage({
-        type: 'lookupByRegex',
-        regex: regex.source,
-        flags: regex.flags
-    });
-}
-
-// Handle results from regex lookup
-worker.onmessage = function (e) {
-    const msg = e.data;
-
-    if (msg.type === "regexResults") {
+    } else if (msg.type === "regexResults") {
         /** @type {Array<Object>} */
         const matches = msg.results;
 
         console.log("Regex match results:", matches);
         // Do something useful here (e.g., render to UI)
     }
-
-    // Existing fetch handler
-    else if (msg.type === "fetch") {
-        // ... your existing AJAX handling logic ...
-    }
 };
 
+/**
+ * Takes a pattern in the form A?B??C?D and returns a regular expression for searching a word list
+ * @param {string} pattern the pattern to convert
+ * @param {boolean} bareLettersVersion should Regex be suitable for searching a bare-letters list, or one with spaces and punctuation?
+ * @returns RegExp the regular expression used to search
+ */
+function getRegexFromPattern(pattern, bareLettersVersion = true) {
+    if (bareLettersVersion) {
+        // This is the simple one
+        var rePattern = pattern.replace('?','.').toUpperCase();
+        return re = new RegExp(rePattern, 'i');
+    } else {
+        // This is the complex one
+        var rePattern = pattern.replace('?','.').toUpperCase();
+        var arr = rePattern.split('');
+        rePattern = arr.join("[\\s'-]*");
+        return re = new RegExp(rePattern, 'i');
+    }
+}
+
+/**
+ * Requests a list of words from the worker whose `word` property matches a given regex.
+ * 
+ * @param {RegExp} regex - Regular expression to match against the 'word' field.
+ * @param {string} destination - Where to output the results
+ * @param {string} format - What form to post the results (currently only table-row or text)
+ * @returns void
+ */
+function lookupWordsByRegex(regex, destination, format) {
+    worker.postMessage({
+        type: 'lookupByRegex',
+        regex: regex.source,
+        flags: regex.flags,
+        destination: destination,
+        format: format
+    });
+}
 
 /**
  * Initiates the sync process when the DOM is ready.

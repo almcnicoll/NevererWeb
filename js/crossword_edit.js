@@ -10,6 +10,8 @@ const FLAG_CONFLICT = 1;
 const FLAG_FEWMATCHES = 2;    
 const FLAG_NOMATCHES = 4;
 
+// TODO - Highlight clue in clue list when highlighted in grid
+
 //#region Utility methods
 /**
  * 
@@ -405,8 +407,10 @@ function populateEditForm(data) {
     $('#edit-clue input#edit-clue-col').val( pc.x );
     $('#edit-clue select#edit-clue-orientation').val(pc.orientation);
     $('#edit-clue input#edit-clue-answer').val(c.answer);
+    $('#edit-clue-suggested-words-pattern').text(c.answer);
     $('#edit-clue input#edit-clue-clue').val(c.question);
     $('#edit-clue input#edit-clue-explanation').val(c.explanation);
+    refreshSuggestedWordList('edit');
     // Symmetry clues message
     if (symClueTexts.length == 0) {
         $('#form-edit-clue-affected-clues-warning').hide();
@@ -540,6 +544,28 @@ function getAnswerPattern(answer) {
         pattern_parts[i] = answer_parts[i].length;
     }
     return '('+pattern_parts.join(',')+')';
+}
+
+/**
+ * Updates the suggested word list based on the pattern
+ * @param {string} context the modal context in which to refresh (new or edit) 
+ */
+function refreshSuggestedWordList(context) {
+    // Get pattern
+    var pattern = '';
+    switch (context) {
+        case 'new':
+            pattern = $('#new-clue input#new-clue-answer').val();
+            lookupWordsByRegex(getRegexFromPattern(pattern), '#new-clue-suggested-words-tbody', 'html');
+            break;
+        case 'edit':
+            pattern = $('#edit-clue input#edit-clue-answer').val();
+            lookupWordsByRegex(getRegexFromPattern(pattern), '#edit-clue-suggested-words-tbody', 'html');
+            break;
+        default:
+            throw new Exception("Invalid context '"+context+"' for refreshSuggestedWordList.")
+            break;
+    }
 }
 //#endregion
 

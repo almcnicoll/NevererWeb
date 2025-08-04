@@ -86,14 +86,16 @@ self.onmessage = function (e) {
 
     startSync();
   } else if (msg.type === "lookupByRegex") {
-    const { regex, flags, offset = 0, limit = Infinity } = msg;
+    const { regex, flags, destination, format, offset = 0, limit = Infinity } = msg;
 
     const pattern = new RegExp(regex, flags);
 
     getAllMatchingEntries(pattern, offset, limit).then(matches => {
         self.postMessage({
             type: "regexResults",
-            results: matches
+            results: matches,
+            destination: destination,
+            format: format
         });
     });
 }
