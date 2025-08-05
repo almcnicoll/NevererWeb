@@ -67,11 +67,11 @@ worker.onmessage = function (e) {
 function getRegexFromPattern(pattern, bareLettersVersion = true) {
     if (bareLettersVersion) {
         // This is the simple one
-        var rePattern = pattern.replace('?','.').toUpperCase();
+        var rePattern = pattern.replaceAll('?','.').toUpperCase();
         return re = new RegExp(rePattern, 'i');
     } else {
         // This is the complex one
-        var rePattern = pattern.replace('?','.').toUpperCase();
+        var rePattern = pattern.replaceAll('?','.').toUpperCase();
         var arr = rePattern.split('');
         rePattern = arr.join("[\\s'-]*");
         return re = new RegExp(rePattern, 'i');
