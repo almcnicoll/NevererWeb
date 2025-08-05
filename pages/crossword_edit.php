@@ -1,5 +1,6 @@
 <?php
     use Crosswords\Crossword, Crosswords\PlacedClue, UI\DisplayMessage;
+    //TODO - HIGH Make clue and explanation fields clear / load when doing new / edit clue
 
     $fatal_error = false;
 
