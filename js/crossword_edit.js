@@ -556,11 +556,11 @@ function refreshSuggestedWordList(context) {
     switch (context) {
         case 'new':
             pattern = $('#new-clue input#new-clue-answer').val();
-            lookupWordsByRegex(getRegexFromPattern(pattern), '#new-clue-suggested-words-tbody', 'html');
+            lookupWordsByRegex(getRegexFromPattern(pattern), pattern.length, '#new-clue-suggested-words-tbody', 'html');
             break;
         case 'edit':
             pattern = $('#edit-clue input#edit-clue-answer').val();
-            lookupWordsByRegex(getRegexFromPattern(pattern), '#edit-clue-suggested-words-tbody', 'html');
+            lookupWordsByRegex(getRegexFromPattern(pattern), pattern.length, '#edit-clue-suggested-words-tbody', 'html');
             break;
         default:
             throw new Exception("Invalid context '"+context+"' for refreshSuggestedWordList.")

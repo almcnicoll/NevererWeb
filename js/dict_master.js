@@ -54,7 +54,7 @@ worker.onmessage = function (e) {
         const matches = msg.results;
 
         console.log("Regex match results:", matches);
-        // Do something useful here (e.g., render to UI)
+        // TODO - HIGH output the results in the specified format to the specified destination
     }
 };
 
@@ -86,11 +86,12 @@ function getRegexFromPattern(pattern, bareLettersVersion = true) {
  * @param {string} format - What form to post the results (currently only table-row or text)
  * @returns void
  */
-function lookupWordsByRegex(regex, destination, format) {
+function lookupWordsByRegex(regex, length, destination, format) {
     worker.postMessage({
         type: 'lookupByRegex',
         regex: regex.source,
         flags: regex.flags,
+        length: length,
         destination: destination,
         format: format
     });

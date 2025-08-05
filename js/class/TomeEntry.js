@@ -18,7 +18,9 @@ class TomeEntry {
     /** @type {string} */
     this.word = word;
     /** @type {string|null} */
-    this.bare_letters = obj.bare_letters || TomeEntry.computeBareLetters(obj.word);
+    this.bare_letters = bare_letters || TomeEntry.computeBareLetters(word);
+    /** @type {number} */
+    this.length = bare_letters.length;
     /** @type {number} */
     this.user_id = user_id;
     /** @type {Date} */

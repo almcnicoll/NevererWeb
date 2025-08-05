@@ -28,6 +28,24 @@ db.version(2).stores({
     }
   });
 });
+// Upgrade path: version 3 adds `length` index to entries
+db.version(3)
+  .stores({
+    tomes: 'id, name, source_type, source_format, writeable, user_id, last_updated',
+    // Index `length` so we can efficiently filter by it
+    entries: '++id, tome_id, word, bare_letters, user_id, date_added, length',
+    sync_meta: 'key, last_sync'
+  })
+  .upgrade(async tx => {
+    // Populate length for existing entries if missing
+    const all = await tx.table('entries').toArray();
+    for (const entry of all) {
+      if (entry.length === undefined || entry.length === null) {
+        const computedLength = entry.bare_letters ? entry.bare_letters.length : 0;
+        await tx.table('entries').update(entry.id, { length: computedLength });
+      }
+    }
+  });
 
 // --- Utility Functions ---
 
@@ -86,11 +104,11 @@ self.onmessage = function (e) {
 
     startSync();
   } else if (msg.type === "lookupByRegex") {
-    const { regex, flags, destination, format, offset = 0, limit = Infinity } = msg;
+    const { regex, flags, destination, format, length, offset = 0, limit = Infinity } = msg;
 
     const pattern = new RegExp(regex, flags);
 
-    getAllMatchingEntries(pattern, offset, limit).then(matches => {
+    getAllMatchingEntries(pattern, length, offset, limit).then(matches => {
         self.postMessage({
             type: "regexResults",
             results: matches,
@@ -172,25 +190,35 @@ function startSync() {
   });
 }
 
+// TODO - HIGH need some efficiency savers here!
+// Suggest immediate win of adding a length field, which is calculated at storage time (ie not in online database)
+// We can then filter on that before doing any each() looping...
+// TODO - HIGH don't call this for patterns with no fixed letters!
+
+
 /**
- * Queries entries and filters them by regex on the 'word' field, with pagination.
- * Efficiently iterates entry-by-entry, collecting only the requested window while
- * optionally also counting the total number of matches.
+ * Queries entries matching a given length and regex on the 'word' field, with pagination.
+ * Efficiently restricts by length first (using index), then tests regex, optionally computing total matches.
  * 
  * @param {RegExp} pattern - Compiled regex to test against each entry's `word`.
+ * @param {number|null} lengthFilter - If provided, only entries with this `.length` are considered.
  * @param {number} [offset=0] - Number of matching results to skip before collecting.
  * @param {number} [limit=Infinity] - Maximum number of matching results to return.
- * @param {boolean} [computeTotal=true] - Whether to compute the total match count.
- * @returns {Promise<{ results: Array<Object>, totalMatches: number | null }>} 
- *          Object containing the paginated results and totalMatches (or null if skipped).
+ * @param {boolean} [computeTotal=true] - Whether to compute the total match count (ignoring pagination).
+ * @returns {Promise<{ results: Array<Object>, totalMatches: number | null }>} Paginated matches and total.
  */
-async function getAllMatchingEntries(pattern, offset = 0, limit = Infinity, computeTotal = true) {
+async function getAllMatchingEntries(pattern, lengthFilter = null, offset = 0, limit = Infinity, computeTotal = true) {
   const results = [];
-  let matchedCount = 0;      // Count of matches seen so far (for offset/limit logic)
+  let matchedCount = 0;      // Count of matches seen so far for offset logic
   let totalMatches = 0;     // Overall matches if computeTotal is true
 
-  // Iterate over entries one by one. Dexie's each() lets us break early by returning false.
-  await db.entries.each(entry => {
+  // Use a collection prefiltered by length if lengthFilter is specified, else all entries
+  let collection = lengthFilter !== null
+    ? db.entries.where('length').equals(lengthFilter)
+    : db.entries;
+
+  // Iterate efficiently
+  await collection.each(entry => {
     if (pattern.test(entry.word)) {
       // Always increment totalMatches if requested
       if (computeTotal) {
