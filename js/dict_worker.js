@@ -174,31 +174,49 @@ function startSync() {
 
 /**
  * Queries entries and filters them by regex on the 'word' field, with pagination.
- * This implementation is memory-efficient: it does not build the full match set,
- * but iterates until it has collected `limit` items after skipping `offset`.
+ * Efficiently iterates entry-by-entry, collecting only the requested window while
+ * optionally also counting the total number of matches.
  * 
  * @param {RegExp} pattern - Compiled regex to test against each entry's `word`.
  * @param {number} [offset=0] - Number of matching results to skip before collecting.
  * @param {number} [limit=Infinity] - Maximum number of matching results to return.
- * @returns {Promise<Array<Object>>} Matching entries (up to `limit` after `offset`).
+ * @param {boolean} [computeTotal=true] - Whether to compute the total match count.
+ * @returns {Promise<{ results: Array<Object>, totalMatches: number | null }>} 
+ *          Object containing the paginated results and totalMatches (or null if skipped).
  */
-async function getAllMatchingEntries(pattern, offset = 0, limit = Infinity) {
+async function getAllMatchingEntries(pattern, offset = 0, limit = Infinity, computeTotal = true) {
   const results = [];
-  let matchedCount = 0;
+  let matchedCount = 0;      // Count of matches seen so far (for offset/limit logic)
+  let totalMatches = 0;     // Overall matches if computeTotal is true
 
-  // Dexie's each() will iterate entry-by-entry and can be stopped early by returning false.
+  // Iterate over entries one by one. Dexie's each() lets us break early by returning false.
   await db.entries.each(entry => {
     if (pattern.test(entry.word)) {
+      // Always increment totalMatches if requested
+      if (computeTotal) {
+        totalMatches++;
+      }
+
+      // If we've skipped enough for offset, start collecting into results
       if (matchedCount >= offset) {
-        results.push(entry);
-        if (results.length >= limit) {
-          return false; // stop iteration early
+        if (results.length < limit) {
+          results.push(entry);
         }
       }
+
       matchedCount++;
+
+      // If we are not required to compute totalMatches and have enough results, we can stop early
+      if (!computeTotal && results.length >= limit) {
+        return false; // stops iteration
+      }
     }
-    // continue iteration
+    // Continue iteration
   });
 
-  return results;
+  // If computeTotal was false, we don't know total matches: set to null
+  return {
+    results,
+    totalMatches: computeTotal ? totalMatches : null
+  };
 }
