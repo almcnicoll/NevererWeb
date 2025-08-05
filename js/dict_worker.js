@@ -173,22 +173,32 @@ function startSync() {
 }
 
 /**
- * Queries all entries and filters them by regex on the 'word' field.
- * Supports optional pagination.
+ * Queries entries and filters them by regex on the 'word' field, with pagination.
+ * This implementation is memory-efficient: it does not build the full match set,
+ * but iterates until it has collected `limit` items after skipping `offset`.
  * 
- * @param {RegExp} pattern - Compiled regex to match against each word.
- * @param {number} [offset=0] - Number of matching results to skip.
+ * @param {RegExp} pattern - Compiled regex to test against each entry's `word`.
+ * @param {number} [offset=0] - Number of matching results to skip before collecting.
  * @param {number} [limit=Infinity] - Maximum number of matching results to return.
- * @returns {Promise<Array<Object>>} Matching entries.
+ * @returns {Promise<Array<Object>>} Matching entries (up to `limit` after `offset`).
  */
 async function getAllMatchingEntries(pattern, offset = 0, limit = Infinity) {
-  // Use Dexie to filter entries in memory.
-  // Dexie does not support regex in indexes directly,
-  // so we use .filter which iterates but keeps the API consistent.
-  const filtered = await db.entries
-    .filter(entry => pattern.test(entry.word))
-    .toArray();
+  const results = [];
+  let matchedCount = 0;
 
-  // Apply pagination on the filtered results
-  return filtered.slice(offset, offset + limit);
+  // Dexie's each() will iterate entry-by-entry and can be stopped early by returning false.
+  await db.entries.each(entry => {
+    if (pattern.test(entry.word)) {
+      if (matchedCount >= offset) {
+        results.push(entry);
+        if (results.length >= limit) {
+          return false; // stop iteration early
+        }
+      }
+      matchedCount++;
+    }
+    // continue iteration
+  });
+
+  return results;
 }
