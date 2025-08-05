@@ -674,6 +674,8 @@ function gridSquareMenuClickHandler(eventObject) {
             $('#new-clue input#new-clue-col').val( $('#context-menu-menu-grid-square').data('trigger-col') );
             $('#new-clue select#new-clue-orientation').val('across');
             new bootstrap.Modal('#new-clue').toggle();
+            $('#new-clue #new-clue-clue').val('');
+            $('#new-clue #new-clue-explanation').val('');
             $('#new-clue #new-clue-answer').trigger('focus').val('');
             break;
         case 'menu-grid-square-new-clue-down':
@@ -681,6 +683,8 @@ function gridSquareMenuClickHandler(eventObject) {
             $('#new-clue input#new-clue-col').val( $('#context-menu-menu-grid-square').data('trigger-col') );
             $('#new-clue select#new-clue-orientation').val('down');
             new bootstrap.Modal('#new-clue').toggle();
+            $('#new-clue #new-clue-clue').val('');
+            $('#new-clue #new-clue-explanation').val('');
             $('#new-clue #new-clue-answer').trigger('focus').val('');
             break;
         case 'menu-grid-square-edit-clue-across':
