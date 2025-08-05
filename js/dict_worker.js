@@ -174,39 +174,6 @@ function startSync() {
 
 /**
  * Queries all entries and filters them by regex on the 'word' field.
- * 
- * @param {RegExp} pattern - Compiled regex to match against each word.
- * @returns {Promise<Array<Object>>} Matching entries.
- */
-async function getAllMatchingEntries(pattern) {
-    /** @type {IDBObjectStore} */
-    const store = await getObjectStore("entries", "readonly");
-
-    return new Promise((resolve, reject) => {
-        const results = [];
-        const request = store.openCursor();
-
-        request.onsuccess = function (event) {
-            const cursor = event.target.result;
-            if (cursor) {
-                const entry = cursor.value;
-                if (pattern.test(entry.word)) {
-                    results.push(entry);
-                }
-                cursor.continue();
-            } else {
-                resolve(results);
-            }
-        };
-
-        request.onerror = function (event) {
-            reject(event.target.error);
-        };
-    });
-}
-
-/**
- * Queries all entries and filters them by regex on the 'word' field.
  * Supports optional pagination.
  * 
  * @param {RegExp} pattern - Compiled regex to match against each word.
@@ -215,37 +182,13 @@ async function getAllMatchingEntries(pattern) {
  * @returns {Promise<Array<Object>>} Matching entries.
  */
 async function getAllMatchingEntries(pattern, offset = 0, limit = Infinity) {
-    /** @type {IDBObjectStore} */
-    const store = await getObjectStore("entries", "readonly");
+  // Use Dexie to filter entries in memory.
+  // Dexie does not support regex in indexes directly,
+  // so we use .filter which iterates but keeps the API consistent.
+  const filtered = await db.entries
+    .filter(entry => pattern.test(entry.word))
+    .toArray();
 
-    return new Promise((resolve, reject) => {
-        const results = [];
-        let matchedCount = 0;
-
-        const request = store.openCursor();
-
-        request.onsuccess = function (event) {
-            const cursor = event.target.result;
-            if (cursor) {
-                const entry = cursor.value;
-                if (pattern.test(entry.word)) {
-                    if (matchedCount >= offset && results.length < limit) {
-                        results.push(entry);
-                    }
-                    matchedCount++;
-                    // Early exit if we've collected enough
-                    if (results.length >= limit) {
-                        return resolve(results);
-                    }
-                }
-                cursor.continue();
-            } else {
-                resolve(results);
-            }
-        };
-
-        request.onerror = function (event) {
-            reject(event.target.error);
-        };
-    });
+  // Apply pagination on the filtered results
+  return filtered.slice(offset, offset + limit);
 }
