@@ -52,9 +52,23 @@ worker.onmessage = function (e) {
     } else if (msg.type === "regexResults") {
         /** @type {Array<Object>} */
         const matches = msg.results;
+        const totalMatches = msg.totalMatches;
+        console.log("Regex match results ("+msg.offset+"-"+(msg.offset+msg.limit)+"/"+totalMatches+"):", matches);
 
-        console.log("Regex match results:", matches);
-        // TODO - HIGH output the results in the specified format to the specified destination
+        /** @type {string} */
+        var output = '';
+        switch (msg.format) {
+            case 'table-row':
+                output = "<tr><td>"+matches.toArray().join("</td></tr>\n<tr><td>")+"</td></tr>";
+                break;
+            case 'text':
+                output = matches.join("\n");
+                break;
+            case 'default':
+                throw new Exception("Invalid format "+msg.format+" specified.");
+        }
+
+        $(msg.destination).html(output); // Works fine if it's plain text too
     }
 };
 
@@ -82,7 +96,7 @@ function getRegexFromPattern(pattern, bareLettersVersion = true) {
  * Requests a list of words from the worker whose `word` property matches a given regex.
  * 
  * @param {RegExp} regex - Regular expression to match against the 'word' field.
- * @param {string} destination - Where to output the results
+ * @param {string} destination - Where to output the results (a jQuery query string)
  * @param {string} format - What form to post the results (currently only table-row or text)
  * @returns void
  */

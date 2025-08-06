@@ -46,6 +46,14 @@ db.version(3)
       }
     }
   });
+  // Upgrade path: version 4 removes unnecessary indices from entries
+  db.version(4)
+  .stores({
+    tomes: 'id, name, source_type, source_format, writeable, user_id, last_updated',
+    // Index `length` so we can efficiently filter by it
+    entries: '++id, tome_id, bare_letters, length',
+    sync_meta: 'key, last_sync'
+  });
 
 // --- Utility Functions ---
 
@@ -112,6 +120,8 @@ self.onmessage = function (e) {
         self.postMessage({
             type: "regexResults",
             results: matches,
+            offset: offset,
+            limit: limit,
             destination: destination,
             format: format
         });
@@ -190,12 +200,8 @@ function startSync() {
   });
 }
 
-// TODO - HIGH need some efficiency savers here!
-// Suggest immediate win of adding a length field, which is calculated at storage time (ie not in online database)
-// We can then filter on that before doing any each() looping...
+
 // TODO - HIGH don't call this for patterns with no fixed letters!
-
-
 /**
  * Queries entries matching a given length and regex on the 'word' field, with pagination.
  * Efficiently restricts by length first (using index), then tests regex, optionally computing total matches.
@@ -216,10 +222,13 @@ async function getAllMatchingEntries(pattern, lengthFilter = null, offset = 0, l
   let collection = lengthFilter !== null
     ? db.entries.where('length').equals(lengthFilter)
     : db.entries;
+  /*collection.count().then(count => {
+    console.log("Cut dictionary down to "+count+" entries before Regex search.");
+  });*/
 
-  // Iterate efficiently
+  // Iterate more efficiently
   await collection.each(entry => {
-    if (pattern.test(entry.word)) {
+    if (pattern.test(entry.bare_letters)) {
       // Always increment totalMatches if requested
       if (computeTotal) {
         totalMatches++;
