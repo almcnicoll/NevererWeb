@@ -54,6 +54,21 @@ db.version(3)
     entries: '++id, tome_id, bare_letters, length',
     sync_meta: 'key, last_sync'
   });
+  // Upgrade path: version 5 re-populates `length` where missing
+  db.version(5)
+  .stores({
+    tomes: 'id, name, source_type, source_format, writeable, user_id, last_updated',
+    entries: '++id, tome_id, word, bare_letters, user_id, date_added, length',
+    sync_meta: 'key, last_sync'
+  })
+  .upgrade(async tx => {
+    const entries = tx.table('entries');
+    const allMissing = await entries.filter(e => !e.length && e.length !== 0).toArray();
+    for (const entry of allMissing) {
+      const computedLength = entry.bare_letters ? entry.bare_letters.length : 0;
+      await entries.update(entry.id, { length: computedLength });
+    }
+  });
 
 // --- Utility Functions ---
 
@@ -100,16 +115,6 @@ self.onmessage = function (e) {
   const msg = e.data;
   if (msg.type === 'startSync') {
     self.root_path = msg.root_path;
-
-    /*
-    // Optional: dynamically load class definitions if needed in future
-    if (!self.librariesLoaded) {
-        importScripts('~ROOT~/js/class/Tome.js');
-        importScripts('~ROOT~/js/class/TomeEntry.js');
-        self.librariesLoaded = true;
-    }
-    */
-
     startSync();
   } else if (msg.type === "lookupByRegex") {
     const { regex, flags, destination, format, length, offset = 0, limit = Infinity } = msg;
@@ -130,7 +135,7 @@ self.onmessage = function (e) {
 };
 
 // --- Sync Process ---
-
+// TODO - HIGH see latest suggestion that uses bulk data methods
 /**
  * Starts the sync process by fetching Tomes and entries from the server
  * and updating the local IndexedDB cache accordingly.
@@ -203,57 +208,26 @@ function startSync() {
 
 // TODO - HIGH don't call this for patterns with no fixed letters!
 /**
- * Queries entries matching a given length and regex on the 'word' field, with pagination.
- * Efficiently restricts by length first (using index), then tests regex, optionally computing total matches.
- * 
- * @param {RegExp} pattern - Compiled regex to test against each entry's `word`.
- * @param {number|null} lengthFilter - If provided, only entries with this `.length` are considered.
- * @param {number} [offset=0] - Number of matching results to skip before collecting.
- * @param {number} [limit=Infinity] - Maximum number of matching results to return.
- * @param {boolean} [computeTotal=true] - Whether to compute the total match count (ignoring pagination).
- * @returns {Promise<{ results: Array<Object>, totalMatches: number | null }>} Paginated matches and total.
+ * Queries entries with a specific length and filters them by regex on the 'word' field.
+ *
+ * @param {RegExp} pattern - Compiled regex to match against each word.
+ * @param {number} length - Word length to pre-filter with indexed search.
+ * @param {number} [offset=0] - Number of entries to skip (pagination).
+ * @param {number} [limit=50] - Max number of matching entries to return.
+ * @returns {Promise<{ results: Array<Object>, total: number }>}
  */
-async function getAllMatchingEntries(pattern, lengthFilter = null, offset = 0, limit = Infinity, computeTotal = true) {
-  const results = [];
-  let matchedCount = 0;      // Count of matches seen so far for offset logic
-  let totalMatches = 0;     // Overall matches if computeTotal is true
+async function getAllMatchingEntries(pattern, length, offset = 0, limit = 50) {
+    // Step 1: Narrow the query using indexed `length`
+    const entries = await db.entries.where("length").equals(length).toArray();
 
-  // Use a collection prefiltered by length if lengthFilter is specified, else all entries
-  let collection = lengthFilter !== null
-    ? db.entries.where('length').equals(lengthFilter)
-    : db.entries;
-  /*collection.count().then(count => {
-    console.log("Cut dictionary down to "+count+" entries before Regex search.");
-  });*/
+    // Step 2: Filter using RegExp in memory
+    const filtered = entries.filter(entry => pattern.test(entry.bare_letters));
 
-  // Iterate more efficiently
-  await collection.each(entry => {
-    if (pattern.test(entry.bare_letters)) {
-      // Always increment totalMatches if requested
-      if (computeTotal) {
-        totalMatches++;
-      }
+    // Step 3: Paginate
+    const paged = filtered.slice(offset, offset + limit);
 
-      // If we've skipped enough for offset, start collecting into results
-      if (matchedCount >= offset) {
-        if (results.length < limit) {
-          results.push(entry);
-        }
-      }
-
-      matchedCount++;
-
-      // If we are not required to compute totalMatches and have enough results, we can stop early
-      if (!computeTotal && results.length >= limit) {
-        return false; // stops iteration
-      }
-    }
-    // Continue iteration
-  });
-
-  // If computeTotal was false, we don't know total matches: set to null
-  return {
-    results,
-    totalMatches: computeTotal ? totalMatches : null
-  };
+    return {
+        results: paged,
+        total: filtered.length // total *matched* count, not total in DB
+    };
 }
