@@ -138,7 +138,7 @@ self.onmessage = function (e) {
 // TODO - HIGH see latest suggestion that uses bulk data methods
 /**
  * Starts the sync process by fetching Tomes and entries from the server
- * and updating the local IndexedDB cache accordingly.
+ * and updating the local IndexedDB cache accordingly using bulk operations.
  */
 function startSync() {
   /** @type {{ url: string }} */
@@ -149,28 +149,40 @@ function startSync() {
   fetchFromServer('get', data, async (success, payload) => {
     if (!success) return;
 
-    /** @type {Array<Object>} */
-    const serverTomes = JSON.parse(payload); // TODO - allow for parse failures if e.g. error returned
-    if (!(serverTomes instanceof Array || serverTomes instanceof Object)) { return; } // No Tomes
-	// Get all local tome IDs
-    const localTomeIds = new Set((await db.tomes.toArray()).map(t => t.id));
-    // Extract server tome IDs
+    let serverTomes;
+    try {
+      serverTomes = JSON.parse(payload);
+    } catch (e) {
+      console.error("Failed to parse Tomes payload:", e);
+      return;
+    }
+
+    if (!Array.isArray(serverTomes)) return;
+
     const serverTomeIds = new Set(serverTomes.map(t => t.id));
+    const localTomes = await db.tomes.toArray();
+    const localTomeIds = new Set(localTomes.map(t => t.id));
+
+    // Identify obsolete tome IDs
+    const obsoleteTomeIds = [...localTomeIds].filter(id => !serverTomeIds.has(id));
 
     // Update tomes and remove obsolete ones
     await db.transaction('rw', db.tomes, db.entries, async () => {
-      for (const tome of serverTomes) {
-        await db.tomes.put(tome); // Insert or update
-      }
-      for (const localId of localTomeIds) {
-        if (!serverTomeIds.has(localId)) {
-          await db.tomes.delete(localId);
-          await db.entries.where('tome_id').equals(localId).delete(); // Clean up orphan entries
+      // Bulk insert/update tomes
+      await db.tomes.bulkPut(serverTomes);
+
+      // Bulk delete tomes and their entries that are no longer on the server
+      if (obsoleteTomeIds.length > 0) {
+        await db.tomes.bulkDelete(obsoleteTomeIds);
+
+        // Delete associated entries
+        for (const id of obsoleteTomeIds) {
+          await db.entries.where('tome_id').equals(id).delete(); // can't bulkDelete on compound index
         }
       }
     });
 
-    // Fetch new or updated entries since the last sync
+    // Fetch new/updated entries
     const lastSync = (await db.sync_meta.get('entries'))?.last_sync ?? '1970-01-01T00:00:00Z';
 
     data = {
@@ -182,20 +194,40 @@ function startSync() {
     fetchFromServer('get', data, async (success, payload) => {
       if (!success) return;
 
-      /** @type {Array<Object>} */
-      const newEntries = JSON.parse(payload); // TODO - allow for parse failures if e.g. error returned
+      let newEntries;
+      try {
+        newEntries = JSON.parse(payload);
+      } catch (e) {
+        console.error("Failed to parse entries payload:", e);
+        return;
+      }
 
-      // Insert new/updated entries and record new sync time
-      await db.transaction('rw', db.entries, db.sync_meta, async () => {
+      if (!Array.isArray(newEntries)) return;
+
+      // Separate deletions and additions
+      const entriesToDelete = [];
+      const entriesToPut = [];
+
         for (const entry of newEntries) {
           if (entry.date_deleted) {
-            await db.entries.where('[tome_id+word]').equals([entry.tome_id, entry.word]).delete();
+          entriesToDelete.push([entry.tome_id, entry.word]);
           } else {
-            await db.entries.put(entry);
+          entriesToPut.push(entry);
+        }
+      }
+
+      await db.transaction('rw', db.entries, db.sync_meta, async () => {
+        // Delete matching entries by [tome_id + word] — can't bulk delete compound index directly
+        for (const [tome_id, word] of entriesToDelete) {
+          await db.entries.where('[tome_id+word]').equals([tome_id, word]).delete();
           }
+
+        // Bulk insert/update new or changed entries
+        if (entriesToPut.length > 0) {
+          await db.entries.bulkPut(entriesToPut);
         }
 
-        // Update the last sync timestamp
+        // Update sync metadata
         await db.sync_meta.put({
           key: 'entries',
           last_sync: new Date().toISOString()
@@ -203,6 +235,10 @@ function startSync() {
       });
     });
   });
+
+  // Tell the main thread that our sync is complete
+  var msgId = generateId();
+  self.postMessage({ type: 'syncComplete', msgId });
 }
 
 

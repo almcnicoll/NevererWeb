@@ -14,6 +14,9 @@ var worker_path = "~ROOT~/js/dict_worker.js";
 /** @type {Worker} WebWorker instance for background sync and IndexedDB operations. */
 const worker = new Worker(worker_path);
 
+/** @type {boolean} Tracks whether the dictionary sync has completed */
+var dictionary_sync_complete = false;
+
 /**
  * Handles messages received from the worker thread.
  * If the worker requests a fetch, this makes an AJAX call and sends the result back.

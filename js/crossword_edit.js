@@ -551,17 +551,31 @@ function getAnswerPattern(answer) {
  * @param {string} context the modal context in which to refresh (new or edit) 
  */
 function refreshSuggestedWordList(context) {
-    // Get pattern
+    /** @type {string} */
     var pattern = '';
+
+    // Handle according to where/how it was called
     switch (context) {
         case 'new':
-            pattern = $('#new-clue input#new-clue-answer').val();
-            lookupWordsByRegex(getRegexFromPattern(pattern), pattern.length, '#new-clue-suggested-words-tbody', 'table-row');
-            break;
+            // Handle possibility of dictionary sync not yet being complete
+            if (!dictionary_sync_complete) {
+                $('#new-clue-suggested-words-tbody').html('<h5>Dictionary still syncing from server</h5>');
+                return;
+            } else {
+                pattern = $('#new-clue input#new-clue-answer').val();
+                lookupWordsByRegex(getRegexFromPattern(pattern), pattern.length, '#new-clue-suggested-words-tbody', 'table-row');
+                break;
+            }
         case 'edit':
-            pattern = $('#edit-clue input#edit-clue-answer').val();
-            lookupWordsByRegex(getRegexFromPattern(pattern), pattern.length, '#edit-clue-suggested-words-tbody', 'table-row');
-            break;
+            // Handle possibility of dictionary sync not yet being complete
+            if (!dictionary_sync_complete) {
+                $('#edit-clue-suggested-words-tbody').html('<h5>Dictionary still syncing from server</h5>');
+                return;
+            } else {
+                pattern = $('#edit-clue input#edit-clue-answer').val();
+                lookupWordsByRegex(getRegexFromPattern(pattern), pattern.length, '#edit-clue-suggested-words-tbody', 'table-row');
+                break;
+            }
         default:
             throw new Exception("Invalid context '"+context+"' for refreshSuggestedWordList.")
             break;

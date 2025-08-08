@@ -248,3 +248,7 @@ ALTER TABLE `tome_clues`
 /* VERSION 18 */
 CREATE INDEX `filter`
 ON `tome_entries` (tome_id, modified);
+/* UPDATE */
+/* VERSION 19 */
+CREATE INDEX `filter2`
+ON `tome_entries` (modified, tome_id, bare_letters, word);

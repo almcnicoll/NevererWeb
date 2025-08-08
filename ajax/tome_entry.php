@@ -71,7 +71,7 @@ switch ($action) {
         $criteria[] = ['modified','>=',$since];
         if (!isset($limit)) { $limit = null; }
         if (!isset($offset)) { $offset = null; }
-        $tome_entries = TomeEntry::find($criteria, ['tome_id','bare_letters','word'], $limit, $offset);
+        $tome_entries = TomeEntry::find($criteria, ['modified','tome_id','bare_letters','word'], $limit, $offset);
         die(json_encode($tome_entries));
     case 'create':
         // TODO - not implemented yet
