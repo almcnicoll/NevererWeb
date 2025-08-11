@@ -210,7 +210,7 @@ function startSync() {
     // const lastSync = (await db.sync_meta.get('entries'))?.last_sync ?? '1970-01-01T00:00:00Z';
     const meta = (await db.sync_meta.get("entries")) || {};
     const lastSync = meta.last_sync || "1970-01-01T00:00:00Z";
-    const lastOffset = meta.lastOffset || 0;
+    const lastOffset = meta.lastOffset || 0; // Could be null if it's our first sync or if our last sync completed all rows
 
     data = {
       url: "tome_entry/*/list",
@@ -223,9 +223,13 @@ function startSync() {
     fetchFromServer("get", data, async (success, payload) => {
       if (!success) return;
 
+      let ajaxData;
       let newEntries;
+      let nextOffset;
       try {
-        newEntries = JSON.parse(payload);
+        ajaxData = JSON.parse(payload);
+        newEntries = ajaxData.entries;
+        nextOffset = ajaxData.nextOffset;
       } catch (e) {
         console.error("Failed to parse entries payload:", e);
         return;
@@ -263,7 +267,7 @@ function startSync() {
         await db.sync_meta.put({
           key: "entries",
           last_sync: new Date().toISOString(),
-          last_offset: lastOffset + SyncLimit, // TODO - HIGH need to retrieve this from the ajax call instead, along with whether there's more
+          last_offset: nextOffset,
         });
       });
     });

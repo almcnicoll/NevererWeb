@@ -71,8 +71,19 @@ switch ($action) {
         $criteria[] = ['modified','>=',$since];
         if (!isset($limit)) { $limit = null; }
         if (!isset($offset)) { $offset = null; }
+        // Return entries
         $tome_entries = TomeEntry::find($criteria, ['modified','tome_id','bare_letters','word'], $limit, $offset);
-        die(json_encode($tome_entries));
+        // Also return whether there are more entries to process - more reliable than checking if row count smaller than limit
+        $more_entries = TomeEntry::find($criteria, ['modified','tome_id','bare_letters','word'], 1, $offset+$limit);
+        $return_value = [
+            'entries' => $tome_entries,
+            'nextOffset' => (
+                (count($more_entries)>0) ?
+                $offset+$limit: // Next offset to try
+                null // No more rows
+            )
+        ];
+        die(json_encode($return_value));
     case 'create':
         // TODO - not implemented yet
         die("Not implemented");
