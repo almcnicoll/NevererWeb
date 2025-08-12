@@ -122,7 +122,7 @@ if (file_exists('sql/db-updates.sql')) {
             pre_die("Unable to start a transaction at version #{$v}.");
         }
         try {
-        $pdo->exec($sql);
+            $pdo->exec($sql);
         } catch (Exception $e) {
             pre_die("Error running SQL for version #{$v}.",
                     "You will need to check that the database is in a valid state.",

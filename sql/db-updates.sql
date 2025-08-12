@@ -252,3 +252,91 @@ ON `tome_entries` (tome_id, modified);
 /* VERSION 19 */
 CREATE INDEX `filter2`
 ON `tome_entries` (modified, tome_id, bare_letters, word);
+/* UPDATE */
+/* VERSION 20 */
+ALTER TABLE `tome_entries`
+ADD COLUMN `length` TINYINT(2) UNSIGNED NULL,
+ADD COLUMN `a` TINYINT(2) UNSIGNED NULL,ADD COLUMN `b` TINYINT(2) UNSIGNED NULL,
+ADD COLUMN `c` TINYINT(2) UNSIGNED NULL,ADD COLUMN `d` TINYINT(2) UNSIGNED NULL,
+ADD COLUMN `e` TINYINT(2) UNSIGNED NULL,ADD COLUMN `f` TINYINT(2) UNSIGNED NULL,
+ADD COLUMN `g` TINYINT(2) UNSIGNED NULL,ADD COLUMN `h` TINYINT(2) UNSIGNED NULL,
+ADD COLUMN `i` TINYINT(2) UNSIGNED NULL,ADD COLUMN `j` TINYINT(2) UNSIGNED NULL,
+ADD COLUMN `k` TINYINT(2) UNSIGNED NULL,ADD COLUMN `l` TINYINT(2) UNSIGNED NULL,
+ADD COLUMN `m` TINYINT(2) UNSIGNED NULL,ADD COLUMN `n` TINYINT(2) UNSIGNED NULL,
+ADD COLUMN `o` TINYINT(2) UNSIGNED NULL,ADD COLUMN `p` TINYINT(2) UNSIGNED NULL,
+ADD COLUMN `q` TINYINT(2) UNSIGNED NULL,ADD COLUMN `r` TINYINT(2) UNSIGNED NULL,
+ADD COLUMN `s` TINYINT(2) UNSIGNED NULL,ADD COLUMN `t` TINYINT(2) UNSIGNED NULL,
+ADD COLUMN `u` TINYINT(2) UNSIGNED NULL,ADD COLUMN `v` TINYINT(2) UNSIGNED NULL,
+ADD COLUMN `w` TINYINT(2) UNSIGNED NULL,ADD COLUMN `x` TINYINT(2) UNSIGNED NULL,
+ADD COLUMN `y` TINYINT(2) UNSIGNED NULL,ADD COLUMN `z` TINYINT(2) UNSIGNED NULL
+;
+/* UPDATE */
+/* VERSION 21 */
+CREATE DEFINER=CURRENT_USER PROCEDURE `PopulateLetterCounts`()
+    MODIFIES SQL DATA
+    SQL SECURITY INVOKER
+    COMMENT 'Populates letter-counts for words with none, n rows at a time'
+BEGIN
+
+/* Declare variables */
+DECLARE rowLimit INT DEFAULT 100000;
+DECLARE rowCount INT DEFAULT 0;
+DECLARE rowsToGo INT DEFAULT 0;
+DECLARE letterAsc INT DEFAULT 97;
+DECLARE letterLower CHAR DEFAULT 'a';
+DECLARE letterUpper CHAR DEFAULT 'A';
+#DECLARE sqlUpdate VARCHAR(1000) DEFAULT ''; 
+
+/* Get target rows */
+DROP TEMPORARY TABLE IF EXISTS `tmpEntries`;
+CREATE TEMPORARY TABLE `tmpEntries` LIKE `tome_entries`;
+
+/* Pick working rows */
+INSERT INTO `tmpEntries` SELECT * FROM `tome_entries` WHERE `z` IS NULL LIMIT rowLimit;
+SELECT COUNT(*) INTO rowCount FROM `tmpEntries`;
+
+/* Set length */
+UPDATE `tmpEntries` SET `length` = LENGTH(`bare_letters`);
+
+/* Set letter-counts */
+letter_loop: WHILE letterAsc < 123 DO
+	/* Populate CHAR variables */
+	SET letterLower = CHAR(letterAsc);
+	SET letterUpper = CHAR(letterAsc - 32);
+	/* Prep the SQL */
+	SET @sqlPopulateLetterCountsUpdate = CONCAT("UPDATE `tmpEntries` SET `",letterLower,"` = LENGTH(REPLACE(`bare_letters`,'",letterUpper,"','**')) - `length`;");
+	PREPARE stmt FROM @sqlPopulateLetterCountsUpdate;
+	EXECUTE stmt;
+	DEALLOCATE PREPARE stmt;
+	/* Now increment letter */
+	SET letterAsc = letterAsc+1;
+END WHILE;
+
+/* Debugging output */
+#SELECT * FROM `tmpEntries`;
+
+/* Push results */
+UPDATE `tome_entries` dest INNER JOIN `tmpEntries` src ON `src`.`id`=`dest`.`id`
+SET `dest`.`length`=`src`.`length`,
+`dest`.`a`=`src`.`a`,`dest`.`b`=`src`.`b`,
+`dest`.`c`=`src`.`c`,`dest`.`d`=`src`.`d`,
+`dest`.`e`=`src`.`e`,`dest`.`f`=`src`.`f`,
+`dest`.`g`=`src`.`g`,`dest`.`h`=`src`.`h`,
+`dest`.`i`=`src`.`i`,`dest`.`j`=`src`.`j`,
+`dest`.`k`=`src`.`k`,`dest`.`l`=`src`.`l`,
+`dest`.`m`=`src`.`m`,`dest`.`n`=`src`.`n`,
+`dest`.`o`=`src`.`o`,`dest`.`p`=`src`.`p`,
+`dest`.`q`=`src`.`q`,`dest`.`r`=`src`.`r`,
+`dest`.`s`=`src`.`s`,`dest`.`t`=`src`.`t`,
+`dest`.`u`=`src`.`u`,`dest`.`v`=`src`.`v`,
+`dest`.`w`=`src`.`w`,`dest`.`x`=`src`.`x`,
+`dest`.`y`=`src`.`y`,`dest`.`z`=`src`.`z`
+;
+
+SELECT COUNT(*) INTO rowsToGo FROM `tome_entries` WHERE `z` IS NULL;
+
+SELECT rowCount AS `RowsCompleted`, rowsToGo AS `RowsToGo`;
+
+DROP TEMPORARY TABLE `tmpEntries`;
+
+	END
