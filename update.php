@@ -103,6 +103,7 @@ if (file_exists('sql/db-updates.sql')) {
     $pdo = db::getPDO();
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     foreach (array_keys($updates) as $v) {
+        set_time_limit(300);
         if ($v <= $current_version) { continue; }
         $sql = $updates[$v];
         // Now check for any includes (other SQL files referenced)
@@ -122,7 +123,11 @@ if (file_exists('sql/db-updates.sql')) {
             pre_die("Unable to start a transaction at version #{$v}.");
         }
         try {
-            $pdo->exec($sql);
+            $stmt = $pdo->prepare($sql);
+            //$pdo->exec($sql);
+            $stmt->execute();
+            // Close the cursor - prevents error #2014 "Cannot execute queries while there are pending result sets"
+            $stmt->closeCursor();
         } catch (Exception $e) {
             pre_die("Error running SQL for version #{$v}.",
                     "You will need to check that the database is in a valid state.",
@@ -139,6 +144,7 @@ if (file_exists('sql/db-updates.sql')) {
             // That's OK - if we performed CREATE/ ALTER statements, they sometimes auto-commit apparently
         }
         pre_echo("Upgraded database to version {$v}.");
+        flush();
     }
 }
 

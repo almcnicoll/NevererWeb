@@ -9,7 +9,7 @@ namespace Basic {
             return "mysql:host={$config['DB_HOST']};dbname={$config['DB_SCHEMA']};charset={$config['DB_CHARSET']};port={$config['DB_PORT']}";
         }
 
-        public static function getPDO() {
+        public static function getPDO() : PDO {
             global $config;
             if (isset(static::$pdo) && !empty(static::$pdo)) { return static::$pdo; }
 
