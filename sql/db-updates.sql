@@ -340,3 +340,15 @@ SELECT rowCount AS `RowsCompleted`, rowsToGo AS `RowsToGo`;
 DROP TEMPORARY TABLE `tmpEntries`;
 
 	END
+/* UPDATE */
+/* VERSION 22 */
+CALL PopulateLetterCounts();
+/* UPDATE */
+/* VERSION 23 */
+CALL PopulateLetterCounts();
+/* UPDATE */
+/* VERSION 24 */
+CALL PopulateLetterCounts();
+/* UPDATE */
+/* VERSION 25 */
+CALL PopulateLetterCounts();
