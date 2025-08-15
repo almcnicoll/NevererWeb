@@ -105,8 +105,7 @@ END_SQL;
             $stmt = $pdo->prepare($sql);
             $criteria_values = [$tome_id,$user_id];
             $stmt->execute($criteria_values);
-// TODO - HIGH Uncaught ArgumentCountError: PDOStatement::setFetchMode() expects exactly 2 arguments for the fetch mode provided, 1 given in C:\Bitnami\wampstack-8.0.9-0\apache2\htdocs\neverer-web\class\Dictionaries\Tome.php:109
-            $stmt->setFetchMode(PDO::FETCH_COLUMN);
+            $stmt->setFetchMode(PDO::FETCH_COLUMN, 0);
             $readable = $stmt->fetch();
             return ($readable == 1);
         }

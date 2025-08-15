@@ -265,6 +265,7 @@ function startSync() {
 
         // Update sync metadata
         await db.sync_meta.put({
+          /** TODO - V.HIGH - only update date if nextOffset is null */
           key: "entries",
           last_sync: new Date().toISOString(),
           last_offset: nextOffset,

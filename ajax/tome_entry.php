@@ -64,7 +64,7 @@ switch ($action) {
         }
         // Check they're all integers and all user-readable
         foreach ($tome_ids as $tome_id) {
-            if (!is_integer($tome_id)) { $errors[] = "Cannot parse tome id with value of {$tome_id}"; }
+            if (!is_numeric($tome_id)) { $errors[] = "Cannot parse tome id with value of {$tome_id}"; }
             if (!$permissions_checked) { // We don't need to check if we've just pulled the list of user-readable tomes
                 if (!Tome::readableBy($tome_id, $user->id)) { $errors[] = "User does not have permission to read tome with id of {$tome_id}"; }
             }
