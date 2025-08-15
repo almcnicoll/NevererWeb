@@ -1,14 +1,8 @@
-DELIMITER $$
-
-USE `nevererweb`$$
-
-DROP PROCEDURE IF EXISTS `AnagramTest01`$$
-
-CREATE DEFINER=`root`@`localhost` PROCEDURE `AnagramTest01`(
+CREATE DEFINER=CURRENT_USER PROCEDURE `AnagramMethod01`(
 	originalWord VARCHAR(20),
 	maxWords TINYINT(1)
     )
-    COMMENT 'Let us try to get this working'
+    COMMENT "It works, but it's quite slow for longer words - stick to <=9 letters"
 BEGIN
 /* Variables for letter-loop */
 DECLARE letterAsc INT DEFAULT 97;
@@ -26,46 +20,37 @@ END IF;
 
 /* Set up temporary tables */
 DROP TEMPORARY TABLE IF EXISTS `orig`;
-DROP TEMPORARY TABLE IF EXISTS `w1`;
 DROP TEMPORARY TABLE IF EXISTS `wN`;
-DROP TEMPORARY TABLE IF EXISTS `w2`;
-DROP TEMPORARY TABLE IF EXISTS `w3`;
 DROP TEMPORARY TABLE IF EXISTS `comp1`;
 DROP TEMPORARY TABLE IF EXISTS `compNodd`;
 DROP TEMPORARY TABLE IF EXISTS `compNeven`;
 DROP TEMPORARY TABLE IF EXISTS `comp2`;
 DROP TEMPORARY TABLE IF EXISTS `comp3`;
 DROP TEMPORARY TABLE IF EXISTS `results`;
-DROP TEMPORARY TABLE IF EXISTS `debug`;
+/* DROP TEMPORARY TABLE IF EXISTS `debug`; */
 CREATE TEMPORARY TABLE `orig` LIKE `tome_entries`;
 ALTER TABLE `orig` DROP COLUMN `created`, DROP COLUMN `modified`;
 ALTER TABLE `orig` DROP INDEX `alphabetical`, DROP INDEX `filter`, DROP INDEX `filter2`;
-CREATE TEMPORARY TABLE `w1` LIKE `orig`;
 CREATE TEMPORARY TABLE `wN` LIKE `orig`; /* NEW */
-CREATE TEMPORARY TABLE `w2` LIKE `orig`; /* LEGACY */
-CREATE TEMPORARY TABLE `w3` LIKE `orig`; /* LEGACY */
 CREATE TEMPORARY TABLE `comp1` LIKE `tome_entries`;
 ALTER TABLE `comp1` DROP COLUMN `created`, DROP COLUMN `modified`;
 ALTER TABLE `comp1` DROP INDEX `alphabetical`, DROP INDEX `filter`, DROP INDEX `filter2`;
-#ALTER TABLE `comp1` ENGINE=MEMORY; /* Would be nice, but we run out of memory! */
 ALTER TABLE `comp1` ADD COLUMN `composite_word` VARCHAR(100) NOT NULL DEFAULT '';
 ALTER TABLE `comp1` ADD COLUMN `composite_bare_letters` VARCHAR(100) NOT NULL DEFAULT '';
 ALTER TABLE `comp1` ADD COLUMN `last_length` TINYINT(2) UNSIGNED DEFAULT NULL;
 CREATE TEMPORARY TABLE `compNodd` LIKE `comp1`; /* NEW */
 CREATE TEMPORARY TABLE `compNeven` LIKE `comp1`; /* NEW */
-CREATE TEMPORARY TABLE `comp2` LIKE `comp1`; /* LEGACY */
-CREATE TEMPORARY TABLE `comp3` LIKE `comp1`; /* LEGACY */
 CREATE TEMPORARY TABLE `results` (
 `id` INT(10) UNSIGNED AUTO_INCREMENT,
 `word` VARCHAR (100) COLLATE utf8mb4_unicode_ci NOT NULL,
 `bare_letters` VARCHAR (100) COLLATE utf8mb4_unicode_ci NOT NULL,
  PRIMARY KEY (`id`)
 ) /*ENGINE=MEMORY*/ DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci; /* NEW */
-CREATE TEMPORARY TABLE `debug` (
+/*CREATE TEMPORARY TABLE `debug` (
 `id` INT(10) UNSIGNED AUTO_INCREMENT,
 `message` VARCHAR (400) COLLATE utf8mb4_unicode_ci NOT NULL,
 PRIMARY KEY (`id`)
-) /*ENGINE=MEMORY*/ DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci; /* DEBUG */
+) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;*/ /* DEBUG */
 
 /* Start timer */
 SET @timeStart = NOW(6);
@@ -118,11 +103,11 @@ WHERE `length` BETWEEN 0 AND @originalLength AND `a` BETWEEN 0 AND @orig_a AND `
  AND `s` BETWEEN 0 AND @orig_s AND `t` BETWEEN 0 AND @orig_t AND `u` BETWEEN 0 AND @orig_u AND `v` BETWEEN 0 AND @orig_v
  AND `w` BETWEEN 0 AND @orig_w AND `x` BETWEEN 0 AND @orig_x AND `y` BETWEEN 0 AND @orig_y AND `z` BETWEEN 0 AND @orig_z
 ;
-INSERT INTO `debug` (`message`) SELECT CONCAT('Populated wN with ',COUNT(*),' rows') FROM `wN`; /* DEBUG */
+/* INSERT INTO `debug` (`message`) SELECT CONCAT('Populated wN with ',COUNT(*),' rows') FROM `wN`; */ /* DEBUG */
 
 /* The first round is slightly different, due to the initial join process */
-INSERT INTO `debug` (`message`) VALUES (''); /* DEBUG */
-INSERT INTO `debug` (`message`) VALUES ('Starting round 1'); /* DEBUG */
+/* INSERT INTO `debug` (`message`) VALUES (''); */ /* DEBUG */
+/* INSERT INTO `debug` (`message`) VALUES ('Starting round 1'); */ /* DEBUG */
 /* Do our first join */
 /*EXPLAIN EXTENDED
 SELECT 0 AS tome_id, `wN`.`word` AS `word`, `wN`.`bare_letters` AS `bare_letters`, `wN`.`word` AS `composite_word`, `wN`.`bare_letters` AS `composite_bare_letters`
@@ -166,8 +151,8 @@ INNER JOIN `wN` ON `wN`.`length` BETWEEN 0 AND `orig`.`length` AND `wN`.`a` BETW
  AND `wN`.`s` BETWEEN 0 AND `orig`.`s` AND `wN`.`t` BETWEEN 0 AND `orig`.`t` AND `wN`.`u` BETWEEN 0 AND `orig`.`u` AND `wN`.`v` BETWEEN 0 AND `orig`.`v`
  AND `wN`.`w` BETWEEN 0 AND `orig`.`w` AND `wN`.`x` BETWEEN 0 AND `orig`.`x` AND `wN`.`y` BETWEEN 0 AND `orig`.`y` AND `wN`.`z` BETWEEN 0 AND `orig`.`z`
  ;
-INSERT INTO `debug` (`message`) SELECT CONCAT('Populated compNodd with ',COUNT(*),' rows') FROM `compNodd`; /* DEBUG */
-INSERT INTO `debug` (`message`) SELECT CONCAT('Outputting ',COUNT(*),' rows to results') FROM `compNodd` WHERE `length`=0; /* DEBUG */
+/* INSERT INTO `debug` (`message`) SELECT CONCAT('Populated compNodd with ',COUNT(*),' rows') FROM `compNodd`; */ /* DEBUG */
+/* INSERT INTO `debug` (`message`) SELECT CONCAT('Outputting ',COUNT(*),' rows to results') FROM `compNodd` WHERE `length`=0; */ /* DEBUG */
 
 /* The only rows we want from here are the ones which are perfect anagrams */
 INSERT INTO `results` (`word`,`bare_letters`)
@@ -184,8 +169,8 @@ IF @maxRounds > 1 THEN
 	SET @oddRound = FALSE;
 	rounds_loop: WHILE @currentRound <= @maxRounds DO
         /* Loop admin */
-        INSERT INTO `debug` (`message`) VALUES (''); /* DEBUG */
-        INSERT INTO `debug` (`message`) SELECT CONCAT('Starting round ',@currentRound); /* DEBUG */
+        /* INSERT INTO `debug` (`message`) VALUES (''); */ /* DEBUG */
+        /* INSERT INTO `debug` (`message`) SELECT CONCAT('Starting round ',@currentRound); */ /* DEBUG */
         /* To save unnecessary copying, move back and forth between odd and even tables */
         SET @oddRound = (@currentRound % 2 = 1);
         /* Get rid of candidate words that are too long */
@@ -206,13 +191,13 @@ IF @maxRounds > 1 THEN
                 , @max_n, @max_o, @max_p, @max_q, @max_r, @max_s, @max_t, @max_u, @max_v, @max_w, @max_x, @max_y, @max_z
             FROM `compNodd`;
         END IF;
-        INSERT INTO `debug` (`message`) SELECT CONCAT("Longest word inserted last round: ",IFNULL(@max_last_length,'NULL')," letters; cutting wN to ",COUNT(*)," rows") FROM `wN` WHERE `length` <= @max_last_length OR `a`>@max_a OR `b`>@max_b
+        /* INSERT INTO `debug` (`message`) SELECT CONCAT("Longest word inserted last round: ",IFNULL(@max_last_length,'NULL')," letters; cutting wN to ",COUNT(*)," rows") FROM `wN` WHERE `length` <= @max_last_length OR `a`>@max_a OR `b`>@max_b
             OR `c`>@max_c OR `d`>@max_d OR `e`>@max_e OR `f`>@max_f
             OR `g`>@max_g OR `h`>@max_h OR `i`>@max_i OR `j`>@max_j
             OR `k`>@max_k OR `l`>@max_l OR `m`>@max_m OR `n`>@max_n
             OR `o`>@max_o OR `p`>@max_p OR `q`>@max_q OR `r`>@max_r
             OR `s`>@max_s OR `t`>@max_t OR `u`>@max_u OR `v`>@max_v
-            OR `w`>@max_w OR `x`>@max_x OR `y`>@max_y OR `z`>@max_z; /* DEBUG */
+            OR `w`>@max_w OR `x`>@max_x OR `y`>@max_y OR `z`>@max_z; */ /* DEBUG */
         DELETE FROM `wN` WHERE `length` > @max_last_length OR `a`>@max_a OR `b`>@max_b
             OR `c`>@max_c OR `d`>@max_d OR `e`>@max_e OR `f`>@max_f
             OR `g`>@max_g OR `h`>@max_h OR `i`>@max_i OR `j`>@max_j
@@ -271,8 +256,8 @@ IF @maxRounds > 1 THEN
              AND `wN`.`w` BETWEEN 0 AND `compNeven`.`w` AND `wN`.`x` BETWEEN 0 AND `compNeven`.`x` AND `wN`.`y` BETWEEN 0 AND `compNeven`.`y` AND `wN`.`z` BETWEEN 0 AND `compNeven`.`z`
              ;
              /* Save results */             
-            INSERT INTO `debug` (`message`) SELECT CONCAT('Populated compNodd with ',COUNT(*),' rows') FROM `compNodd`; /* DEBUG */
-            INSERT INTO `debug` (`message`) SELECT CONCAT('Outputting ',COUNT(*),' rows to results') FROM `compNodd` WHERE `length`=0; /* DEBUG */
+            /* INSERT INTO `debug` (`message`) SELECT CONCAT('Populated compNodd with ',COUNT(*),' rows') FROM `compNodd`; */ /* DEBUG */
+            /* INSERT INTO `debug` (`message`) SELECT CONCAT('Outputting ',COUNT(*),' rows to results') FROM `compNodd` WHERE `length`=0; */ /* DEBUG */
             INSERT INTO `results` (`word`,`bare_letters`)
              SELECT `composite_word`,`composite_bare_letters`
              FROM `compNodd`
@@ -328,8 +313,8 @@ IF @maxRounds > 1 THEN
              AND `wN`.`w` BETWEEN 0 AND `compNodd`.`w` AND `wN`.`x` BETWEEN 0 AND `compNodd`.`x` AND `wN`.`y` BETWEEN 0 AND `compNodd`.`y` AND `wN`.`z` BETWEEN 0 AND `compNodd`.`z`
              ;
              /* Save results */
-            INSERT INTO `debug` (`message`) SELECT CONCAT('Populated compNeven with ',COUNT(*),' rows') FROM `compNeven`; /* DEBUG */
-            INSERT INTO `debug` (`message`) SELECT CONCAT('Outputting ',COUNT(*),' rows to results') FROM `compNeven` WHERE `length`=0; /* DEBUG */
+            /* INSERT INTO `debug` (`message`) SELECT CONCAT('Populated compNeven with ',COUNT(*),' rows') FROM `compNeven`; */ /* DEBUG */
+            /* INSERT INTO `debug` (`message`) SELECT CONCAT('Outputting ',COUNT(*),' rows to results') FROM `compNeven` WHERE `length`=0; */ /* DEBUG */
             INSERT INTO `results` (`word`,`bare_letters`)
              SELECT `composite_word`,`composite_bare_letters`
              FROM `compNeven`
@@ -352,6 +337,5 @@ SELECT *
 FROM `results`
 ;
 
-	END$$
-
-DELIMITER ;
+	END
+;

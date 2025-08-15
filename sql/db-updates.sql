@@ -352,3 +352,6 @@ CALL PopulateLetterCounts();
 /* UPDATE */
 /* VERSION 25 */
 CALL PopulateLetterCounts();
+/* UPDATE */
+/* VERSION 26 */
+/*include 26_anagram_sp.sql*/
