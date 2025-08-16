@@ -210,7 +210,7 @@ function startSync() {
     // const lastSync = (await db.sync_meta.get('entries'))?.last_sync ?? '1970-01-01T00:00:00Z';
     const meta = (await db.sync_meta.get("entries")) || {};
     const lastSync = meta.last_sync || "1970-01-01T00:00:00Z";
-    const lastOffset = meta.lastOffset || 0; // Could be null if it's our first sync or if our last sync completed all rows
+    const lastOffset = meta.last_offset || 0; // Could be null if it's our first sync or if our last sync completed all rows
 
     data = {
       url: "tome_entry/*/list",
@@ -264,19 +264,29 @@ function startSync() {
         }
 
         // Update sync metadata
-        await db.sync_meta.put({
-          /** TODO - V.HIGH - only update date if nextOffset is null */
-          key: "entries",
-          last_sync: new Date().toISOString(),
-          last_offset: nextOffset,
-        });
+        if (nextOffset == null) {
+          await db.sync_meta.put({
+            // We're done - update the date
+            key: "entries",
+            last_sync: new Date().toISOString(),
+            last_offset: nextOffset,
+          });
+          // Tell the main thread that our sync is complete
+          var msgId = generateId();
+          self.postMessage({ type: "syncComplete", msgId });
+        } else {
+          await db.sync_meta.put({
+            // There's more to retrieve - don't update the date
+            key: "entries",
+            last_offset: nextOffset,
+          });
+          // Tell the main thread that our sync is partially complete
+          var msgId = generateId();
+          self.postMessage({ type: "syncIncomplete", msgId });
+        }
       });
     });
   });
-
-  // Tell the main thread that our sync is complete
-  var msgId = generateId();
-  self.postMessage({ type: "syncComplete", msgId });
 }
 
 // TODO - HIGH don't call this for patterns with no fixed letters!

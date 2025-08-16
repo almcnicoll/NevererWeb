@@ -72,6 +72,15 @@ worker.onmessage = function (e) {
         }
 
         $(msg.destination).html(output); // Works fine if it's plain text too
+    } else if (msg.type === "syncIncomplete") {
+        // TODO - HIGH some UI update here
+        // Now trigger the next partial sync
+        worker.postMessage({
+            type: 'startSync',
+            root_path: root_path
+        });
+    } else if (msg.type === "syncComplete") {
+        // TODO - HIGH some UI update here
     }
 };
 
