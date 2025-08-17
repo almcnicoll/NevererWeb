@@ -91,7 +91,7 @@ worker.onmessage = function (e) {
     $("#status-bar").html(
       "Synchronised " +
         msg.count +
-        " words <i class='bi bi-info-square-fill' title='Synchronising the full dictionary happens once per browser and will take several minutes.'></i>"
+        " words <i class='bi bi-info-square-fill' title='Synchronising the full dictionary happens once per browser and will take several minutes to an hour.'></i>"
     );
     // Now trigger the next partial sync
     worker.postMessage({
