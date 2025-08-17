@@ -88,7 +88,11 @@ worker.onmessage = function (e) {
     $(msg.destination).html(output); // Works fine if it's plain text too
   } else if (msg.type === "syncIncomplete") {
     // Update the UI
-    $("#status-bar").html("Synchronised " + msg.count + " words");
+    $("#status-bar").html(
+      "Synchronised " +
+        msg.count +
+        " words <i class='bi bi-info-square-fill' title='Synchronising the full dictionary happens once per browser and will take several minutes.'></i>"
+    );
     // Now trigger the next partial sync
     worker.postMessage({
       type: "startSync",
