@@ -209,11 +209,22 @@ if (isset($config['KOFI_SHOW']) && $config['KOFI_SHOW']):
     <?php
 endif;
 ?>
-    <footer class="footer mt-auto py-3 bg-light">
+    <br />
+    <footer class="footer mt-auto py-3 bg-secondary-subtle">
         <div class="container">
-            <div id='status-bar'>&nbsp;</div>
-            <div id='open-source'>Open Source licenses <i class='bi bi-info-square-fill'
-                    title="PDF generation: by mpdf (https://github.com/mpdf/mpdf)"></i>
+            <div class='row'>
+                <div id='footer-left' class='col-sm-5'>
+                    <ul class='list-inline'>
+                        <li id='status-bar'>&nbsp;</li>
+                    </ul>
+                </div>
+                <div class='col-sm-2'>&nbsp;</div>
+                <div id='footer-right' class='col-sm-5 text-end'>
+                    <ul class='list-inline'>
+                        <li id='open-source'>Open Source licenses <i class='bi bi-info-square-fill'
+                                title="PDF generation: by mpdf (https://github.com/mpdf/mpdf)"></i></li>
+                    </ul>
+                </div>
             </div>
         </div>
     </footer>
