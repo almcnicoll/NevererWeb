@@ -6,82 +6,22 @@ importScripts("https://cdn.jsdelivr.net/npm/dexie@3/dist/dexie.min.js");
 // Global flag for library loading (may be used for dynamic class loading in future)
 self.librariesLoaded = false;
 
-// --- IndexedDB Setup ---
+// --- dexie.js Setup ---
+
+// Name of the old and new databases
+const DB_NAME_V01 = "dictionary_cache"; // No longer used - will need manual deletion
+const DB_NAME_V02 = "tome_cache";
 
 /** @type {Dexie} */
-const db = new Dexie("dictionary_cache");
+const db = new Dexie(DB_NAME_V02);
 
 // Define database schema
 db.version(1).stores({
   tomes:
     "id, name, source_type, source_format, writeable, user_id, last_updated",
-  entries: "++id, tome_id, word, user_id, date_added",
-  sync_meta: "key, last_sync",
+  entries: "id, tome_id, word, bare_letters, user_id, date_added, length",
+  sync_meta: "key, last_sync, last_offset", // keep last_offset if used
 });
-db.version(2)
-  .stores({
-    tomes:
-      "id, name, source_type, source_format, writeable, user_id, last_updated",
-    entries: "++id, tome_id, word, bare_letters, user_id, date_added",
-    sync_meta: "key, last_sync",
-  })
-  .upgrade((tx) => {
-    return tx
-      .table("entries")
-      .toCollection()
-      .modify((entry) => {
-        if (entry.bare_letters === undefined) {
-          entry.bare_letters = TomeEntry.computeBareLetters(word); // Calculate bare_letters from word
-        }
-      });
-  });
-// Upgrade path: version 3 adds `length` index to entries
-db.version(3)
-  .stores({
-    tomes:
-      "id, name, source_type, source_format, writeable, user_id, last_updated",
-    // Index `length` so we can efficiently filter by it
-    entries: "++id, tome_id, word, bare_letters, user_id, date_added, length",
-    sync_meta: "key, last_sync",
-  })
-  .upgrade(async (tx) => {
-    // Populate length for existing entries if missing
-    const all = await tx.table("entries").toArray();
-    for (const entry of all) {
-      if (entry.length === undefined || entry.length === null) {
-        const computedLength = entry.bare_letters
-          ? entry.bare_letters.length
-          : 0;
-        await tx.table("entries").update(entry.id, { length: computedLength });
-      }
-    }
-  });
-// Upgrade path: version 4 removes unnecessary indices from entries
-db.version(4).stores({
-  tomes:
-    "id, name, source_type, source_format, writeable, user_id, last_updated",
-  // Index `length` so we can efficiently filter by it
-  entries: "++id, tome_id, bare_letters, length",
-  sync_meta: "key, last_sync",
-});
-// Upgrade path: version 5 re-populates `length` where missing
-db.version(5)
-  .stores({
-    tomes:
-      "id, name, source_type, source_format, writeable, user_id, last_updated",
-    entries: "++id, tome_id, word, bare_letters, user_id, date_added, length",
-    sync_meta: "key, last_sync",
-  })
-  .upgrade(async (tx) => {
-    const entries = tx.table("entries");
-    const allMissing = await entries
-      .filter((e) => !e.length && e.length !== 0)
-      .toArray();
-    for (const entry of allMissing) {
-      const computedLength = entry.bare_letters ? entry.bare_letters.length : 0;
-      await entries.update(entry.id, { length: computedLength });
-    }
-  });
 
 // --- Utility Functions ---
 
@@ -282,7 +222,11 @@ function startSync() {
           });
           // Tell the main thread that our sync is partially complete
           var msgId = generateId();
-          self.postMessage({ type: "syncIncomplete", msgId });
+          self.postMessage({
+            type: "syncIncomplete",
+            count: nextOffset,
+            msgId,
+          });
         }
       });
     });

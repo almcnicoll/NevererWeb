@@ -113,6 +113,7 @@ if (!isset($_SESSION['PAGE_LOADCOUNTS'])) {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <?php
     if (strpos(strtolower($_SERVER['SERVER_NAME']), 'localhost') === false):
@@ -121,7 +122,10 @@ if (!isset($_SESSION['PAGE_LOADCOUNTS'])) {
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-K2LEKFKTGT"></script>
     <script>
     window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
+
+    function gtag() {
+        dataLayer.push(arguments);
+    }
     gtag('js', new Date());
     gtag('config', 'G-K2LEKFKTGT');
     </script>
@@ -132,24 +136,30 @@ if (!isset($_SESSION['PAGE_LOADCOUNTS'])) {
     endif;
     ?>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><?= (substr($config['root_path'],0,strlen('http://localhost'))=='http://localhost' ? 'LOCAL ':'') ?>Neverer</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <title><?= (substr($config['root_path'],0,strlen('http://localhost'))=='http://localhost' ? 'LOCAL ':'') ?>Neverer
+    </title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
     <link href="<?= $config['root_path'] ?>/css/app.css" rel="stylesheet">
     <script type='text/javascript'>
-        // Variables from PHP script
-        <?php
+    // Variables from PHP script
+    <?php
         echo "\t\tvar root_path = \"{$config['root_path']}\";\n";
         ?>
-        // Stub for debug (stub functions so that code can call these without throwing exceptions)
-        let debugPane = {};
-        debugPane.print = function() {};
-        debugPane.clear = function() {};
+    // Stub for debug (stub functions so that code can call these without throwing exceptions)
+    let debugPane = {};
+    debugPane.print = function() {};
+    debugPane.clear = function() {};
     </script>
 </head>
+
 <body>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
-<?php
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous">
+    </script>
+    <?php
 if (file_exists("js/{$stub}.js")) {
     echo "\t<script type='text/javascript' src='{$config['root_path']}/js/{$stub}.js'></script>\n";
 }
@@ -196,10 +206,15 @@ if (isset($config['KOFI_SHOW']) && $config['KOFI_SHOW']):
     });
     </script>
     <!-- END KO-FI -->
-<?php
+    <?php
 endif;
 ?>
-<?php
+    <footer class="footer mt-auto py-3 bg-light">
+        <div class="container">
+            <div id='status-bar'>&nbsp;</div>
+        </div>
+    </footer>
+    <?php
 if (Security\Config::getValueOrDefault('debug_pane',false)) {
     echo <<<END_HTML
 <script type='text/javascript' src="{$config['root_path']}/js/debug.js"></script>
@@ -212,4 +227,5 @@ END_HTML;
 }
 ?>
 </body>
+
 </html>
