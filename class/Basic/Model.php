@@ -208,7 +208,6 @@ namespace Basic {
             return $values[0];
         }
 
-        // TODO - Add extra param descriptors here
         /**
          * Finds records matching the specified criteria
          * @param array each criterion should be an array in the form [field,operator,value], and multiple criteria should be specified as an array of arrays
