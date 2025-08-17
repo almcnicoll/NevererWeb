@@ -208,19 +208,24 @@ namespace Basic {
             return $values[0];
         }
 
+        // TODO - Add extra param descriptors here
         /**
          * Finds records matching the specified criteria
          * @param array each criterion should be an array in the form [field,operator,value], and multiple criteria should be specified as an array of arrays
          * @param string $orderBy either an array of field names OR an array of arrays in the form ['field', 'asc|desc'] OR null to use default ordering
+         * @param int $limit the number of rows to retrieve
+         * @param int $offset the number of rows to offset by
+         * @param mixed $extras an associative array of other query tweaks - currently supported are useIndex and forceIndex
          * @return mixed an array of objects of the class or subclass calling the function - an empty array if there are no matches
          */
-        public static function find($criteria, $orderBy = null, $limit = null, $offset = null) : array {
+        public static function find($criteria, $orderBy = null, $limit = null, $offset = null, $extras = null) : array {
             $pdo = db::getPDO();
 
             // Check arguments
             if (!is_array($criteria)) {
                 throw new Exception("Find method requires an array of three-element arrays to operate");
             }
+            if ($extras == null) { $extras = []; }
             // Allow for people passing in a single criterion without the enclosing array
             if (count($criteria) == 3) {
                 // To minimise potential for error, only do this where the intent is really clear:
@@ -300,7 +305,18 @@ namespace Basic {
                 }
             }
             
-            $sql = "SELECT * FROM `".static::$tableName."` "
+            $tableExtra = '';
+            if (array_key_exists('forceIndex',$extras)) {
+                $idx = $extras['forceIndex'];
+                if (strpos($idx,'`') !== false) { throw new InvalidArgumentException("Index name cannot contain backticks ($idx)"); }
+                $tableExtra = " FORCE INDEX (`{$idx}`) ";
+            } else if (array_key_exists('useIndex',$extras)) {
+                $idx = $extras['useIndex'];
+                if (strpos($idx,'`') !== false) { throw new InvalidArgumentException("Index name cannot contain backticks ($idx)"); }
+                $tableExtra = " USE INDEX (`{$idx}`) ";
+            }
+
+            $sql = "SELECT * FROM `".static::$tableName."` {$tableExtra} "
                     ."WHERE ".implode(" AND ", $criteria_strings)
                     .$orderSql
                     .$limitSql;
