@@ -77,13 +77,17 @@ switch ($action) {
         if (!isset($limit)) { $limit = null; }
         if (!isset($offset)) { $offset = null; }
         // Return entries
-        $tome_entries = TomeEntry::find($criteria, ['modified','tome_id','bare_letters','word'], $limit, $offset);
-        // Also return whether there are more entries to process - more reliable than checking if row count smaller than limit
-        $more_entries = TomeEntry::find($criteria, ['modified','tome_id','bare_letters','word'], 1, $offset+$limit);
+        $extras = ['forceIndex' => 'filter2'];
+        $tome_entries = TomeEntry::find($criteria, ['modified','tome_id','bare_letters','word'], $limit+1, $offset, $extras);
+        $more_entries = false;
+        if (count($tome_entries) == $limit+1) {
+            $more_entries = true;
+            array_pop($tome_entries); // Because we don't actually want the last one (we just want to know it exists)
+        }
         $return_value = [
             'entries' => $tome_entries,
             'nextOffset' => (
-                (count($more_entries)>0) ?
+                $more_entries ?
                 $offset+$limit: // Next offset to try
                 null // No more rows
             )

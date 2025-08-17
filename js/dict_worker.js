@@ -101,7 +101,7 @@ self.onmessage = function (e) {
  * Starts the sync process by fetching Tomes and entries from the server
  * and updating the local IndexedDB cache accordingly using bulk operations.
  */
-const SyncLimit = 1000;
+const SyncLimit = 100;
 function startSync() {
   /** @type {{ url: string }} */
   let data = {
