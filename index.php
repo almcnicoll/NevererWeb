@@ -212,6 +212,9 @@ endif;
     <footer class="footer mt-auto py-3 bg-light">
         <div class="container">
             <div id='status-bar'>&nbsp;</div>
+            <div id='open-source'>Open Source licenses <i class='bi bi-info-square-fill'
+                    title="PDF generation: by mpdf (https://github.com/mpdf/mpdf)"></i>
+            </div>
         </div>
     </footer>
     <?php
