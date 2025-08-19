@@ -22,6 +22,13 @@ db.version(1).stores({
   entries: "id, tome_id, word, bare_letters, user_id, date_added, length",
   sync_meta: "key, last_sync, last_offset", // keep last_offset if used
 });
+// Version 2 schema with compound indexes
+db.version(2).stores({
+  tomes:
+    "id, name, source_type, source_format, writeable, user_id, last_updated",
+  entries: "id,word,bare_letters,length,[length+bare_letters]",
+  sync_meta: "key, last_sync, last_offset", // keep last_offset if used
+});
 
 // --- Utility Functions ---
 
@@ -82,21 +89,44 @@ self.onmessage = function (e) {
 
     const pattern = new RegExp(regex, flags);
 
-    getAllMatchingEntries(pattern, length, offset, limit).then((matches) => {
-      self.postMessage({
-        type: "regexResults",
-        results: matches,
-        offset: offset,
-        limit: limit,
-        destination: destination,
-        format: format,
-      });
-    });
+    getAllMatchingEntriesByRegex(pattern, length, offset, limit).then(
+      (matches) => {
+        self.postMessage({
+          type: "regexResults",
+          results: matches,
+          offset: offset,
+          limit: limit,
+          destination: destination,
+          format: format,
+        });
+      }
+    );
+  } else if (msg.type === "lookupByPattern") {
+    const {
+      pattern,
+      destination,
+      format,
+      length,
+      offset = 0,
+      limit = Infinity,
+    } = msg;
+
+    getAllMatchingEntriesByPattern(pattern, length, offset, limit).then(
+      (matches) => {
+        self.postMessage({
+          type: "regexResults",
+          results: matches,
+          offset: offset,
+          limit: limit,
+          destination: destination,
+          format: format,
+        });
+      }
+    );
   }
 };
 
 // --- Dictionary sync Process ---
-// TODO - HIGH see latest suggestion that uses bulk data methods
 /**
  * Starts the sync process by fetching Tomes and entries from the server
  * and updating the local IndexedDB cache accordingly using bulk operations.
@@ -156,7 +186,7 @@ function startSync() {
       url: "tome_entry/*/list",
       tome_ids: [...serverTomeIds],
       since: lastSync,
-      offset: lastOffset, // TODO - HIGH this is problematic - won't work if we don't know whether it finished last time. Set to null when done?
+      offset: lastOffset,
       limit: SyncLimit,
     };
 
@@ -233,9 +263,28 @@ function startSync() {
   });
 }
 
-// TODO - HIGH don't call this for patterns with no fixed letters!
 /**
- * Queries entries with a specific length and filters them by regex on the 'word' field.
+ * Takes a pattern in the form A?B??C?D and returns a regular expression for searching a word list
+ * @param {string} pattern the pattern to convert
+ * @param {boolean} bareLettersVersion should Regex be suitable for searching a bare-letters list, or one with spaces and punctuation?
+ * @returns RegExp the regular expression used to search
+ */
+function getRegexFromPattern(pattern, bareLettersVersion = true) {
+  if (bareLettersVersion) {
+    // This is the simple one
+    var rePattern = pattern.replaceAll("?", ".").toUpperCase();
+    return (re = new RegExp(rePattern, "i"));
+  } else {
+    // This is the complex one
+    var rePattern = pattern.replaceAll("?", ".").toUpperCase();
+    var arr = rePattern.split("");
+    rePattern = arr.join("[\\s'-]*");
+    return (re = new RegExp(rePattern, "i"));
+  }
+}
+
+/**
+ * DEPRECATED / UNFINISHED Queries entries with a specific length and filters them by regex on the 'word' field.
  *
  * @param {RegExp} pattern - Compiled regex to match against each word.
  * @param {number} length - Word length to pre-filter with indexed search.
@@ -243,7 +292,12 @@ function startSync() {
  * @param {number} [limit=50] - Max number of matching entries to return.
  * @returns {Promise<{ results: Array<Object>, total: number }>}
  */
-async function getAllMatchingEntries(pattern, length, offset = 0, limit = 50) {
+async function getAllMatchingEntriesByRegex(
+  pattern,
+  length,
+  offset = 0,
+  limit = 50
+) {
   // Step 1: Narrow the query using indexed `length`
   const entries = await db.entries.where("length").equals(length).toArray();
 
@@ -256,5 +310,58 @@ async function getAllMatchingEntries(pattern, length, offset = 0, limit = 50) {
   return {
     results: paged,
     total: filtered.length, // total *matched* count, not total in DB
+  };
+}
+
+/**
+ * The preferred way to retrieve possible word matches - supply a word in "pattern form" ( e.g. C??I?TM?S )
+ * Note that record paging happens after all matching records have been retrieved - that is, it saves bandwidth but not db load
+ * @param {string} pattern the pattern (in the form of letters and question marks) to search for
+ * @param {int} length the length of the pattern
+ * @param {int} offset the offset from which to retrieve records (for record paging)
+ * @param {int} limit the limit of how many records to retrieve (for record paging)
+ * @returns
+ */
+async function getAllMatchingEntriesByPattern(
+  pattern,
+  length,
+  offset = 0,
+  limit = 50
+) {
+  // Determine if there are any opening known letters to filter by
+  const firstQM = pattern.indexOf("?");
+  var searchString;
+  switch (firstQM) {
+    case -1:
+      // No question marks - we have a whole string - simples!
+      searchString = pattern;
+      break;
+    default:
+      // Otherwise, use whatever letters we have (if any) as a prefix
+      searchString = pattern.substr(0, firstQM);
+  }
+  // We can't do this in stages - we have to use the compound length+bare_letters index
+  const lowerBound = [length, searchString];
+  const upperBound = [length, searchString + "\uffff"];
+  const filteredByIndex = await db.entries
+    .where("[length+bare_letters]")
+    .between(lowerBound, upperBound)
+    .toArray();
+
+  // Check for "no fixed letters" option
+  const noLettersSpecified = pattern == new String("").repeat(length);
+
+  // Now generate a regular expression and filter using RegExp in memory
+  const rePattern = getRegexFromPattern(pattern, true);
+  const filteredByRegex = noLettersSpecified
+    ? filteredByIndex
+    : filteredByIndex.filter((entry) => rePattern.test(entry.bare_letters));
+
+  // Step 3: Paginate
+  const paged = filteredByRegex.slice(offset, offset + limit);
+
+  return {
+    results: paged,
+    total: filteredByRegex.length, // total *matched* count, not total in DB
   };
 }

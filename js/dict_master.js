@@ -75,11 +75,11 @@ worker.onmessage = function (e) {
       case "table-row":
         output =
           "<tr><td>" +
-          matches.toArray().join("</td></tr>\n<tr><td>") +
+          matches.results.map((o) => o.word).join("</td></tr>\n<tr><td>") +
           "</td></tr>";
         break;
       case "text":
-        output = matches.join("\n");
+        output = matches.results.map((o) => o.bare_letters).join("\n");
         break;
       case "default":
         throw new Exception("Invalid format " + msg.format + " specified.");
@@ -138,6 +138,24 @@ function lookupWordsByRegex(regex, length, destination, format) {
     type: "lookupByRegex",
     regex: regex.source,
     flags: regex.flags,
+    length: length,
+    destination: destination,
+    format: format,
+  });
+}
+
+/**
+ * Requests a list of words from the worker whose `word` property matches a given regex.
+ *
+ * @param {RegExp} regex - Regular expression to match against the 'word' field.
+ * @param {string} destination - Where to output the results (a jQuery query string)
+ * @param {string} format - What form to post the results (currently only table-row or text)
+ * @returns void
+ */
+function lookupWordsByPattern(pattern, length, destination, format) {
+  worker.postMessage({
+    type: "lookupByPattern",
+    pattern: pattern.toUpperCase(),
     length: length,
     destination: destination,
     format: format,

@@ -66,6 +66,7 @@
     $form_edit_clue->addField('pattern')->setLabel('')->setType('hidden');
     $form_edit_clue->addField('clue')->setLabel('Clue')->setDivClass('mb-3')->setClass('border-secondary'); /*->setHelp("The clue text")*/
     $form_edit_clue->addField('explanation')->setLabel('Explanation')->setClass('border-secondary'); /*->setHelp("An explanation of the working of the clue (optional, will not show on crossword output)")*/
+    // TODO - HIGH sort max-height on this and force scrolling
     $edit_clue_sidebar = <<<END_HTML
 <div class="container">
 <div class="row">
@@ -128,7 +129,9 @@ END_HTML;
 <script type="text/javascript" src='~ROOT~/js/dict_master.js'></script>
 
 <!-- Ajax cue -->
-<div id="ajaxCue"><div id="ajaxCount"></div></div>
+<div id="ajaxCue">
+    <div id="ajaxCount"></div>
+</div>
 <!-- Title etc -->
 <div style="float:right;">
     <?= $modal_edit_settings->getTriggerHtml(); ?>
@@ -172,7 +175,7 @@ if ($fatal_error) {
 <div class='row'>
     <div class='col-md-6'>
         <div class='crossword-container'>
-        <?php
+            <?php
         echo $crossword->getGridHtml(true);
         ?>
         </div>
