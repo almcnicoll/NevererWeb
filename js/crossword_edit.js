@@ -10,8 +10,6 @@ const FLAG_CONFLICT = 1;
 const FLAG_FEWMATCHES = 2;
 const FLAG_NOMATCHES = 4;
 
-// TODO - Highlight clue in clue list when highlighted in grid
-
 //#region Utility methods
 /**
  *
@@ -300,6 +298,7 @@ function updateClueList(json, removeMissing = true) {
   // Clues should be in order - all across and then all down
   for (var i in allClues) {
     var pClue = allClues[i];
+    var pcId = pClue.id;
     var num = pClue.place_number;
     var ori = pClue.orientation;
     if (ori !== lastOrientation) {
@@ -335,7 +334,11 @@ function updateClueList(json, removeMissing = true) {
         .clone()
         .attr("id", id)
         .data("clue-orientation", ori)
-        .data("clue-number", num);
+        .data("clue-number", num)
+        .data("placed-clue-id", pcId)
+        .attr("data-clue-orientation", ori)
+        .attr("data-clue-number", num)
+        .attr("data-placed-clue-id", pcId);
       newRow.find(".clue-number").text(num);
       if (pClue.clue.question == null || pClue.clue.question == "") {
         newRow.find(".clue-question").html("<i>" + pClue.clue.answer + "</i>"); // Update question text with answer in italics
@@ -765,12 +768,20 @@ function selectClue(id = 0) {
   var reSel = new RegExp("\\b" + id + "\\b"); // To allow for standalone numbers and comma-delimited ones, but not digits within larger numbers
   // Remove selection classes
   $(".crossword-grid-square").removeClass("ui-select");
+  $(".clue-row").removeClass("ui-select");
   if (id == 0) {
     return;
   } // Nothing more to do if we're just deselecting - save some unneeded looping
   // Add selection classes
+  // Grid squares
   $(".crossword-grid-square").each(function () {
     if (reSel.test($(this).data("placed-clue-ids"))) {
+      $(this).addClass("ui-select");
+    }
+  });
+  // Clue list
+  $(".clue-row").each(function () {
+    if ($(this).data("placed-clue-id") == id) {
       $(this).addClass("ui-select");
     }
   });
