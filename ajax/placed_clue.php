@@ -103,16 +103,21 @@ switch ($action) {
                             ['x','>=',$possibleMatch->x],
                             ['x','<=',$possibleMatch->x + $possibleMatch->getLength()]
                         ]);
+                        $intersections_exposed = [];
                         // Refine the list to actual intersectors
                         for ($i=count($intersections)-1;$i>=0;$i--) {
-                            if (!$intersections[$i]->overlapsWith($possibleMatch)) {
+                            if ($intersections[$i]->overlapsWith($possibleMatch)) {
+                                // Ensure clue object populated
+                                $intersections_exposed[] = $intersections[$i]->expose();
+                            } else {
+                                // Cut it out
                                 array_splice($intersections, $i, 1);
                             }
                         }
                         // Now build the return array
                         $output = [ 'original' => $possibleMatch->expose(),
                                     'additional' => $possibleMatch->getSymmetryClues()->expose(),
-                                    'intersecting' => $intersections,
+                                    'intersecting' => $intersections_exposed,
                                 ];
                         die(json_encode($output));
                     }
@@ -126,16 +131,21 @@ switch ($action) {
                             ['y','>=',$possibleMatch->y],
                             ['y','<=',$possibleMatch->y + $possibleMatch->getLength()]
                         ]);
+                        $intersections_exposed = [];
                         // Refine the list to actual intersectors
                         for ($i=count($intersections)-1;$i>=0;$i--) {
-                            if (!$intersections[$i]->overlapsWith($possibleMatch)) {
+                            if ($intersections[$i]->overlapsWith($possibleMatch)) {
+                                // Ensure clue object populated
+                                $intersections_exposed[] = $intersections[$i]->expose();
+                            } else {
+                                // Cut it out
                                 array_splice($intersections, $i, 1);
                             }
                         }
                         // Now build the return array
                         $output = [ 'original' => $possibleMatch->expose(),
                                     'additional' => $possibleMatch->getSymmetryClues()->expose(),
-                                    'intersecting' => $intersections,
+                                    'intersecting' => $intersections_exposed,
                                 ];
                         die(json_encode($output));
                     }

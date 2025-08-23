@@ -472,22 +472,34 @@ function populateEditForm(data) {
     symClueTexts.push(symClue.place_number + " " + symClue.orientation);
   }
   var symClueText = symClueTexts.join(", ");
-  // TODO - do something with the clues in the "intersecting" sub-array, which should be used to replace any
-  //  blanks in the current clue's pattern
+  
   // Parse intersecting clues
   var intCluesList = arr["intersecting"];
-  var intClues;
-  if ("_list" in intCluesList) {
-    intClues = arr["intersecting"]["_list"];
-  } else {
-    intClues = Array();
+  if (!intCluesList instanceof Array) {
+    intCluesList = Array();
   }
+  for (var ii=0; ii<intCluesList.length; ii++) {
+    // Work out where it overlaps
+    var intClue = intCluesList[ii];
+    var srcPos;
+    var destPos;
+    if (pc.orientation == 'across' && intClue.orientation == 'down') {
+      srcPos = pc.y - intClue.y;
+      destPos = intClue.x - pc.x;
+    } else if (pc.orientation == 'down' && intClue.orientation == 'across') {
+      srcPos = pc.x - intClue.x;
+      destPos = intClue.y - pc.y;
+    }
+    c.answer = c.answer.substr(0,destPos) + intClue.clue.answer.substr(srcPos,1).toUpperCase() + c.answer.substr(destPos+1);
+  }
+
   // Put those variables into the modal form
   $("#edit-clue input#edit-clue-id").val(pc.id);
   $("#edit-clue input#edit-clue-row").val(pc.y);
   $("#edit-clue input#edit-clue-col").val(pc.x);
   $("#edit-clue select#edit-clue-orientation").val(pc.orientation);
   $("#edit-clue input#edit-clue-answer").val(c.answer);
+  $("#edit-clue input#edit-clue-answer").data('old-answer',c.answer); // TODO - HIGH use this to add an onLostFocus or similar which refreshes the list of candidate words
   $("#edit-clue-suggested-words-pattern").text(c.answer);
   $("#edit-clue input#edit-clue-clue").val(c.question);
   $("#edit-clue input#edit-clue-explanation").val(c.explanation);

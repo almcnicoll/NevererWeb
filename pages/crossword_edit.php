@@ -69,7 +69,7 @@
     // TODO - HIGH sort max-height on this and force scrolling
     $edit_clue_sidebar = <<<END_HTML
 <div class="container">
-<div class="row">
+<div class="row word-list-row">
 <table class="table table-hover word-list">
     <thead>
         <tr class='table-dark'>

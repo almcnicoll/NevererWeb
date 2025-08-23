@@ -224,11 +224,19 @@ span.letter-holder {
   max-height: 30em;
   overflow-y: auto;
 }
+div.word-list-row {
+  max-height: 32em;
+  overflow-y: auto;
+}
 table.word-list {
   text-transform: uppercase;
   font-family: "Courier New", Courier, monospace;
   font-size: 125%;
   text-align: center;
+}
+table.word-list th {
+  position: sticky;
+  top: 0;
 }
 table.word-list td {
   cursor: pointer;
