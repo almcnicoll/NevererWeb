@@ -159,6 +159,7 @@ if (!isset($_SESSION['PAGE_LOADCOUNTS'])) {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous">
     </script>
+    <script src="<?= $config['root_path'] ?>/js/app.js"></script>
     <?php
 if (file_exists("js/{$stub}.js")) {
     echo "\t<script type='text/javascript' src='{$config['root_path']}/js/{$stub}.js'></script>\n";
@@ -186,6 +187,20 @@ if (!@include_once($page)) {
     }
     ob_end_flush();
 }
+
+?>
+    <!-- Toast -->
+    <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" id='toast-main'>
+        <div class="toast-header text-bg-warning">
+            <strong class="me-auto" id="toast-title"></strong>
+            <small id="toast-timestamp" class='text-body-secondary'></small>
+            <button type="button" class="ml-2 mb-1 close btn-close" aria-label="Close" data-dismiss="toast">
+                <span>&times;</span>
+            </button>
+        </div>
+        <div class="toast-body" id="toast-body-message"></div>
+    </div>
+    <?php
 
 // Check if we need to authenticate now
 if ($pageinfo->authSetting === PageInfo::AUTH_LATE) {

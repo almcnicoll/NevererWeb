@@ -67,7 +67,7 @@ function serializeForm(selector, stripPrefix = false) {
 //#endregion
 
 //#region Ajax handling
-// TODO - consider prompting an internet connection check if makeAjaxCall is regularly returning fails
+// TODO - consider prompting an internet connection check if makeAjaxCall is regularly returning fails (we have a makeToast() javascript function if we can get the messages there)
 
 /**
  *
@@ -140,7 +140,7 @@ function handleAjaxReturn(arg1, textStatus, arg3) {
   // Manage success/failure in UI
   switch (textStatus) {
     case "failure":
-      // TODO - some kind of failure notification using or replacing displayAjaxError()
+      makeToast(errorThrown, "error");
       break;
   }
   // Remove UI cue
@@ -155,7 +155,7 @@ function handleAjaxReturn(arg1, textStatus, arg3) {
  */
 function displayAjaxError(json) {
   // Do nothing for the moment
-  // TODO - need code here - use Bootstrap Toasts methinks https://getbootstrap.com/docs/5.2/components/toasts/
+  // TODO - need code here - (we have a makeToast() javascript function if we can get the messages there)
 }
 
 //#endregion
@@ -472,25 +472,28 @@ function populateEditForm(data) {
     symClueTexts.push(symClue.place_number + " " + symClue.orientation);
   }
   var symClueText = symClueTexts.join(", ");
-  
+
   // Parse intersecting clues
   var intCluesList = arr["intersecting"];
   if (!intCluesList instanceof Array) {
     intCluesList = Array();
   }
-  for (var ii=0; ii<intCluesList.length; ii++) {
+  for (var ii = 0; ii < intCluesList.length; ii++) {
     // Work out where it overlaps
     var intClue = intCluesList[ii];
     var srcPos;
     var destPos;
-    if (pc.orientation == 'across' && intClue.orientation == 'down') {
+    if (pc.orientation == "across" && intClue.orientation == "down") {
       srcPos = pc.y - intClue.y;
       destPos = intClue.x - pc.x;
-    } else if (pc.orientation == 'down' && intClue.orientation == 'across') {
+    } else if (pc.orientation == "down" && intClue.orientation == "across") {
       srcPos = pc.x - intClue.x;
       destPos = intClue.y - pc.y;
     }
-    c.answer = c.answer.substr(0,destPos) + intClue.clue.answer.substr(srcPos,1).toUpperCase() + c.answer.substr(destPos+1);
+    c.answer =
+      c.answer.substr(0, destPos) +
+      intClue.clue.answer.substr(srcPos, 1).toUpperCase() +
+      c.answer.substr(destPos + 1);
   }
 
   // Put those variables into the modal form
@@ -499,7 +502,7 @@ function populateEditForm(data) {
   $("#edit-clue input#edit-clue-col").val(pc.x);
   $("#edit-clue select#edit-clue-orientation").val(pc.orientation);
   $("#edit-clue input#edit-clue-answer").val(c.answer);
-  $("#edit-clue input#edit-clue-answer").data('old-answer',c.answer); // TODO - HIGH use this to add an onLostFocus or similar which refreshes the list of candidate words
+  $("#edit-clue input#edit-clue-answer").data("old-answer", c.answer); // TODO - HIGH use this to add an onLostFocus or similar which refreshes the list of candidate words
   $("#edit-clue-suggested-words-pattern").text(c.answer);
   $("#edit-clue input#edit-clue-clue").val(c.question);
   $("#edit-clue input#edit-clue-explanation").val(c.explanation);
