@@ -9,7 +9,7 @@ DECLARE letterAsc INT DEFAULT 97;
 DECLARE letterLower CHAR DEFAULT 'a';
 DECLARE letterUpper CHAR DEFAULT 'A';
 
-/* TODO - ensure that this matches the PHP code for generating bare_letters */
+/* NB - this is not an exact copy of the JS function as we don't have access to Unicode normalisation */
 SET @originalWord = originalWord;
 SET @originalBareLetters = REPLACE(REPLACE(REPLACE(originalWord,"'",''),'-',''),' ','');
 SET @originalLength = LENGTH(@originalBareLetters);
@@ -58,7 +58,6 @@ SET @timeStart = NOW(6);
 /* We want our original word in a single-row table */
 INSERT INTO `orig` (`id`,`tome_id`,`word`,`bare_letters`,`length`) SELECT 0,0,@originalWord,@originalBareLetters,@originalLength;
 /* Populate letter-columns */
-/* TODO - we could check if it exists in tome_entries and copy the row if it does */
 letter_loop: WHILE letterAsc < 123 DO
 	/* Populate CHAR variables */
 	SET letterLower = CHAR(letterAsc);
