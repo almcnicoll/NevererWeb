@@ -56,6 +56,7 @@ switch ($action) {
         $tome->source_format = $source_format;
         $tome->readable = $readable;
         $tome->writeable = $writeable;
+        $tome->user_id = $user->id;
         $tome->created = date('Y-m-d H:i:s');
         $tome->modified = date('Y-m-d H:i:s');
         $tome->save();
@@ -69,7 +70,8 @@ switch ($action) {
         /** @var int $readable */
         /** @var int $writeable */
         populate_from_request(['id','name','source','source_type','source_format','readable','writeable']);
-        $tome = Tome::find(['id','=',$id]);
+        $tome = Tome::getById($id);
+        if ($tome->user_id != $user->id) { throw_error("Cannot update tome: you do not own it"); }
         if (!empty($name)) { $tome->name = $name; }
         if (!empty($source)) { $tome->source = $source; }
         if (!empty($source_type)) { $tome->source_type = $source_type; }
@@ -82,7 +84,8 @@ switch ($action) {
     case 'delete':
         /** @var int $id */
         populate_from_request(['id']);
-        $tome = Tome::find(['id','=',$id]);
+        $tome = Tome::getById($id);
+        if ($tome->user_id != $user->id) { throw_error("Cannot delete tome: you do not own it"); }
         $tome->delete();
         die("OK");
     default:

@@ -109,6 +109,51 @@ END_SQL;
             $readable = $stmt->fetch();
             return ($readable == 1);
         }
+        
+        /**
+         * Returns whether the specified tome can be written by the specified user
+         * @param int $tome_id the id of the tome
+         * @param int $user_id the id of the user to check
+         * @return bool true if the tome is writeable by that user; false if not
+         */
+        public static function writeableBy(int $tome_id, int $user_id) : bool {
+            // Check values
+            if (!is_integer($tome_id)) { throw new Exception("Supplied tome_id {$tome_id} is not an integer."); }
+            if (!is_integer($user_id)) { throw new Exception("Supplied user_id {$user_id} is not an integer."); }
+            // Construct SQL
+            $owner_writeable = self::PERMISSION_OWNER;
+            $public_writeable = self::PERMISSION_PUBLIC;
+            $sql = <<<END_SQL
+SELECT COUNT(id)>0 AS writeable
+FROM tomes t
+WHERE t.id=?
+AND ((t.user_id = ? AND writeable = {$owner_writeable}) OR writeable = {$public_writeable})
+END_SQL;
+            $pdo = db::getPDO();
+            $stmt = $pdo->prepare($sql);
+            $criteria_values = [$tome_id,$user_id];
+            $stmt->execute($criteria_values);
+            $stmt->setFetchMode(PDO::FETCH_COLUMN, 0);
+            $writeable = $stmt->fetch();
+            return ($writeable == 1);
+        }
 
+        /**
+         * Wrapper for static readableBy method for current instance
+         * @param int $user_id the id of the user to query
+         * @return bool Whether or not the specified user can read this tome
+         */
+        public function isReadableBy(int $user_id) : bool {
+            return static::readableBy($this->id,$user_id);
+        }
+
+        /**
+         * Wrapper for static writeableBy method for current instance
+         * @param int $user_id the id of the user to query
+         * @return bool Whether or not the specified user can write to this tome
+         */
+        public function isWriteableBy(int $user_id) : bool {
+            return static::writeableBy($this->id,$user_id);
+        }
     }
 }

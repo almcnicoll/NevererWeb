@@ -94,14 +94,36 @@ switch ($action) {
         ];
         die(json_encode($return_value));
     case 'create':
-        // TODO - not implemented yet
+        // TODO - not implemented yet - need to add field processing/populating and save
+        /** @var int $tome_id */
+        populate_from_request(['tome_id']);
+        $tome = Tome::getById($tome_id);
+        if (!$tome->isWriteableBy($user->id)) { throw_error("Cannot create entry: you do not have write permissions to {$tome->name}"); }
+        $tome_entry = new TomeEntry();
+        $tome_entry->tome_id = $tome_id;
+        //$tome_entry->save();
         die("Not implemented");
     case 'update':
-        // TODO - not implemented yet
+        // TODO - not implemented yet - need to add field processing/populating etc.
+        populate_from_request(['id']);
+        /** @var TomeEntry $tome_entry */
+        $tome_entry = TomeEntry::getById($id);
+        /** @var Tome $tome */
+        $tome = $tome_entry->getParent();
+        if (!$tome->isWriteableBy($user->id)) { throw_error("Cannot update entry: you do not have write permissions to {$tome->name}"); }
+        //
+        $tome_entry->modified = date('Y-m-d H:i:s');
+        $tome_entry->save();
         die("Not implemented");
     case 'delete':
-        // TODO - not implemented yet
-        die("Not implemented");
+        /** @var int $id */
+        populate_from_request(['id']);
+        $tome_entry = TomeEntry::getById($id);
+        /** @var Tome $tome */
+        $tome = $tome_entry->getParent();
+        if (!$tome->isWriteableBy($user->id)) { throw_error("Cannot delete entry: you do not have write permissions to {$tome->name}"); }
+        $tome_entry->delete();
+        die("OK");
     default:
         $file = str_replace(__DIR__,'',__FILE__);
         throw_error("Invalid action {$action} passed to {$file}");
