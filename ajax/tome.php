@@ -40,14 +40,51 @@ switch ($action) {
         $tomes = Tome::getAllForUser($user->id);
         die(json_encode($tomes));
     case 'create':
-        // TODO - not implemented yet
-        die("Not implemented");
+        /** @var string $name */
+        /** @var string $source */
+        /** @var string $source_type */
+        /** @var string $source_format */
+        /** @var int $readable */
+        /** @var int $writeable */
+        /** @var string $created */
+        /** @var string $modified */
+        populate_from_request(['name','source','source_type','source_format','readable','writeable']);
+        $tome = new Tome();
+        $tome->name = $name;
+        $tome->source = $source;
+        $tome->source_type = $source_type;
+        $tome->source_format = $source_format;
+        $tome->readable = $readable;
+        $tome->writeable = $writeable;
+        $tome->created = date('Y-m-d H:i:s');
+        $tome->modified = date('Y-m-d H:i:s');
+        $tome->save();
+        die(json_encode($tome->expose()));
     case 'update':
-        // TODO - not implemented yet
-        die("Not implemented");
+        /** @var int $id */
+        /** @var string $name */
+        /** @var string $source */
+        /** @var string $source_type */
+        /** @var string $source_format */
+        /** @var int $readable */
+        /** @var int $writeable */
+        populate_from_request(['id','name','source','source_type','source_format','readable','writeable']);
+        $tome = Tome::find(['id','=',$id]);
+        if (!empty($name)) { $tome->name = $name; }
+        if (!empty($source)) { $tome->source = $source; }
+        if (!empty($source_type)) { $tome->source_type = $source_type; }
+        if (!empty($source_format)) { $tome->source_format = $source_format; }
+        if (!empty($readable)) { $tome->readable = $readable; }
+        if (!empty($writeable)) { $tome->writeable = $writeable; }
+        $tome->modified = date('Y-m-d H:i:s');
+        $tome->save();
+        die(json_encode($tome->expose()));
     case 'delete':
-        // TODO - not implemented yet
-        die("Not implemented");
+        /** @var int $id */
+        populate_from_request(['id']);
+        $tome = Tome::find(['id','=',$id]);
+        $tome->delete();
+        die("OK");
     default:
         $file = str_replace(__DIR__,'',__FILE__);
         throw_error("Invalid action {$action} passed to {$file}");
