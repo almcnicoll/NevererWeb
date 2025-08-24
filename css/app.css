@@ -220,10 +220,6 @@ span.letter-holder {
 }
 
 /* Candidate word list */
-#suggested-words-row {
-  max-height: 30em;
-  overflow-y: auto;
-}
 div.word-list-row {
   max-height: 32em;
   overflow-y: auto;
