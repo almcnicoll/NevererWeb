@@ -2,6 +2,7 @@
 use Logging\LoggedError;
 use Dictionaries\Tome;
 use Dictionaries\TomeEntry;
+use Crosswords\Clue;
 
 function throw_error($errors) {
     $retval = ['errors' => $errors];
@@ -94,27 +95,44 @@ switch ($action) {
         ];
         die(json_encode($return_value));
     case 'create':
-        // TODO - not implemented yet - need to add field processing/populating and save
         /** @var int $tome_id */
-        populate_from_request(['tome_id']);
+        populate_from_request(['tome_id','word']);
         $tome = Tome::getById($tome_id);
         if (!$tome->isWriteableBy($user->id)) { throw_error("Cannot create entry: you do not have write permissions to {$tome->name}"); }
+        $word = trim($word);
+        if (empty($word)) { throw_error("Cannot supply a word that is blank or only whitespace ({$word})"); }
+        $bare_letters = Clue::stripToAnswerLetters($word);
+        if (empty($bare_letters)) { throw_error("Cannot supply a word that is blank or only whitespace when non-crossword characters are removed ({$word})"); }
         $tome_entry = new TomeEntry();
         $tome_entry->tome_id = $tome_id;
-        //$tome_entry->save();
-        die("Not implemented");
+        $tome_entry->word = $word;
+        $tome_entry->bare_letters = $bare_letters;
+        $tome_entry->length = strlen($bare_letters);
+        $tome_entry->created = date('Y-m-d H:i:s');
+        $tome_entry->modified = date('Y-m-d H:i:s');
+        $tome_entry->flagForLetterCountUpdate(); // Shouldn't be needed, as this is default true, but let's play it safe, given the minimal time cost
+        $tome_entry->save();
+        return json_encode($tome_entry->expose());
     case 'update':
-        // TODO - not implemented yet - need to add field processing/populating etc.
-        populate_from_request(['id']);
+        populate_from_request(['id','word']);
+        $word = trim($word);
+        if (empty($word)) { throw_error("Cannot supply a word that is blank or only whitespace ({$word})"); }
+        $bare_letters = Clue::stripToAnswerLetters($word);
+        if (empty($bare_letters)) { throw_error("Cannot supply a word that is blank or only whitespace when non-crossword characters are removed ({$word})"); }
         /** @var TomeEntry $tome_entry */
         $tome_entry = TomeEntry::getById($id);
         /** @var Tome $tome */
         $tome = $tome_entry->getParent();
         if (!$tome->isWriteableBy($user->id)) { throw_error("Cannot update entry: you do not have write permissions to {$tome->name}"); }
-        //
+        // Update fields
+        $tome_entry->word = $word;
+        $tome_entry->bare_letters = $bare_letters;
+        $tome_entry->length = strlen($bare_letters);
+        $tome_entry->flagForLetterCountUpdate();
         $tome_entry->modified = date('Y-m-d H:i:s');
         $tome_entry->save();
-        die("Not implemented");
+        $tome_entry = TomeEntry::getById($id); // To retrieve the now-updated values
+        return json_encode($tome_entry->expose());
     case 'delete':
         /** @var int $id */
         populate_from_request(['id']);

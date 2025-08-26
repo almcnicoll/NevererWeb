@@ -111,7 +111,7 @@ namespace Crosswords {
          * @param string the input string to strip
          * @return string the string with spaces and punctuation removed, in the form it would appear in a crossword grid
          */
-        public static function stripAnswerLetters(string $input) : string {
+        public static function stripToAnswerLetters(string $input) : string {
             return preg_replace(Clue::NON_PATTERN_CHARS,'',preg_replace(Clue::PATTERN_SPLIT_CHARS,'',$input));
         }
 
@@ -120,7 +120,7 @@ namespace Crosswords {
          * @return string the letters as a string
          */
         public function getAnswerLetters() : string {
-            return Clue::stripAnswerLetters($this->answer);
+            return Clue::stripToAnswerLetters($this->answer);
         }
 
         /** Returns a blank clone (same length, no specified letters) of the current clue */

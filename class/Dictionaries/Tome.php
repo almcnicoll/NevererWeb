@@ -155,5 +155,14 @@ END_SQL;
         public function isWriteableBy(int $user_id) : bool {
             return static::writeableBy($this->id,$user_id);
         }
+
+        public static function updateLetterCounts() {
+            $sql = "CALL PopulateLetterCounts();";
+            $pdo = db::getPDO();
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute();
+            // Close the cursor - prevents error #2014 "Cannot execute queries while there are pending result sets"
+            $stmt->closeCursor();
+        }
     }
 }

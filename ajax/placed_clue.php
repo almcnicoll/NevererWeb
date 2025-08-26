@@ -213,7 +213,7 @@ switch ($action) {
         // Work out what's changed, for symmetry-clue-update purposes
         $clue = $placedClue->getClue();
         $orientation_change = ($placedClue->orientation != $_POST['orientation']);
-        $length_change = strlen(Clue::stripAnswerLetters($_POST['answer'])) - strlen(Clue::stripAnswerLetters($clue->answer)); // Important to use stripAnswerLetters so we're using the "grid length" of the submitted answer
+        $length_change = strlen(Clue::stripToAnswerLetters($_POST['answer'])) - strlen(Clue::stripToAnswerLetters($clue->answer)); // Important to use stripToAnswerLetters so we're using the "grid length" of the submitted answer
         $x_change = $_POST['col'] - $placedClue->x;
         $y_change = $_POST['row'] - $placedClue->y;
 
