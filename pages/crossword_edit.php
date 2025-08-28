@@ -49,11 +49,26 @@
     $form_new_clue->addField('pattern')->setLabel('')->setType('hidden');
     $form_new_clue->addField('clue')->setLabel('Clue')->setDivClass('mb-3')->setClass('border-secondary'); /*->setHelp("The clue text")*/
     $form_new_clue->addField('explanation')->setLabel('Explanation')->setClass('border-secondary'); /*->setHelp("An explanation of the working of the clue (optional, will not show on crossword output)")*/
+    $new_clue_sidebar = <<<END_HTML
+<div class="container">
+<div class="row word-list-row">
+<table class="table table-hover word-list">
+    <thead>
+        <tr class='table-dark'>
+            <th scope='col' id='new-clue-suggested-words-pattern'></th>
+        </tr>
+    </thead>
+    <tbody id='new-clue-suggested-words-tbody'></tbody>
+</table>
+</div>
+</div>
+END_HTML;
     $modal_new_clue = new UI\BootstrapModal('new-clue');
     $modal_new_clue->setTitle('Add clue')
     ->setBody($form_new_clue->getHtml())
     ->setButtons("Save")
-    ->setTrigger("+");
+    ->setTrigger("+")
+    ->setSidebar($new_clue_sidebar); // TODO - HIGH wire up this new-clue sidebar with javascript too
     echo $modal_new_clue->getMainHtml();
     
     $form_edit_clue = new UI\BootstrapForm('edit-clue');
@@ -66,7 +81,6 @@
     $form_edit_clue->addField('pattern')->setLabel('')->setType('hidden');
     $form_edit_clue->addField('clue')->setLabel('Clue')->setDivClass('mb-3')->setClass('border-secondary'); /*->setHelp("The clue text")*/
     $form_edit_clue->addField('explanation')->setLabel('Explanation')->setClass('border-secondary'); /*->setHelp("An explanation of the working of the clue (optional, will not show on crossword output)")*/
-    // TODO - HIGH sort max-height on this and force scrolling
     $edit_clue_sidebar = <<<END_HTML
 <div class="container">
 <div class="row word-list-row">
@@ -89,7 +103,7 @@ END_HTML;
     echo $modal_edit_clue->getMainHtml();
     
     $form_edit_settings = new UI\BootstrapForm('edit-settings');
-    //$form_edit_settings->addHtml("<div class='' id='form-edit-settings-affected-settingss-warning'>This may also affect: <span id='form-edit-settings-affected-settingss-details'></span></div>");
+    //$form_edit_settings->addHtml("<div class='' id='form-edit-settings-affected-settings-warning'>This may also affect: <span id='form-edit-settings-affected-settingss-details'></span></div>");
     $form_edit_settings->setColumns(2);
     $form_edit_settings->addField('id')->setType("hidden")->setValue($crossword->id);
     $form_edit_settings->addField('title')->setValue($crossword->title)->setLabel('Title')->setDivClass('mb-3')->setClass('focussed-input border-secondary')->setStylePreset('floating');
