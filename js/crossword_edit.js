@@ -199,6 +199,8 @@ $(document).ready(
       gridSquareMenuClickHandler
     );
     $(".alters-trim").on("change", updateTrims);
+    // Word-list updaters
+    $('input#edit-clue-answer').on('blur', function(){}); // TODO - HIGH see prev note on lostfocus
 
     // Refresh data
     refreshGrid();
