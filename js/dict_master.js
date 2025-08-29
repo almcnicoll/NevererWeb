@@ -74,8 +74,8 @@ worker.onmessage = function (e) {
     switch (msg.format) {
       case "table-row":
         output =
-          "<tr><td>" +
-          matches.results.map((o) => o.word).join("</td></tr>\n<tr><td>") +
+          "<tr><td class='suggested-word-list-item'>" +
+          matches.results.map((o) => o.word).join("</td></tr>\n<tr><td class='suggested-word-list-item'>") +
           "</td></tr>";
         break;
       case "text":
@@ -160,6 +160,7 @@ function lookupWordsByPattern(pattern, length, destination, format) {
     destination: destination,
     format: format,
   });
+  // dict_Worker.js returns message "regexResults" when complete
 }
 
 /**

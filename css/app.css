@@ -234,7 +234,7 @@ table.word-list th {
   position: sticky;
   top: 0;
 }
-table.word-list td {
+table.word-list td.suggested-word-list-item {
   cursor: pointer;
 }
 

@@ -1,3 +1,4 @@
+// TODO - clear suggested word list on when new- and edit-clue forms load
 // Global variables
 var rows = 0;
 var cols = 0;
@@ -200,7 +201,10 @@ $(document).ready(
     );
     $(".alters-trim").on("change", updateTrims);
     // Word-list updaters
-    $('input#edit-clue-answer').on('blur', function(){}); // TODO - HIGH see prev note on lostfocus
+    $('input#new-clue-answer').on('change', checkForSuggestWordListRefresh);
+    $('input#edit-clue-answer').on('change', checkForSuggestWordListRefresh);
+    $('#new-clue').on('click', 'td.suggested-word-list-item', function() { $('#new-clue-answer').val( $(this).text() ); });
+    $('#edit-clue').on('click', 'td.suggested-word-list-item', function() { $('#edit-clue-answer').val( $(this).text() ); });
 
     // Refresh data
     refreshGrid();
@@ -504,11 +508,11 @@ function populateEditForm(data) {
   $("#edit-clue input#edit-clue-col").val(pc.x);
   $("#edit-clue select#edit-clue-orientation").val(pc.orientation);
   $("#edit-clue input#edit-clue-answer").val(c.answer);
-  $("#edit-clue input#edit-clue-answer").data("old-answer", c.answer); // TODO - HIGH use this to add an onLostFocus or similar which refreshes the list of candidate words
+  $("#edit-clue input#edit-clue-answer").data("old-answer", c.answer);
   $("#edit-clue-suggested-words-pattern").text(c.answer);
   $("#edit-clue input#edit-clue-clue").val(c.question);
   $("#edit-clue input#edit-clue-explanation").val(c.explanation);
-  refreshSuggestedWordList("edit"); // TODO - HIGH overlay any constraints from crossing clues
+  refreshSuggestedWordList("edit");
   // Symmetry clues message
   if (symClueTexts.length == 0) {
     $("#form-edit-clue-affected-clues-warning").hide();
@@ -683,6 +687,24 @@ function getAnswerPattern(answer) {
     pattern_parts[i] = answer_parts[i].length;
   }
   return "(" + pattern_parts.join(",") + ")";
+}
+
+/**
+ * Checks the correct input to determine if a refresh is needed, and triggers it if so
+ * @param {object} e the jQuery event object
+ */
+function checkForSuggestWordListRefresh(e) {
+  var oldVal = $(this).data('old-answer');
+  var newVal = $(this).val();
+  if (newVal != oldVal) {
+    $(this).data('old-answer',newVal);
+    if ((newVal !== null) && (typeof newVal === 'string') && (newVal.trim() !== '') && ( getAnswerPattern(newVal) !== null )) {
+      var id = $(this).attr('id');
+      var parts = id.split('-');
+      var context = parts[0];
+      refreshSuggestedWordList(context);
+    }
+  }
 }
 
 /**
