@@ -1,4 +1,3 @@
-// TODO - clear suggested word list on when new- and edit-clue forms load
 // Global variables
 var rows = 0;
 var cols = 0;
@@ -509,6 +508,7 @@ function populateEditForm(data) {
   $("#edit-clue select#edit-clue-orientation").val(pc.orientation);
   $("#edit-clue input#edit-clue-answer").val(c.answer);
   $("#edit-clue input#edit-clue-answer").data("old-answer", c.answer);
+  $("table.word-list tbody td").remove();
   $("#edit-clue-suggested-words-pattern").text(c.answer);
   $("#edit-clue input#edit-clue-clue").val(c.question);
   $("#edit-clue input#edit-clue-explanation").val(c.explanation);
@@ -887,6 +887,7 @@ function gridSquareMenuClickHandler(eventObject) {
         $("#context-menu-menu-grid-square").data("trigger-col")
       );
       $("#new-clue select#new-clue-orientation").val("across");
+      $("table.word-list tbody td").remove();
       new bootstrap.Modal("#new-clue").toggle();
       $("#new-clue #new-clue-clue").val("");
       $("#new-clue #new-clue-explanation").val("");
@@ -900,6 +901,7 @@ function gridSquareMenuClickHandler(eventObject) {
         $("#context-menu-menu-grid-square").data("trigger-col")
       );
       $("#new-clue select#new-clue-orientation").val("down");
+      $("table.word-list tbody td").remove();
       new bootstrap.Modal("#new-clue").toggle();
       $("#new-clue #new-clue-clue").val("");
       $("#new-clue #new-clue-explanation").val("");
