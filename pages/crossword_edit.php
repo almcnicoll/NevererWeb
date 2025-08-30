@@ -68,7 +68,7 @@ END_HTML;
     ->setBody($form_new_clue->getHtml())
     ->setButtons("Save")
     ->setTrigger("+")
-    ->setSidebar($new_clue_sidebar); // TODO - HIGH wire up this new-clue sidebar with javascript too
+    ->setSidebar($new_clue_sidebar);
     echo $modal_new_clue->getMainHtml();
     
     $form_edit_clue = new UI\BootstrapForm('edit-clue');

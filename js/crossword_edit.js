@@ -723,10 +723,12 @@ function refreshSuggestedWordList(context) {
         $("#new-clue-suggested-words-tbody").html(
           "<h5>Dictionary still syncing from server</h5>"
         );
+        // TODO - Offload to server method (needs creating!) until dict sync complete
         return;
       } else {
         pattern = $("#new-clue input#new-clue-answer").val();
-        //lookupWordsByRegex(getRegexFromPattern(pattern), pattern.length, '#new-clue-suggested-words-tbody', 'table-row');
+        $("#new-clue-suggested-words-pattern").text(pattern);
+        $("table.word-list tbody td").remove();
         lookupWordsByPattern(
           pattern,
           pattern.length,
@@ -741,10 +743,12 @@ function refreshSuggestedWordList(context) {
         $("#edit-clue-suggested-words-tbody").html(
           "<h5>Dictionary still syncing from server</h5>"
         );
+        // TODO - Offload to server method (needs creating!) until dict sync complete
         return;
       } else {
         pattern = $("#edit-clue input#edit-clue-answer").val();
-        //lookupWordsByRegex(getRegexFromPattern(pattern), pattern.length, '#edit-clue-suggested-words-tbody', 'table-row');
+        $("#edit-clue-suggested-words-pattern").text(pattern);
+        $("table.word-list tbody td").remove();
         lookupWordsByPattern(
           pattern,
           pattern.length,
@@ -840,8 +844,7 @@ function gridSquareRightClickHandler(eventObject) {
     .data("trigger-row", parts[1])
     .data("trigger-col", parts[2]);
   // Check the validity of each item
-  // TODO - change from visibility to enabled/disabled to prevent menu from being unfamiliar each time?
-  if (eventObject.currentTarget.classList.contains("black-square")) {
+    if (eventObject.currentTarget.classList.contains("black-square")) {
     $("#menu-grid-square-clear-grid-square").hide();
   } else {
     $("#menu-grid-square-clear-grid-square").show();
