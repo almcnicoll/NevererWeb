@@ -3,6 +3,8 @@ use Logging\LoggedError;
 use Dictionaries\Tome;
 use Dictionaries\TomeEntry;
 use Crosswords\Clue;
+use PDO,Exception,DateTime;
+use Basic\db;
 
 function throw_error($errors) {
     $retval = ['errors' => $errors];
@@ -45,7 +47,7 @@ switch ($action) {
     case 'list':
         $errors = [];
         $permissions_checked = false;
-        // Called as /ajax/tome/*/list?tome_ids=[m,n]&limit=p&offset=q
+        // Called as /ajax/tome_entry/*/list?tome_ids=[m,n]&limit=p&offset=q
         // If tome_id is not supplied, retrieve for all user-accessible dictionaries
         populate_from_request(['tome_ids','since','limit','offset']);
         if (!isset($since)) { $since = new DateTime('1970-01-01 00:00:00'); }
@@ -94,6 +96,33 @@ switch ($action) {
             )
         ];
         die(json_encode($return_value));
+    case 'lookup':
+        // TODO - HIGH - test this
+        $errors = [];
+        // Called as /ajax/tome_entry/*/lookup?pattern=...
+        $pattern = ''; $limit = null; $offset = null;
+        populate_from_request(['pattern','limit','offset']);
+        // Retrieve for all user-accessible dictionaries
+        $tomes = Tome::getAllForUser($user->id);
+        $tome_ids = array_column($tomes, 'id');
+        // Generate query
+        $criteria_values = $tome_ids;
+        $qmarks = implode(',',array_fill(0, count($tome_ids), '?'));
+        $rlike = str_replace('?','.',$pattern);
+        $criteria_values[] = $rlike;
+        $sql = <<<END_SQL
+            SELECT `tome_entries`.*
+            FROM `tome_entries`
+            WHERE `tome_id` IN ({$qmarks})
+            AND `bare_letters` RLIKE ?
+END_SQL;
+        $pdo = db::getPDO();        
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($criteria_values);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, TomeEntry::class);
+        $results = $stmt->fetchAll();
+        return $results;
+        break;
     case 'create':
         /** @var int $tome_id */
         populate_from_request(['tome_id','word']);

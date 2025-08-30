@@ -723,7 +723,7 @@ function refreshSuggestedWordList(context) {
         $("#new-clue-suggested-words-tbody").html(
           "<h5>Dictionary still syncing from server</h5>"
         );
-        // TODO - Offload to server method (needs creating!) until dict sync complete
+        // TODO - Offload to server method until dict sync complete (use new tome_entry\lookup method)
         return;
       } else {
         pattern = $("#new-clue input#new-clue-answer").val();
@@ -743,7 +743,7 @@ function refreshSuggestedWordList(context) {
         $("#edit-clue-suggested-words-tbody").html(
           "<h5>Dictionary still syncing from server</h5>"
         );
-        // TODO - Offload to server method (needs creating!) until dict sync complete
+        // TODO - Offload to server method until dict sync complete (use new tome_entry\lookup method)
         return;
       } else {
         pattern = $("#edit-clue input#edit-clue-answer").val();
