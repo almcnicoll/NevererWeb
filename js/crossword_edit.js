@@ -200,10 +200,14 @@ $(document).ready(
     );
     $(".alters-trim").on("change", updateTrims);
     // Word-list updaters
-    $('input#new-clue-answer').on('change', checkForSuggestWordListRefresh);
-    $('input#edit-clue-answer').on('change', checkForSuggestWordListRefresh);
-    $('#new-clue').on('click', 'td.suggested-word-list-item', function() { $('#new-clue-answer').val( $(this).text() ); });
-    $('#edit-clue').on('click', 'td.suggested-word-list-item', function() { $('#edit-clue-answer').val( $(this).text() ); });
+    $("input#new-clue-answer").on("change", checkForSuggestWordListRefresh);
+    $("input#edit-clue-answer").on("change", checkForSuggestWordListRefresh);
+    $("#new-clue").on("click", "td.suggested-word-list-item", function () {
+      $("#new-clue-answer").val($(this).text());
+    });
+    $("#edit-clue").on("click", "td.suggested-word-list-item", function () {
+      $("#edit-clue-answer").val($(this).text());
+    });
 
     // Refresh data
     refreshGrid();
@@ -694,13 +698,18 @@ function getAnswerPattern(answer) {
  * @param {object} e the jQuery event object
  */
 function checkForSuggestWordListRefresh(e) {
-  var oldVal = $(this).data('old-answer');
+  var oldVal = $(this).data("old-answer");
   var newVal = $(this).val();
   if (newVal != oldVal) {
-    $(this).data('old-answer',newVal);
-    if ((newVal !== null) && (typeof newVal === 'string') && (newVal.trim() !== '') && ( getAnswerPattern(newVal) !== null )) {
-      var id = $(this).attr('id');
-      var parts = id.split('-');
+    $(this).data("old-answer", newVal);
+    if (
+      newVal !== null &&
+      typeof newVal === "string" &&
+      newVal.trim() !== "" &&
+      getAnswerPattern(newVal) !== null
+    ) {
+      var id = $(this).attr("id");
+      var parts = id.split("-");
       var context = parts[0];
       refreshSuggestedWordList(context);
     }
@@ -718,17 +727,32 @@ function refreshSuggestedWordList(context) {
   // Handle according to where/how it was called
   switch (context) {
     case "new":
+      pattern = $("#new-clue input#new-clue-answer").val();
+      $("#new-clue-suggested-words-pattern").text(pattern);
+      $("table.word-list tbody td").remove();
       // Handle possibility of dictionary sync not yet being complete
       if (!dictionary_sync_complete) {
-        $("#new-clue-suggested-words-tbody").html(
+        /*$("#new-clue-suggested-words-tbody").html(
           "<h5>Dictionary still syncing from server</h5>"
-        );
-        // TODO - Offload to server method until dict sync complete (use new tome_entry\lookup method)
+        );*/
+        // Offload to server method until dict sync complete
+        // TODO - test this
+        const url =
+          root_path +
+          "/tome_entry/*/lookup?domain=ajax" +
+          "&pattern=" +
+          pattern +
+          "&limit=null&offset=null";
+        makeAjaxCall("get", url, null, function (data) {
+          populateSuggestedWords(
+            data,
+            data.length,
+            "#new-clue-suggested-words-tbody",
+            "table-row"
+          );
+        });
         return;
       } else {
-        pattern = $("#new-clue input#new-clue-answer").val();
-        $("#new-clue-suggested-words-pattern").text(pattern);
-        $("table.word-list tbody td").remove();
         lookupWordsByPattern(
           pattern,
           pattern.length,
@@ -738,17 +762,32 @@ function refreshSuggestedWordList(context) {
         break;
       }
     case "edit":
+      pattern = $("#edit-clue input#edit-clue-answer").val();
+      $("#edit-clue-suggested-words-pattern").text(pattern);
+      $("table.word-list tbody td").remove();
       // Handle possibility of dictionary sync not yet being complete
       if (!dictionary_sync_complete) {
-        $("#edit-clue-suggested-words-tbody").html(
+        /*$("#edit-clue-suggested-words-tbody").html(
           "<h5>Dictionary still syncing from server</h5>"
-        );
-        // TODO - Offload to server method until dict sync complete (use new tome_entry\lookup method)
+        );*/
+        // Offload to server method until dict sync complete
+        // TODO - test this
+        const url =
+          root_path +
+          "/tome_entry/*/lookup?domain=ajax" +
+          "&pattern=" +
+          pattern +
+          "&limit=null&offset=null";
+        makeAjaxCall("get", url, null, function (data) {
+          populateSuggestedWords(
+            data,
+            data.length,
+            "#edit-clue-suggested-words-tbody",
+            "table-row"
+          );
+        });
         return;
       } else {
-        pattern = $("#edit-clue input#edit-clue-answer").val();
-        $("#edit-clue-suggested-words-pattern").text(pattern);
-        $("table.word-list tbody td").remove();
         lookupWordsByPattern(
           pattern,
           pattern.length,
@@ -844,7 +883,7 @@ function gridSquareRightClickHandler(eventObject) {
     .data("trigger-row", parts[1])
     .data("trigger-col", parts[2]);
   // Check the validity of each item
-    if (eventObject.currentTarget.classList.contains("black-square")) {
+  if (eventObject.currentTarget.classList.contains("black-square")) {
     $("#menu-grid-square-clear-grid-square").hide();
   } else {
     $("#menu-grid-square-clear-grid-square").show();

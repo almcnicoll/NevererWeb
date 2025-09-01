@@ -55,37 +55,12 @@ worker.onmessage = function (e) {
       }
     );
   } else if (msg.type === "regexResults") {
-    /** @type {Array<Object>} */
-    const matches = msg.results;
-    const totalMatches = msg.totalMatches;
-    console.log(
-      "Regex match results (" +
-        msg.offset +
-        "-" +
-        (msg.offset + msg.limit) +
-        "/" +
-        totalMatches +
-        "):",
-      matches
+    populateSuggestedWords(
+      msg.results,
+      msg.totalMatches,
+      msg.destination,
+      msg.format
     );
-
-    /** @type {string} */
-    var output = "";
-    switch (msg.format) {
-      case "table-row":
-        output =
-          "<tr><td class='suggested-word-list-item'>" +
-          matches.results.map((o) => o.word).join("</td></tr>\n<tr><td class='suggested-word-list-item'>") +
-          "</td></tr>";
-        break;
-      case "text":
-        output = matches.results.map((o) => o.bare_letters).join("\n");
-        break;
-      case "default":
-        throw new Exception("Invalid format " + msg.format + " specified.");
-    }
-
-    $(msg.destination).html(output); // Works fine if it's plain text too
   } else if (msg.type === "syncIncomplete") {
     // Update the UI
     $("#status-bar").html(
@@ -104,6 +79,35 @@ worker.onmessage = function (e) {
     dictionary_sync_complete = true;
   }
 };
+
+/**
+ * Populates the suggested word list with the returned matches in the specified format
+ * @param {Array<Object>} matches an array of matched word entries
+ * @param {int} totalMatches the total number of matches (in case we've paged the results) - currently unused
+ * @param {string} destination the jQuery identifier of the location to put the results
+ * @param {string} format the format in which to put the results (currently table-row|text)
+ */
+function populateSuggestedWords(matches, totalMatches, destination, format) {
+  /** @type {string} */
+  var output = "";
+  switch (format) {
+    case "table-row":
+      output =
+        "<tr><td class='suggested-word-list-item'>" +
+        matches.results
+          .map((o) => o.word)
+          .join("</td></tr>\n<tr><td class='suggested-word-list-item'>") +
+        "</td></tr>";
+      break;
+    case "text":
+      output = matches.results.map((o) => o.bare_letters).join("\n");
+      break;
+    case "default":
+      throw new Exception("Invalid format " + format + " specified.");
+  }
+
+  $(destination).html(output); // Works fine if it's plain text too
+}
 
 /**
  * Takes a pattern in the form A?B??C?D and returns a regular expression for searching a word list
