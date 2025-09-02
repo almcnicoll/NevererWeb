@@ -108,7 +108,7 @@ switch ($action) {
         // Generate query
         $criteria_values = $tome_ids;
         $qmarks = implode(',',array_fill(0, count($tome_ids), '?'));
-        $rlike = str_replace('?','.',$pattern);
+        $rlike = '^'.str_replace('?','.',$pattern).'$';
         $criteria_values[] = $rlike;
         $sql = <<<END_SQL
             SELECT `tome_entries`.*
@@ -121,8 +121,8 @@ END_SQL;
         $stmt->execute($criteria_values);
         $stmt->setFetchMode(PDO::FETCH_CLASS, TomeEntry::class);
         $results = $stmt->fetchAll();
-        return $results;
-        break;
+        $output = ['results' => $results];
+        die(json_encode($output));
     case 'create':
         /** @var int $tome_id */
         populate_from_request(['tome_id','word']);

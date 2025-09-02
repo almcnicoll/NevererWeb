@@ -732,11 +732,10 @@ function refreshSuggestedWordList(context) {
       $("table.word-list tbody td").remove();
       // Handle possibility of dictionary sync not yet being complete
       if (!dictionary_sync_complete) {
-        /*$("#new-clue-suggested-words-tbody").html(
-          "<h5>Dictionary still syncing from server</h5>"
-        );*/
         // Offload to server method until dict sync complete
-        // TODO - test this
+        $("#new-clue-suggested-words-tbody").html(
+          "<h5>Retrieving words will be slower while dictionary sync underway</h5>"
+        );
         const url =
           root_path +
           "/tome_entry/*/lookup?domain=ajax" +
@@ -744,9 +743,10 @@ function refreshSuggestedWordList(context) {
           pattern +
           "&limit=null&offset=null";
         makeAjaxCall("get", url, null, function (data) {
+          parsedData = JSON.parse(data);
           populateSuggestedWords(
-            data,
-            data.length,
+            parsedData,
+            parsedData.length,
             "#new-clue-suggested-words-tbody",
             "table-row"
           );
@@ -767,11 +767,10 @@ function refreshSuggestedWordList(context) {
       $("table.word-list tbody td").remove();
       // Handle possibility of dictionary sync not yet being complete
       if (!dictionary_sync_complete) {
-        /*$("#edit-clue-suggested-words-tbody").html(
-          "<h5>Dictionary still syncing from server</h5>"
-        );*/
         // Offload to server method until dict sync complete
-        // TODO - test this
+        $("#edit-clue-suggested-words-tbody").html(
+          "<h5>Retrieving words will be slower while dictionary sync underway</h5>"
+        );
         const url =
           root_path +
           "/tome_entry/*/lookup?domain=ajax" +
@@ -779,9 +778,10 @@ function refreshSuggestedWordList(context) {
           pattern +
           "&limit=null&offset=null";
         makeAjaxCall("get", url, null, function (data) {
+          parsedData = JSON.parse(data);
           populateSuggestedWords(
-            data,
-            data.length,
+            parsedData,
+            parsedData.length,
             "#edit-clue-suggested-words-tbody",
             "table-row"
           );
