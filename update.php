@@ -128,8 +128,14 @@ if (file_exists('sql/db-updates.sql')) {
             $stmt->execute();
             // Close the cursor - prevents error #2014 "Cannot execute queries while there are pending result sets"
             $stmt->closeCursor();
+        } catch (PDOException $pe) {
+            error_log($pe->getMessage());
+            pre_die("PDO: Error running SQL for version #{$v}.",
+                    $pe->getMessage(),
+                    "You will need to check that the database is in a valid state.",
+                    "SQL reads ".ellipsis($sql, 1000));
         } catch (Exception $e) {
-            pre_die("Error running SQL for version #{$v}.",
+            pre_die("EXC: Error running SQL for version #{$v}.",
                     "You will need to check that the database is in a valid state.",
                     "SQL reads ".ellipsis($sql, 1000));
         }

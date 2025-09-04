@@ -359,3 +359,6 @@ CALL PopulateLetterCounts();
 /* VERSION 27 */
 INSERT INTO `faqs` (`question`,`answer`,`rank`,`created`,`modified`)
 VALUES ("What does 'synchronising words' mean, and why is it taking so long?","There's a bunch of word-based operations which Neverer needs to do to support crossword-making - in particular, looking for words or phrases which match a particular gap in your crossword.<br /><br />Sending these all to the server to query would be (a) slow and (b) costly in terms of server resources. Instead, Neverer downloads a list of words from the server to your local machine.<br /><br />Once those words are stored locally on your machine, Neverer will only need to download any changes, which will most likely be small in number. However, the initial synchronisation could take anything from a few minutes to an hour. The system is useable in the meantime, but a few features will be unavailable.",10,NOW(),NOW());
+/* UPDATE */
+/* VERSION 28 */
+/*include 28_idiom_tome.sql*/
