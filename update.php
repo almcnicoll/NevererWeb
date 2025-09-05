@@ -5,6 +5,9 @@ use Basic\DbUpdate, Basic\db;
 
 $version = 0;
 $updates = [];
+$prepareModePattern = <<<'EXPR'
+#/*\s*(PREPAREMODE)\s*\*/#i
+EXPR;
 
 // Utility functions
 function pre_echo(...$texts) : void {
@@ -123,11 +126,16 @@ if (file_exists('sql/db-updates.sql')) {
             pre_die("Unable to start a transaction at version #{$v}.");
         }
         try {
-            $stmt = $pdo->prepare($sql);
-            //$pdo->exec($sql);
-            $stmt->execute();
-            // Close the cursor - prevents error #2014 "Cannot execute queries while there are pending result sets"
-            $stmt->closeCursor();
+            $prepareMode = ( preg_match($prepareModePattern,$sql) === 1);
+            if ($prepareMode) {
+                // Works for creating a Stored Procedure, but max one query
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute();            
+                $stmt->closeCursor(); // Close the cursor - prevents error #2014 "Cannot execute queries while there are pending result sets"
+            } else {
+                // Can handle multiple queries
+                $pdo->exec($sql);
+            }
         } catch (PDOException $pe) {
             error_log($pe->getMessage());
             pre_die("PDO: Error running SQL for version #{$v}.",

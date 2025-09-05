@@ -1,3 +1,4 @@
+ /* PREPAREMODE */
 CREATE DEFINER=CURRENT_USER PROCEDURE `AnagramMethod01`(
 	originalWord VARCHAR(20),
 	maxWords TINYINT(1)

@@ -1,12 +1,10 @@
-START /* 0 */ TRANSACTION;
-
-INSERT /* 1 */ INTO `tomes` ( `id`,`name`,`source`,`source_type`,`source_format`,`readable`,`writeable`,`user_id`,`last_updated`,`created`,`modified` )
+INSERT INTO `tomes` ( `id`,`name`,`source`,`source_type`,`source_format`,`readable`,`writeable`,`user_id`,`last_updated`,`created`,`modified` )
 VALUES ( 2,'English idioms','', 'local', 'json', 2, 0, 0, NOW(), NOW(), NOW() );
 
-INSERT /* 2 */ INTO `tome_entries` (`tome_id`, `word`, `bare_letters`, `created`, `modified`) VALUES (2,"A STORM IN A TEACUP","ASTORMINATEACUP",NOW(),NOW());
-INSERT /* 3 */ INTO `tome_entries` (`tome_id`, `word`, `bare_letters`, `created`, `modified`) VALUES (2,"ADD FUEL TO THE FIRE","ADDFUELTOTHEFIRE",NOW(),NOW());
-INSERT /* 4 */ INTO `tome_entries` (`tome_id`, `word`, `bare_letters`, `created`, `modified`) VALUES (2,"ALL EARS","ALLEARS",NOW(),NOW());
-INSERT /* 5 */ INTO `tome_entries` (`tome_id`, `word`, `bare_letters`, `created`, `modified`) VALUES (2,"ALL IN THE SAME BOAT","ALLINTHESAMEBOAT",NOW(),NOW());
+INSERT INTO `tome_entries` (`tome_id`, `word`, `bare_letters`, `created`, `modified`) VALUES (2,"A STORM IN A TEACUP","ASTORMINATEACUP",NOW(),NOW());
+INSERT INTO `tome_entries` (`tome_id`, `word`, `bare_letters`, `created`, `modified`) VALUES (2,"ADD FUEL TO THE FIRE","ADDFUELTOTHEFIRE",NOW(),NOW());
+INSERT INTO `tome_entries` (`tome_id`, `word`, `bare_letters`, `created`, `modified`) VALUES (2,"ALL EARS","ALLEARS",NOW(),NOW());
+INSERT INTO `tome_entries` (`tome_id`, `word`, `bare_letters`, `created`, `modified`) VALUES (2,"ALL IN THE SAME BOAT","ALLINTHESAMEBOAT",NOW(),NOW());
 INSERT INTO `tome_entries` (`tome_id`, `word`, `bare_letters`, `created`, `modified`) VALUES (2,"ALL SET","ALLSET",NOW(),NOW());
 INSERT INTO `tome_entries` (`tome_id`, `word`, `bare_letters`, `created`, `modified`) VALUES (2,"AN ARM AND A LEG","ANARMANDALEG",NOW(),NOW());
 INSERT INTO `tome_entries` (`tome_id`, `word`, `bare_letters`, `created`, `modified`) VALUES (2,"APPLE OF ONE'S EYE","APPLEOFONSEYE",NOW(),NOW());
@@ -340,5 +338,3 @@ INSERT INTO `tome_entries` (`tome_id`, `word`, `bare_letters`, `created`, `modif
 INSERT INTO `tome_entries` (`tome_id`, `word`, `bare_letters`, `created`, `modified`) VALUES (2,"ZIP ONE'S LIP","ZIPONESLIP",NOW(),NOW());
 
 CALL PopulateLetterCounts();
-
-COMMIT;

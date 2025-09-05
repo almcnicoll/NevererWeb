@@ -179,7 +179,7 @@ function startSync() {
     // Fetch new/updated entries
     // const lastSync = (await db.sync_meta.get('entries'))?.last_sync ?? '1970-01-01T00:00:00Z';
     const meta = (await db.sync_meta.get("entries")) || {};
-    const lastSync = meta.last_sync || "1970-01-01T00:00:00Z";
+    const lastSync = meta.last_sync || "1970-01-01T00:00:00Z"; // TODO - HIGH this isn't working and it's always pulling all words from 1970 when there's new entries
     const lastOffset = meta.last_offset || 0; // Could be null if it's our first sync or if our last sync completed all rows
 
     data = {
