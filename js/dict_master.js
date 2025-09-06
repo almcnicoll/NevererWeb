@@ -1,5 +1,3 @@
-// File: js/dict_master.js
-
 /**
  * Main thread controller for dictionary sync.
  *
@@ -8,6 +6,7 @@
  * - Sends the result back to the worker using postMessage.
  */
 
+// #region WORKER SETUP
 /** @type {string} Relative path to the WebWorker script. '~ROOT~' is substituted in index.php. */
 var worker_path = "~ROOT~/js/dict_worker.js";
 
@@ -16,70 +15,80 @@ const worker = new Worker(worker_path);
 
 /** @type {boolean} Tracks whether the dictionary sync has completed */
 var dictionary_sync_complete = false;
+// #endregion
 
-/**
- * Handles messages received from the worker thread.
- * If the worker requests a fetch, this makes an AJAX call and sends the result back.
+
+// #region MESSAGE LOOP
+ /** If the worker requests a fetch, this makes an AJAX call and sends the result back.
  *
  * @param {MessageEvent} e - The event object containing the message from the worker.
  */
 worker.onmessage = function (e) {
   const msg = e.data;
 
-  // If the worker is asking for a fetch operation
-  if (msg.type === "fetch") {
-    const url = msg.data.url;
+  switch(msg.type) {
+    case 'fetch':
+      const url = msg.data.url;
 
-    // Make the AJAX request
-    makeAjaxCall(
-      msg.method, // HTTP method (e.g., 'get')
-      "~ROOT~/" + url + "?domain=ajax", // URL with domain=ajax param appended
-      msg.data, // Any additional request data
-      function (response) {
-        // Success callback
-        worker.postMessage({
-          type: "fetched",
-          id: msg.id,
-          success: true,
-          payload: response,
-        });
-      },
-      function (error) {
-        // Failure callback
-        worker.postMessage({
-          type: "fetched",
-          id: msg.id,
-          success: false,
-          payload: error,
-        });
-      }
-    );
-  } else if (msg.type === "regexResults") {
-    populateSuggestedWords(
-      msg.results,
-      msg.totalMatches,
-      msg.destination,
-      msg.format
-    );
-  } else if (msg.type === "syncIncomplete") {
-    // Update the UI
-    $("#status-bar").html(
-      "Synchronised " +
-        msg.count +
-        " words <i class='bi bi-info-square-fill' title='Synchronising the full dictionary happens once per browser and will take several minutes to an hour.'></i>"
-    );
-    // Now trigger the next partial sync
-    worker.postMessage({
-      type: "startSync",
-      root_path: root_path,
-    });
-  } else if (msg.type === "syncComplete") {
-    // Update the UI
-    $("#status-bar").html("Dictionary sync complete");
-    dictionary_sync_complete = true;
+      // Make the AJAX request
+      makeAjaxCall(
+        msg.method, // HTTP method (e.g., 'get')
+        "~ROOT~/" + url + "?domain=ajax", // URL with domain=ajax param appended
+        msg.data, // Any additional request data
+        function (response) {
+          // Success callback
+          worker.postMessage({
+            type: "fetched",
+            id: msg.id,
+            success: true,
+            payload: response,
+          });
+        },
+        function (error) {
+          // Failure callback
+          worker.postMessage({
+            type: "fetched",
+            id: msg.id,
+            success: false,
+            payload: error,
+          });
+        }
+      );
+      break;
+    case 'regexResults':
+      populateSuggestedWords(
+        msg.results,
+        msg.totalMatches,
+        msg.destination,
+        msg.format
+      );
+      break;
+    case 'syncIncomplete':
+      // Update the UI
+      $("#status-bar").html(
+        "Synchronised " +
+          msg.count +
+          " words <i class='bi bi-info-square-fill' title='Synchronising the full dictionary happens once per browser and will take several minutes to an hour.'></i>"
+      );
+      // Now trigger the next partial sync
+      worker.postMessage({
+        type: "continueSync",
+        root_path: root_path,
+      });
+      break;
+    case 'syncComplete':
+      // Update the UI
+      $("#status-bar").html("Dictionary sync complete");
+      dictionary_sync_complete = true;
+      break;
+    default:
+      console.log("Unexpected message "+msg.type+" sent to dict_master.js");
+      break;
   }
 };
+// #endregion
 
+// #region FUNCTIONS
 /**
  * Populates the suggested word list with the returned matches in the specified format
  * @param {Array<Object>} matches an array of matched word entries
@@ -177,3 +186,4 @@ $(document).ready(function () {
     root_path: root_path,
   });
 });
+// #endregion

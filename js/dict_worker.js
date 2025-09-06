@@ -1,13 +1,12 @@
-// js/dict_worker.js
-//debugger;
+// debugger; // Uncomment to open this file in Dev Tools
 
+// #region SETUP
 // Load Dexie.js for IndexedDB management
 importScripts("https://cdn.jsdelivr.net/npm/dexie@3/dist/dexie.min.js");
 // Global flag for library loading (may be used for dynamic class loading in future)
 self.librariesLoaded = false;
 
-// --- dexie.js Setup ---
-
+/** DEXIE.JS SETUP */
 // Name of the old and new databases
 const DB_NAME_V01 = "dictionary_cache"; // No longer used - will need manual deletion
 const DB_NAME_V02 = "tome_cache";
@@ -29,9 +28,9 @@ db.version(2).stores({
   entries: "id,word,bare_letters,length,[length+bare_letters]",
   sync_meta: "key, last_sync, last_offset", // keep last_offset if used
 });
+// #endregion
 
-// --- Utility Functions ---
-
+// #region UTILITY FUNCTIONS
 /**
  * Generates a unique correlation ID to track message responses
  * @returns {string} A unique message ID (e.g., "msg_ab12cd34")
@@ -53,7 +52,7 @@ function fetchFromServer(method, data, callback) {
 
   /** @param {MessageEvent} e */
   const listener = (e) => {
-    const msg = e.data;
+    const msg = e.data; // TODO - move this to main message loop?
     if (msg.type === "fetched" && msg.id === id) {
       self.removeEventListener("message", listener);
       callback(msg.success, msg.payload);
@@ -62,77 +61,103 @@ function fetchFromServer(method, data, callback) {
   self.addEventListener("message", listener);
   self.postMessage({ type: "fetch", method, data, id });
 }
+// #endregion
 
-// --- Message Handling ---
-
+// #region MESSAGE LOOP
 /**
  * Handles incoming messages from the main thread
  * Currently only responds to `startSync`
  *
  * @param {MessageEvent} e
  */
+
+let pattern,destination,format,length,offset = 0,limit = Infinity;
+
 self.onmessage = function (e) {
   const msg = e.data;
-  if (msg.type === "startSync") {
-    self.root_path = msg.root_path;
-    startSync();
-  } else if (msg.type === "lookupByRegex") {
-    const {
-      regex,
-      flags,
-      destination,
-      format,
-      length,
-      offset = 0,
-      limit = Infinity,
-    } = msg;
+  switch (msg.type) {
+    case 'startSync':
+      self.root_path = msg.root_path;
+      getSyncParameters();
+      doSync();
+      break;
+    case 'continueSync':
+      doSync();
+      break;
+    case 'lookupByRegex':
+      ({
+        regex,
+        flags,
+        destination,
+        format,
+        length,
+        offset = 0,
+        limit = Infinity,
+      } = msg);
 
-    const pattern = new RegExp(regex, flags);
+      const pattern = new RegExp(regex, flags);
 
-    getAllMatchingEntriesByRegex(pattern, length, offset, limit).then(
-      (matches) => {
-        self.postMessage({
-          type: "regexResults",
-          results: matches,
-          offset: offset,
-          limit: limit,
-          destination: destination,
-          format: format,
-        });
-      }
-    );
-  } else if (msg.type === "lookupByPattern") {
-    const {
-      pattern,
-      destination,
-      format,
-      length,
-      offset = 0,
-      limit = Infinity,
-    } = msg;
+      getAllMatchingEntriesByRegex(pattern, length, offset, limit).then(
+        (matches) => {
+          self.postMessage({
+            type: "regexResults",
+            results: matches,
+            offset: offset,
+            limit: limit,
+            destination: destination,
+            format: format,
+          });
+        }
+      );
+      break;
+    case 'lookupByPattern':
+      ({
+        pattern,
+        destination,
+        format,
+        length,
+        offset = 0,
+        limit = Infinity,
+      } = msg);
 
-    getAllMatchingEntriesByPattern(pattern, length, offset, limit).then(
-      (matches) => {
-        self.postMessage({
-          type: "regexResults",
-          results: matches,
-          offset: offset,
-          limit: limit,
-          destination: destination,
-          format: format,
-        });
-      }
-    );
-  }
+      getAllMatchingEntriesByPattern(pattern, length, offset, limit).then(
+        (matches) => {
+          self.postMessage({
+            type: "regexResults",
+            results: matches,
+            offset: offset,
+            limit: limit,
+            destination: destination,
+            format: format,
+          });
+        }
+      );
+      break;
+    default:
+      console.log("Unexpected message "+msg.type+" sent to dict_worker.js");
+      break;
+    }
 };
+// #endregion
+
+// #region VARIABLES
+let serverTomes;
+let serverTomeIds = new Set();
+let localTomes;
+let localTomeIds = new Set();
+let obsoleteTomeIds;
+let meta;
+const SyncLimit = 100;
+let thisSyncStamp;
+
+// #endregion
 
 // --- Dictionary sync Process ---
 /**
  * Starts the sync process by fetching Tomes and entries from the server
  * and updating the local IndexedDB cache accordingly using bulk operations.
  */
-const SyncLimit = 100;
-function startSync() {
+function getSyncParameters() {
   /** @type {{ url: string }} */
   let data = {
     url: "tome/*/list",
@@ -141,7 +166,6 @@ function startSync() {
   fetchFromServer("get", data, async (success, payload) => {
     if (!success) return;
 
-    let serverTomes;
     try {
       serverTomes = JSON.parse(payload);
     } catch (e) {
@@ -151,12 +175,12 @@ function startSync() {
 
     if (!Array.isArray(serverTomes)) return;
 
-    const serverTomeIds = new Set(serverTomes.map((t) => t.id));
-    const localTomes = await db.tomes.toArray();
-    const localTomeIds = new Set(localTomes.map((t) => t.id));
+    serverTomeIds = new Set(serverTomes.map((t) => t.id));
+    localTomes = await db.tomes.toArray();
+    localTomeIds = new Set(localTomes.map((t) => t.id));
 
     // Identify obsolete tome IDs
-    const obsoleteTomeIds = [...localTomeIds].filter(
+    obsoleteTomeIds = [...localTomeIds].filter(
       (id) => !serverTomeIds.has(id)
     );
 
@@ -174,22 +198,27 @@ function startSync() {
           await db.entries.where("tome_id").equals(id).delete(); // can't bulkDelete on compound index
         }
       }
-    });
+    }); // end database write function
+  }); // end server-fetch function
+  // Retrieve parameters for tome_entries sync
+  meta = (db.sync_meta.get("entries")) || {};
+  meta.last_sync = meta.last_sync || "1970-01-01T00:00:00Z"; // TODO - HIGH this isn't working and it's always pulling all words from 1970 when there's new entries
+  meta.last_offset = meta.last_offset || 0; // Could be null if it's our first sync or if our last sync completed all rows
+} // end startSync function
 
-    // Fetch new/updated entries
-    // const lastSync = (await db.sync_meta.get('entries'))?.last_sync ?? '1970-01-01T00:00:00Z';
-    const meta = (await db.sync_meta.get("entries")) || {};
-    const lastSync = meta.last_sync || "1970-01-01T00:00:00Z"; // TODO - HIGH this isn't working and it's always pulling all words from 1970 when there's new entries
-    const lastOffset = meta.last_offset || 0; // Could be null if it's our first sync or if our last sync completed all rows
-
+function doSync() {
+{
+    // Set up fetch
     data = {
       url: "tome_entry/*/list",
       tome_ids: [...serverTomeIds],
-      since: lastSync,
-      offset: lastOffset,
+      since: meta.last_sync,
+      offset: meta.last_offset,
       limit: SyncLimit,
     };
 
+    // Fetch next batch of entries from the server
+    thisSyncStamp = new Date(); // Store timestamp of last request, for writing to metadata on completion
     fetchFromServer("get", data, async (success, payload) => {
       if (!success) return;
 
@@ -234,19 +263,19 @@ function startSync() {
         }
 
         // Update sync metadata
-        if (nextOffset == null) {
+        if (nextOffset == null) { // We're done
           await db.sync_meta.put({
-            // We're done - update the date
+            // Update the date
             key: "entries",
-            last_sync: new Date().toISOString(),
+            last_sync: thisSyncStamp,
             last_offset: nextOffset,
           });
           // Tell the main thread that our sync is complete
           var msgId = generateId();
           self.postMessage({ type: "syncComplete", msgId });
-        } else {
+        } else { // There's more to retrieve
           await db.sync_meta.put({
-            // There's more to retrieve - don't update the date
+            // Don't update the date
             key: "entries",
             last_offset: nextOffset,
           });
@@ -260,9 +289,10 @@ function startSync() {
         }
       });
     });
-  });
+  }
 }
 
+// #region FUNCTIONS
 /**
  * Takes a pattern in the form A?B??C?D and returns a regular expression for searching a word list
  * @param {string} pattern the pattern to convert
@@ -365,3 +395,4 @@ async function getAllMatchingEntriesByPattern(
     total: filteredByRegex.length, // total *matched* count, not total in DB
   };
 }
+// #endregion
