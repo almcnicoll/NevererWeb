@@ -47,10 +47,18 @@ function generateId() {
  * @param {*} data - Data payload to send with the request, including a 'url' property
  * @param {(success: boolean, payload: any) => void} callback - Callback invoked with the result
  */
-let fetchReturnCallbacks = {};
 function fetchFromServer(method, data, callback) {
   const id = generateId();
-  fetchReturnCallbacks[id] = callback;
+
+  /** @param {MessageEvent} e */
+  const listener = (e) => {
+    const msg = e.data; // TODO - move this to main message loop?
+    if (msg.type === "fetched" && msg.id === id) {
+      self.removeEventListener("message", listener);
+      callback(msg.success, msg.payload);
+    }
+  };
+  self.addEventListener("message", listener);
   self.postMessage({ type: "fetch", method, data, id });
 }
 // #endregion
@@ -78,15 +86,12 @@ self.onmessage = function (e) {
     case "init.syncMetadata":
       fetchMetadata();
       break;
+    case "initialiseSync":
+      self.root_path = msg.root_path;
+      initialiseSync(); // When finished, will post "initialised" to main thread
+      break;
     case "continueSync":
       doSync();
-      break;
-    case "fetched": // return from fetchFromServer
-      let thisFetchCallback = fetchReturnCallbacks[msg.id];
-      if (thisFetchCallback !== null) {
-        thisFetchCallback(msg.success, msg.payload);
-      }
-      fetchReturnCallbacks[id] = null;
       break;
     case "lookupByRegex":
       ({
@@ -196,7 +201,7 @@ async function parseTomeList(payload) {
 }
 async function saveTomeList(payload) {
   // Bulk insert/update tomes
-  await db.tomes.bulkPut(serverTomes); // TODO VHIGH- these are using vars from the previous function - that doesn't work!
+  await db.tomes.bulkPut(serverTomes);
 
   // Bulk delete tomes and their entries that are no longer on the server
   if (obsoleteTomeIds.length > 0) {
