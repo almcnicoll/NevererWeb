@@ -66,7 +66,6 @@ function fetchFromServer(method, data, callback) {
 // #region MESSAGE LOOP
 /**
  * Handles incoming messages from the main thread
- * Currently only responds to `startSync`
  *
  * @param {MessageEvent} e
  */
@@ -76,10 +75,9 @@ let pattern,destination,format,length,offset = 0,limit = Infinity;
 self.onmessage = function (e) {
   const msg = e.data;
   switch (msg.type) {
-    case 'startSync':
+    case 'initialiseSync':
       self.root_path = msg.root_path;
-      getSyncParameters();
-      doSync();
+      initialiseSync(); // When finished, will post "syncInitialised" to main thread
       break;
     case 'continueSync':
       doSync();
@@ -157,11 +155,14 @@ let thisSyncStamp;
  * Starts the sync process by fetching Tomes and entries from the server
  * and updating the local IndexedDB cache accordingly using bulk operations.
  */
-function getSyncParameters() {
+function initialiseSync() {
   /** @type {{ url: string }} */
   let data = {
     url: "tome/*/list",
   };
+
+  // Change to fetchFromServer("get", data, saveTomeList)
+  // and use .then() chaining to call functions that are currently embedded lambdas below
 
   fetchFromServer("get", data, async (success, payload) => {
     if (!success) return;
@@ -198,12 +199,15 @@ function getSyncParameters() {
           await db.entries.where("tome_id").equals(id).delete(); // can't bulkDelete on compound index
         }
       }
+      // Only now should we retrieve parameters for tome_entries sync
+      meta = await (db.sync_meta.get("entries")) || {};
+      meta.last_sync = meta.last_sync || "1970-01-01T00:00:00Z"; // TODO - HIGH this wasn't working - not sure if it is now
+      meta.last_offset = meta.last_offset || 0; // Could be null if it's our first sync or if our last sync completed all rows
+      // Tell the main thread that our sync is ready to go
+      var msgId = generateId();
+      self.postMessage({ type: "syncInitialised", msgId });
     }); // end database write function
   }); // end server-fetch function
-  // Retrieve parameters for tome_entries sync
-  meta = (db.sync_meta.get("entries")) || {};
-  meta.last_sync = meta.last_sync || "1970-01-01T00:00:00Z"; // TODO - HIGH this isn't working and it's always pulling all words from 1970 when there's new entries
-  meta.last_offset = meta.last_offset || 0; // Could be null if it's our first sync or if our last sync completed all rows
 } // end startSync function
 
 function doSync() {

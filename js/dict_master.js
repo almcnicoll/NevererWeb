@@ -27,6 +27,13 @@ worker.onmessage = function (e) {
   const msg = e.data;
 
   switch(msg.type) {
+    case 'syncInitialised': // Called when getSyncParameters() completes on worker thread
+      // Now trigger the first partial sync
+      worker.postMessage({
+        type: "continueSync",
+        root_path: root_path,
+      });
+      break;
     case 'fetch':
       const url = msg.data.url;
 
@@ -182,7 +189,7 @@ function lookupWordsByPattern(pattern, length, destination, format) {
  */
 $(document).ready(function () {
   worker.postMessage({
-    type: "startSync",
+    type: "initialiseSync",
     root_path: root_path,
   });
 });
