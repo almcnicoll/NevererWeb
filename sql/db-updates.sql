@@ -362,3 +362,6 @@ VALUES ("What does 'synchronising words' mean, and why is it taking so long?","T
 /* UPDATE */
 /* VERSION 28 */
 /*include 28_idiom_tome.sql*/
+/* UPDATE */
+/* VERSION 29 */
+/*include 29_name_tome.sql*/
