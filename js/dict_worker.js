@@ -86,7 +86,7 @@ self.onmessage = function (e) {
       if (thisFetchCallback !== null) {
         thisFetchCallback(msg.success, msg.payload);
       }
-      fetchReturnCallbacks[id] = null;
+      fetchReturnCallbacks[msg.id] = null;
       break;
     case "lookupByRegex":
       ({
@@ -168,11 +168,8 @@ function fetchTomeList() {
     url: "tome/*/list",
   };
   fetchFromServer("get", data, parseTomeList); // end server-fetch function
-
-  // Get tome_entries metadata from IndexedDB
-  db.sync_meta.get("entries").then(initialiseSyncMetadata);
 }
-async function parseTomeList(payload) {
+async function parseTomeList(success, payload) {
   if (!success) return;
 
   try {
@@ -192,33 +189,34 @@ async function parseTomeList(payload) {
   obsoleteTomeIds = [...localTomeIds].filter((id) => !serverTomeIds.has(id));
 
   // Update tomes and remove obsolete ones
-  await db.transaction("rw", db.tomes, db.entries, saveTomeList);
-}
-async function saveTomeList(payload) {
-  // Bulk insert/update tomes
-  await db.tomes.bulkPut(serverTomes); // TODO VHIGH- these are using vars from the previous function - that doesn't work!
+  db.transaction("rw", db.tomes, db.entries, async function() {
+    // Bulk insert/update tomes
+    await db.tomes.bulkPut(serverTomes); // TODO VHIGH- these are using vars from the previous function - that doesn't work!
 
-  // Bulk delete tomes and their entries that are no longer on the server
-  if (obsoleteTomeIds.length > 0) {
-    await db.tomes.bulkDelete(obsoleteTomeIds);
+    // Bulk delete tomes and their entries that are no longer on the server
+    if (obsoleteTomeIds.length > 0) {
+      await db.tomes.bulkDelete(obsoleteTomeIds);
 
-    // Delete associated entries
-    for (const id of obsoleteTomeIds) {
-      await db.entries.where("tome_id").equals(id).delete(); // can't bulkDelete on compound index
+      // Delete associated entries
+      for (const id of obsoleteTomeIds) {
+        await db.entries.where("tome_id").equals(id).delete(); // can't bulkDelete on compound index
+      }
     }
-  }
-  // Now tell the main process that we're done with this part
-  var msgId = generateId();
-  var msgData = {
-    type: "initialised",
-    subType: "tomeList",
-    msgId,
-  };
-  self.postMessage(msgData);
+  })
+  .then( function() {
+    // Now tell the main process that we're done with this part
+    var msgId = generateId();
+    var msgData = {
+      type: "initialised",
+      subType: "tomeList",
+      msgId,
+    };
+    self.postMessage(msgData);
+  } );
 }
 
-function initialiseSyncMetadata(payload) {
-  meta = payload || {};
+async function fetchMetadata(payload) {
+  meta = await (db.sync_meta.get("entries")) || {};
   meta.last_sync = meta.last_sync || "1970-01-01T00:00:00Z";
   meta.last_offset = meta.last_offset || 0; // Could be null if it's our first sync or if our last sync completed all rows
   // Tell the main thread that we're done here
@@ -243,7 +241,7 @@ function doSync() {
     };
 
     // Fetch next batch of entries from the server
-    thisSyncStamp = new Date(); // Store timestamp of last request, for writing to metadata on completion
+    thisSyncStamp = new Date().toISOString(); // Store timestamp of last request, for writing to metadata on completion
     fetchFromServer("get", data, async (success, payload) => {
       if (!success) return;
 
@@ -290,8 +288,10 @@ function doSync() {
         // Update sync metadata
         if (nextOffset == null) {
           // We're done
-          await db.sync_meta.put({
             // Update the date
+          meta.last_offset = null;
+          meta.last_sync = thisSyncStamp;
+          await db.sync_meta.put({
             key: "entries",
             last_sync: thisSyncStamp,
             last_offset: nextOffset,
@@ -301,8 +301,9 @@ function doSync() {
           self.postMessage({ type: "syncComplete", msgId });
         } else {
           // There's more to retrieve
+            // Don't update the date            
+          meta.last_offset = nextOffset;
           await db.sync_meta.put({
-            // Don't update the date
             key: "entries",
             last_offset: nextOffset,
           });

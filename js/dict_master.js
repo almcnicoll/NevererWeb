@@ -14,7 +14,7 @@ let dictionary = {};
 dictionary.worker_path = "~ROOT~/js/dict_worker.js";
 
 /** @type {Worker} WebWorker instance for background sync and IndexedDB operations. */
-dictionary.worker = new Worker(worker_path);
+dictionary.worker = new Worker(dictionary.worker_path);
 
 /** @type {boolean} Tracks whether the dictionary sync has completed */
 dictionary.sync_complete = false;
@@ -42,9 +42,10 @@ dictionary.multiPartInit = function (parts, callback) {
   dictionary.initialisationSetup.callback = callback;
   // Trigger parts
   for (var i in dictionary.initialisationSetup.parts) {
-    console.log("Initialisation: " + parts[i]);
-    worker.postMessage({
-      type: "init." + parts[i],
+    var partName = dictionary.initialisationSetup.parts[i].name;
+    console.log("Initialisation: " + partName);
+    dictionary.worker.postMessage({
+      type: "init." + partName,
       root_path: root_path,
     });
   }
@@ -67,7 +68,7 @@ dictionary.initReturn = function (partName, msg) {
   ).length;
   if (incomplete === 0) {
     // We're ready to start the actual sync
-    worker.postMessage({
+    dictionary.worker.postMessage({
       type: "continueSync",
     });
   }
@@ -82,24 +83,24 @@ dictionary.launchFetch = function (msg) {
     msg.method,
     "~ROOT~/" + url + "?domain=ajax",
     msg.data,
-    dictionary.fetchSuccess,
-    dictionary.fetchFailure
+    dictionary.fetchSuccess.bind(null,msg.id),
+    dictionary.fetchFailure.bind(null,msg.id)
   );
 };
-dictionary.fetchSuccess = function (response) {
+dictionary.fetchSuccess = function (msgId,response) {
   // Success callback
-  worker.postMessage({
+  dictionary.worker.postMessage({
     type: "fetched",
-    id: msg.id,
+    id: msgId,
     success: true,
     payload: response,
   });
 };
-dictionary.fetchFailure = function (error) {
+dictionary.fetchFailure = function (msgId,error) {
   // Failure callback
-  worker.postMessage({
+  dictionary.worker.postMessage({
     type: "fetched",
-    id: msg.id,
+    id: msgId,
     success: false,
     payload: error,
   });
@@ -170,7 +171,7 @@ dictionary.getRegexFromPattern = function (pattern, bareLettersVersion = true) {
  * @returns void
  */
 dictionary.lookupWordsByRegex = function (regex, length, destination, format) {
-  worker.postMessage({
+  dictionary.worker.postMessage({
     type: "lookupByRegex",
     regex: regex.source,
     flags: regex.flags,
@@ -194,7 +195,7 @@ dictionary.lookupWordsByPattern = function (
   destination,
   format
 ) {
-  worker.postMessage({
+  dictionary.worker.postMessage({
     type: "lookupByPattern",
     pattern: pattern.toUpperCase(),
     length: length,
@@ -210,7 +211,7 @@ dictionary.lookupWordsByPattern = function (
  *
  * @param {MessageEvent} e - The event object containing the message from the worker.
  */
-worker.onmessage = function (e) {
+dictionary.worker.onmessage = function (e) {
   const msg = e.data;
   switch (msg.type) {
     case "initialised":
@@ -236,7 +237,7 @@ worker.onmessage = function (e) {
           " words <i class='bi bi-info-square-fill' title='Synchronising the full dictionary happens once per browser and will take several minutes to an hour.'></i>"
       );
       // Now trigger the next partial sync
-      worker.postMessage({
+      dictionary.worker.postMessage({
         type: "continueSync",
         root_path: root_path,
       });
