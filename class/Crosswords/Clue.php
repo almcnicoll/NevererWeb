@@ -129,5 +129,15 @@ namespace Crosswords {
             $clone->answer = str_repeat('?',strlen($this->getAnswerLetters()));
             return $clone;
         }
+        
+        /**
+         * Access the object in a JSON-encodable form
+         * Extends the base method to also add a bare_letters property
+         */
+        public function expose() : mixed {
+            $output = parent::expose();
+            $output['bare_letters'] = $this->getAnswerLetters();
+            return $output;
+        }
     }
 }

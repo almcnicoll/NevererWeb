@@ -499,9 +499,11 @@ function populateEditForm(data) {
       srcPos = pc.x - intClue.x;
       destPos = intClue.y - pc.y;
     }
+    // This should ensure we use the right part of the intersecting clue, even if there's punctuation and spaces in it
+    // TODO - work out how to put it into the right place in c.answer, allowing for punctuation and spaces (harder!)
     c.answer =
       c.answer.substr(0, destPos) +
-      intClue.clue.answer.substr(srcPos, 1).toUpperCase() +
+      intClue.clue.bare_letters.substr(srcPos, 1).toUpperCase() +
       c.answer.substr(destPos + 1);
   }
 
