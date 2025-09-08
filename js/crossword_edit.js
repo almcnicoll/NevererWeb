@@ -753,7 +753,7 @@ function refreshSuggestedWordList(context) {
         });
         return;
       } else {
-        lookupWordsByPattern(
+        dictionary.lookupWordsByPattern(
           pattern,
           pattern.length,
           "#new-clue-suggested-words-tbody",
@@ -788,7 +788,7 @@ function refreshSuggestedWordList(context) {
         });
         return;
       } else {
-        lookupWordsByPattern(
+        dictionary.lookupWordsByPattern(
           pattern,
           pattern.length,
           "#edit-clue-suggested-words-tbody",

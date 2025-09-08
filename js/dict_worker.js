@@ -30,6 +30,23 @@ db.version(2).stores({
 });
 // #endregion
 
+// #region VARIABLES
+let pattern = '';
+let destination = '';
+let format = '';
+let length = 0;
+let offset = 0;
+let limit = Infinity;
+let serverTomes;
+let serverTomeIds = new Set();
+let localTomes;
+let localTomeIds = new Set();
+let obsoleteTomeIds;
+let meta;
+const SyncLimit = 100;
+let thisSyncStamp;
+// #endregion
+
 // #region UTILITY FUNCTIONS
 /**
  * Generates a unique correlation ID to track message responses
@@ -62,13 +79,6 @@ function fetchFromServer(method, data, callback) {
  * @param {MessageEvent} e
  */
 
-let pattern,
-  destination,
-  format,
-  length,
-  offset = 0,
-  limit = Infinity;
-
 self.onmessage = function (e) {
   const msg = e.data;
   switch (msg.type) {
@@ -99,7 +109,7 @@ self.onmessage = function (e) {
         limit = Infinity,
       } = msg);
 
-      const pattern = new RegExp(regex, flags);
+      pattern = new RegExp(regex, flags);
 
       getAllMatchingEntriesByRegex(pattern, length, offset, limit).then(
         (matches) => {
@@ -116,7 +126,7 @@ self.onmessage = function (e) {
       break;
     case "lookupByPattern":
       ({
-        pattern,
+        pattern = '',
         destination,
         format,
         length,
@@ -142,18 +152,6 @@ self.onmessage = function (e) {
       break;
   }
 };
-// #endregion
-
-// #region VARIABLES
-let serverTomes;
-let serverTomeIds = new Set();
-let localTomes;
-let localTomeIds = new Set();
-let obsoleteTomeIds;
-let meta;
-const SyncLimit = 100;
-let thisSyncStamp;
-
 // #endregion
 
 // #region DICTIONARY SYNC FUNCTIONS
