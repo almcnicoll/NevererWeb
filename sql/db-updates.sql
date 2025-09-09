@@ -342,16 +342,20 @@ DROP TEMPORARY TABLE `tmpEntries`;
 	END
 /* UPDATE */
 /* VERSION 22 */
+/* PREPAREMODE */
 CALL PopulateLetterCounts();
 /* UPDATE */
 /* VERSION 23 */
+/* PREPAREMODE */
 CALL PopulateLetterCounts();
 /* UPDATE */
 /* VERSION 24 */
 CALL PopulateLetterCounts();
+/* PREPAREMODE */
 /* UPDATE */
 /* VERSION 25 */
 CALL PopulateLetterCounts();
+/* PREPAREMODE */
 /* UPDATE */
 /* VERSION 26 */
 /*include 26_anagram_sp.sql*/

@@ -147,15 +147,27 @@ if (file_exists('sql/db-updates.sql')) {
                     "You will need to check that the database is in a valid state.",
                     "SQL reads ".ellipsis($sql, 1000));
         }
-        $sql = "INSERT INTO dbupdates (`version`,`created`,`modified`) VALUES ({$v},NOW(),NOW());";
-        $pdo->exec($sql);
-        if ($pdo->inTransaction()) {
-            if (!$pdo->commit()) {
-                pre_die("Unable to commit transaction for version #{$v}.",
-                        "SQL reads ".ellipsis($sql, 1000));
+        try {
+            $sql = "INSERT INTO dbupdates (`version`,`created`,`modified`) VALUES ({$v},NOW(),NOW());";
+            $pdo->exec($sql);
+            if ($pdo->inTransaction()) {
+                if (!$pdo->commit()) {
+                    pre_die("Unable to commit transaction for version #{$v}.",
+                            "SQL reads ".ellipsis($sql, 1000));
+                }
+            } else {
+                // That's OK - if we performed CREATE/ ALTER statements, they sometimes auto-commit apparently
             }
-        } else {
-            // That's OK - if we performed CREATE/ ALTER statements, they sometimes auto-commit apparently
+        } catch (PDOException $pe) {
+            error_log($pe->getMessage());
+            pre_die("PDO: Error running version-update SQL for version #{$v}.",
+                    $pe->getMessage(),
+                    "You will need to check that the database is in a valid state.",
+                    "SQL reads ".ellipsis($sql, 1000));
+        } catch (Exception $e) {
+            pre_die("EXC: Error running version-SQL for version #{$v}.",
+                    "You will need to check that the database is in a valid state.",
+                    "SQL reads ".ellipsis($sql, 1000));
         }
         pre_echo("Upgraded database to version {$v}.");
         flush();
