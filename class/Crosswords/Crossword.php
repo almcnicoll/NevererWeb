@@ -442,5 +442,33 @@ END_SQL;
             // No matches
             return null;
         }
+
+        /**
+         * Expose the crossword with all its settings and clues (eg for exporting to file)
+         */
+        public function exposeForExport() : mixed {
+            $crossword = $this->exposeTree();
+            $export = $crossword; // At some point we will probably cherry-pick which bits to export
+            return $export;
+        }
+        /**
+         * Get the crossword export in JSON format
+         */
+        public function exportAsJSON() : string {
+            return json_encode($this->exposeForExport());
+        }
+
+        /**
+         * Retrieve a crossword from a JSON dump
+         * @param string $json the JSON string from which to hydrate
+         * @param bool $saveToDb - if true, the crossword and all underlying entities will be saved to the database, generating IDs. If not, this will need to be done manually
+         */
+        public static function hydrate(string $json, bool $saveToDb = true) : Crossword {
+            if (empty($json)) {
+                throw new Exception("No JSON passed to hydration function");
+            }
+            $crossword = new Crossword(); // TODO - this should load from the specified JSON instead
+            return $crossword;
+        }
     }
 }

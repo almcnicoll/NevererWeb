@@ -583,5 +583,30 @@ namespace Basic {
                 return $children[$returnKey];
             }
         }
+
+        /**
+         * Access the object and all its descendants in a JSON-encodable form
+         * Unless overridden, this will simply map to calling exposeTree() on all children
+         */
+        public function exposeTree() : mixed {
+            $childClassNames = $this->getChildClassNames();
+            
+            foreach ($childClassNames as $childClassName) {
+                try {
+                    $children = $this->getChildren($childClassName); // Need to check if this is namespaced or not
+                    if (is_array($children) && count($children)>0) {
+                        $shortClassName = end(explode('\\', $childClassName));
+                        $this->{$shortClassName} = [];
+                        foreach ($children as $child) {
+                            $this->{$shortClassName}[] = $child->exposeTree();
+                        }
+                    }
+                } catch (Exception $e) {
+                    // No children - ignore
+                }
+            }
+            
+            return parent::exposeTree();
+        }
     }
 }

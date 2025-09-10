@@ -14,6 +14,15 @@ namespace Basic {
             return get_object_vars($this);
         }
 
+        /**
+         * Access the object and all its descendants in a JSON-encodable form
+         * Unless overridden, this will simply map to expose()
+         */
+        public function exposeTree() : mixed {
+            $propertyName = '__type'; $this->{$propertyName} = get_class($this); // Set this property in a way that doesn't annoy the dev tools
+            return $this->expose();
+        }
+
         /** Used for temporary tagging of objects in a way that isn't persisted to the database */
         public $__tag;
     }
