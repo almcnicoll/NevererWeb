@@ -96,6 +96,13 @@ if (count($my_crosswords)==0) {
     <tbody>
 <?php
     foreach ($my_crosswords as $crossword) {
+        if ($crossword->title==null) {
+            $filename = $crossword->id.'.json';
+        } else {
+            $filename = mb_ereg_replace("([^\w\s\d\-_~,;\[\]\(\).])", '', $crossword->title); // Illegal chars
+            $filename = mb_ereg_replace("([\.]{2,})", '', $filename); // Runs of periods (dir-changing)
+            $filename .= "-{$crossword->id}.json";
+        }
 ?>
         <tr style='vertical-align: middle;'>
         <th scope='row'><div class='cell-container'><?=$crossword->title?></div></th>
@@ -103,11 +110,11 @@ if (count($my_crosswords)==0) {
         <td>
             <div class='row'>
                 <div class='col-md-6'>
-                    <a href='crossword/view/<?=$crossword->id?>' title='View crossword' class='btn btn-md btn-success'><span class='bi bi-eye'></span></a>
-                    <a href='crossword/export/<?=$crossword->id?>' title='Export crossword' class='btn btn-md btn-primary'><span class='bi bi-share'></span></a>
+                    <a href='crossword/edit/<?=$crossword->id?>' title='Edit crossword' class='btn btn-md btn-warning'><span class='bi bi-pencil-square' role='edit'></span></a>
+                    <a href='crossword/share/<?=$crossword->id?>' title='Share crossword' class='btn btn-md btn-primary'><span class='bi bi-share'></span></a>
                 </div>
                 <div class='col-md-6'>
-                    <a href='crossword/edit/<?=$crossword->id?>' title='Edit crossword' class='btn btn-md btn-warning'><span class='bi bi-pencil-square' role='edit'></span></a>
+                    <a href='crossword/export/<?=$crossword->id?>' download="<?= $filename ?>" title='Export crossword' class='btn btn-md btn-success'><span class='bi bi-download'></span></a>                    
                     <a href='#' class='btn btn-md btn-danger' title='Delete crossword' data-bs-toggle='modal' data-bs-target='#crosswordDeleteModal' role='delete' onclick='deleteHandler.idToDelete = <?=$crossword->id?>;'><span class='bi bi-trash3'></span></a>
                 </div>
             </div>

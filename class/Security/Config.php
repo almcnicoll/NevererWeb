@@ -48,6 +48,7 @@ namespace Security {
             self::$__config['pageinfo']['nw_faq'] = new PageInfo(PageInfo::AUTH_NEVER, false);
             //self::$__config['pageinfo']['account_request'] = new PageInfo(PageInfo::AUTH_NEVER, false);
             self::$__config['pageinfo']['privacy_policy'] = new PageInfo(PageInfo::AUTH_NEVER, false);
+            self::$__config['pageinfo']['crossword_export'] = new PageInfo(PageInfo::AUTH_NEVER, false, 'none');
 
             self::$__loaded = true; // Don't need to reinitialise
         }

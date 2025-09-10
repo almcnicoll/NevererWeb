@@ -101,6 +101,12 @@ if ($domain == 'ajax') {
     @include_once($page);
     die();
 }
+// Untemplated calls get all the class loading etc above, but don't get any template output 
+if (($pageinfo->template != null) && (strtolower($pageinfo->template) == 'none')) {
+    //error_log("Serving templateless page {$page}");
+    @include_once($page);
+    die();
+}
 
 ob_start(); // Required, as we're including login-check further down
 

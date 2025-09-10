@@ -10,10 +10,12 @@ namespace Security {
 
         public int $authSetting = self::AUTH_EARLY;
         public $redirectOnFail = true; // Values: false (don't redirect - "soft fail"), true (redirect to login page), URL (string)
+        public $template = null;
 
-        public function __construct($authSetting = self::AUTH_EARLY, $redirectOnFail = true) {
+        public function __construct($authSetting = self::AUTH_EARLY, $redirectOnFail = true, $template = null) {
             $this->authSetting = $authSetting;
             $this->redirectOnFail = $redirectOnFail;
+            $this->template = $template;
         }
 
         public static function get($stub) : PageInfo {
