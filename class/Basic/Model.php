@@ -608,5 +608,41 @@ namespace Basic {
             
             return parent::exposeTree();
         }
+
+        /**
+         * Creates a new object from the specified associative array or object
+         * @param mixed $data an associative array or object containing the relevant keys
+         * @return static an object of the specified class
+         */
+        public static function hydrateNewFrom(mixed $data, bool $nullId = false) : static {
+            $obj = new static();
+            $obj->hydrateFrom($data, $nullId);
+            return $obj;
+        }
+        /**
+         * Populates the current object from the specified associative array or object
+         * @param mixed $data an associative array or object containing the relevant keys
+         */
+        public function hydrateFrom(mixed $data, bool $nullId = false) : void
+        {
+            if (is_array($data)) {
+                $iterable = $data;
+            } elseif (is_object($data)) {
+                // Cast to array so we can iterate over public properties too
+                $iterable = get_object_vars($data);
+            } else {
+                throw new InvalidArgumentException(
+                    __METHOD__ . " expects array or object, " . gettype($data) . " given."
+                );
+            }
+
+            foreach ($iterable as $key => $value) {
+                // Only assign if the property exists on this object
+                if (property_exists($this, $key)) {
+                    $this->$key = $value;
+                }
+            }
+            if ($nullId) { $this->id = null; }
+        }
     }
 }
