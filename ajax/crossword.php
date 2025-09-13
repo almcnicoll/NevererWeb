@@ -169,6 +169,19 @@ switch ($action) {
         if ($change) { $crossword->save(); }
         
         die(json_encode($crossword));
+    case 'import':
+        // Handle upload    
+        if (empty($_FILES)) {
+            throw_error("No files submitted");
+        } else {
+            $tempFile = $_FILES['file']['tmp_name'];            
+            $json = file_get_contents($tempFile);
+            unlink($tempFile);
+            // Try to create crossword in db
+            $crossword = Crossword::hydrate($json,true);
+            $crossword_id = $crossword->id;
+            echo $id;
+        }
     default:
         $file = str_replace(__DIR__,'',__FILE__);
         throw_error("Invalid action {$action} passed to {$file}");

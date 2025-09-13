@@ -83,7 +83,15 @@ if (count($my_crosswords)==0) {
 } else {
     // At least one crossword of our own
 ?>
-<h2 class='card-title'>Your crosswords <a class="btn btn-primary mb-1" href="<?= $config['root_path'] ?>/crossword/create">+ New</a></h2>
+
+<div class="d-grid gap-2 d-md-block">
+    <h2 class='card-title'>Your crosswords
+        <a class="btn btn-primary mb-1 col-1" href="<?= $config['root_path'] ?>/crossword/create">+ New</a>
+        <a class="btn btn-success mb-1 col-1" href="<?= $config['root_path'] ?>/crossword/import">+ Import</a>
+    </h2>
+</div>
+    
+
 
 <table class="table table-sm table-striped table-hover crossword-table" id="my-crosswords-table">
     <thead>
