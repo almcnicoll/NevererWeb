@@ -165,11 +165,8 @@ if (count($my_crosswords)==0) {
                     </div>
                 </div>
                 <div class="row">
-                    <!--<div class="col-4-md p-2">
-            <a class='btn btn-md btn-warning' id='deleteHere' style='width: 100%;'>Just here</a>
-        </div>-->
                     <div class="col-6-md p-2">
-                        <a class='btn btn-md btn-danger' id='deleteBoth' style='width: 100%;'>Yes</a>
+                        <a class='btn btn-md btn-danger' id='deleteHere' style='width: 100%;'>Yes</a>
                     </div>
                     <div class="col-6-md p-2">
                         <button class='btn btn-md btn-success' id='deleteCancel' data-bs-dismiss="modal"

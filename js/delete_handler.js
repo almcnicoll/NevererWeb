@@ -8,15 +8,14 @@ deleteHandler.reportOnDelete = function (jqXHR, textStatus) {
   top.location.reload(); // Reload page
 };
 
-deleteHandler.deletePlaylist = function (local, fromSpotify) {
+deleteHandler.deleteCrossword = function (local) {
   // Check we've specified an id
   if (deleteHandler.idToDelete == null) {
-    alert("Could not delete playlist. Please try again later.");
+    alert("Could not delete crossword. Please try again later.");
     return;
   }
   deleteHandler.url =
-    root_path +
-    "~ROOT~/crossword/delete?domain=ajax&crossword_id=" +
+    "~ROOT~/crossword/*/delete?domain=ajax&crossword_id=" +
     deleteHandler.idToDelete;
   deleteHandler.ajaxOptions = {
     async: true,
@@ -27,7 +26,6 @@ deleteHandler.deletePlaylist = function (local, fromSpotify) {
     complete: deleteHandler.reportOnDelete,
     data: {
       deleteLocal: local,
-      deleteFromSpotify: fromSpotify,
     },
   };
   $("html, html *").css("cursor", "wait"); // Wait cursor
@@ -36,9 +34,6 @@ deleteHandler.deletePlaylist = function (local, fromSpotify) {
 
 $(document).ready(function () {
   $("#deleteHere").click(function () {
-    deleteHandler.deletePlaylist(true, false);
-  });
-  $("#deleteBoth").click(function () {
-    deleteHandler.deletePlaylist(true, true);
+    deleteHandler.deleteCrossword();
   });
 });

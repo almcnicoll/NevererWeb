@@ -46,7 +46,7 @@ switch ($action) {
         // Called as /ajax/crossword/*/get/[id]
         $crossword_id = array_shift($params);
         /** @var Crossword $crossword */
-        $crossword = Crossword::findFirst('id','=',$crossword_id);
+        $crossword = Crossword::findFirst(['id','=',$crossword_id]);
         if ($crossword === null) { throw_error("Cannot find crossword with id {$crossword_id}"); }
         if (!$crossword->isOwnedBy($user->id)) { throw_error("Crossword with id {$crossword_id} does not belong to user #{$user->id}"); }
         die(json_encode($crossword->expose()));
@@ -184,6 +184,15 @@ switch ($action) {
             $crossword_id = $crossword->id;
             echo $id;
         }
+    case 'delete':
+        // Called as /ajax/crossword/*/delete/[id]
+        $crossword_id = array_shift($params);
+        /** @var Crossword $crossword */
+        $crossword = Crossword::findFirst(['id','=',$crossword_id]);
+        if ($crossword === null) { throw_error("Cannot find crossword with id {$crossword_id}"); }
+        if (!$crossword->isOwnedBy($user->id)) { throw_error("Crossword with id {$crossword_id} does not belong to user #{$user->id}"); }
+        $crossword->delete();
+        die("OK");
     default:
         $file = str_replace(__DIR__,'',__FILE__);
         throw_error("Invalid action {$action} passed to {$file}");
