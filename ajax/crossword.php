@@ -2,7 +2,9 @@
 use Logging\LoggedError;
 use Crosswords\Clue, Crosswords\Crossword, Crosswords\PlacedClue;
 
-function throw_error($errors) {
+function throw_error($errors, $code=400) {
+    if ($code == 400) { $code = "400 Bad Request"; }
+    if (!headers_sent()) { header("HTTP/1.1 {$code}"); }
     $retval = ['errors' => $errors];
     if (is_array($errors)) {
         $output = print_r($errors,true);
