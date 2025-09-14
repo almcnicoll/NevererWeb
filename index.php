@@ -27,6 +27,7 @@ if ($root_pos !== false) {
             break;
         default:
             //LoggedError::log(LoggedError::TYPE_DEBUG, 0, __FILE__, __LINE__, "Redirecting {$_SERVER['REQUEST_URI']} to {$redirect}");
+            header("HTTP/1.1 307 Temporary Redirect"); // Prevents losing data (in theory)
             header("Location: {$redirect}");
             break;
     }

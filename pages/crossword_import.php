@@ -45,7 +45,7 @@ if (count($error_messages)>0) {
         &nbsp;
     </div>
     <div class="mb-3 col-md-8">
-        <form action="~ROOT~/ajax/crossword/*/import?domain=ajax" method="POST" class='dropzone' id='import-dropzone'>
+        <form action="~ROOT~/crossword/*/import?domain=ajax" method="POST" class='dropzone' id='import-dropzone'>
             <div id='import-dropzone' class='d-inline-block w-100 min-vh-50 vh-50'>
                 <!-- h2 class='text-center align-middle'>Drop file here or click to upload</h2 -->
             </div>
