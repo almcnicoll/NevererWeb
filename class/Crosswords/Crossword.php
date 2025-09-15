@@ -473,10 +473,10 @@ END_SQL;
             $data = json_decode($json);
             $crossword = Crossword::hydrateNewFrom($data, true);
             $crossword->user_id = $user->id;
-            foreach ($data['PlacedClue'] as $pcData) {
+            foreach ($data->PlacedClue as $pcData) {
                 $pc = PlacedClue::hydrateNewFrom($pcData, true);
-                if (isset($pcData['Clue'])) {
-                    $cData = $pcData['Clue'];
+                if (isset($pcData->Clue)) {
+                    $cData = $pcData->Clue;
                     $c = $pc->getClue();
                     $c->hydrateFrom($cData, true);
                 }
