@@ -132,8 +132,7 @@ if (count($my_crosswords)==0) {
                                         class='bi bi-download'></span></a>
                                 <a href='#' class='btn btn-md btn-danger' title='Delete crossword'
                                     data-bs-toggle='modal' data-bs-target='#crosswordDeleteModal' role='delete'
-                                    onclick='deleteHandler.idToDelete = <?=$crossword->id?>;'><span
-                                        class='bi bi-trash3'></span></a>
+                                    data-id='<?=$crossword->id?>'><span class='bi bi-trash3'></span></a>
                             </div>
                         </div>
                     </td>

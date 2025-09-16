@@ -36,4 +36,13 @@ $(document).ready(function () {
   $("#deleteHere").click(function () {
     deleteHandler.deleteCrossword();
   });
+
+  // When modal is about to show
+  $("#crosswordDeleteModal").on("show.bs.modal", function (event) {
+    var button = $(event.relatedTarget); // Button that triggered the modal
+    var id = button.data("id"); // Extract info from data-* attributes
+
+    // Store the id
+    deleteHandler.idToDelete = id;
+  });
 });
