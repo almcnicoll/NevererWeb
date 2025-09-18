@@ -111,16 +111,24 @@ namespace Basic {
          * @return ?DateTime the created date
          */
         public function getCreated():?DateTime {
-            // TODO - HIGH - needs casting, surely?
-            return $this->created;
+            try {
+                $d = new DateTime($this->created);
+                return $d;
+            } catch (Exception $ex) {
+                return null;
+            }
         }
         /**
          * Retrieves the modified field as a nullable DateTime
          * @return ?DateTime the modified date
          */
         public function getModified():?DateTime {
-            // TODO - HIGH - needs casting, surely?
-            return $this->modified;
+            try {
+                $d = new DateTime($this->modified);
+                return $d;
+            } catch (Exception $ex) {
+                return null;
+            }
         }
 
         /**
