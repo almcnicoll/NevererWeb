@@ -477,7 +477,8 @@ END_SQL;
             foreach ($data->PlacedClue as $pcData) {
                 $pc = PlacedClue::hydrateNewFrom($pcData, true);
                 if (isset($pcData->Clue)) {
-                    $cData = $pcData->Clue;
+                    $cData = null; // In case next line fails
+                    $cData = @$pcData->Clue[0];
                     $c = $pc->getClue();
                     $c->hydrateFrom($cData, true);
                 }
