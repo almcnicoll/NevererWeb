@@ -342,6 +342,7 @@ namespace Basic {
          * @return ?int the id of the created entity
          */
         public function save() : ?int {
+            // TODO HIGH - this is not returning the id in all cases
             $pdo = db::getPDO();
 
             // If id is set and record exists then update; otherwise, create new

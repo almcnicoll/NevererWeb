@@ -5,7 +5,7 @@ deleteHandler.reportOnDelete = function (jqXHR, textStatus) {
   // Handle callback
   $("html,html *").css("cursor", "auto"); // Put cursor back
   $("#deleteModalCloseX").trigger("click"); // Close modal
-  //top.location.reload(); // Reload page
+  top.location.reload(); // Reload page
 };
 
 deleteHandler.deleteCrossword = function () {

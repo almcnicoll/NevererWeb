@@ -184,6 +184,7 @@ switch ($action) {
             $crossword_id = $crossword->id;
             echo $id;
         }
+        die();
     case 'delete':
         // Called as /ajax/crossword/*/delete/[id]
         $crossword_id = array_shift($params);

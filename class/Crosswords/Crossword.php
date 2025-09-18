@@ -473,6 +473,7 @@ END_SQL;
             $data = json_decode($json);
             $crossword = Crossword::hydrateNewFrom($data, true);
             $crossword->user_id = $user->id;
+            $placedClues = [];
             foreach ($data->PlacedClue as $pcData) {
                 $pc = PlacedClue::hydrateNewFrom($pcData, true);
                 if (isset($pcData->Clue)) {
@@ -480,11 +481,13 @@ END_SQL;
                     $c = $pc->getClue();
                     $c->hydrateFrom($cData, true);
                 }
+                $placedClues[] = $pc;
             }
             
             if ($saveToDb) {
                 $crossword->save();
-                foreach ($crossword->getPlacedClues() as $pc) {
+                foreach ($placedClues as $pc) {
+                    $pc->crossword_id = $crossword->id;
                     $pc->save();
                 }
             }
