@@ -5,18 +5,18 @@ deleteHandler.reportOnDelete = function (jqXHR, textStatus) {
   // Handle callback
   $("html,html *").css("cursor", "auto"); // Put cursor back
   $("#deleteModalCloseX").trigger("click"); // Close modal
-  top.location.reload(); // Reload page
+  //top.location.reload(); // Reload page
 };
 
-deleteHandler.deleteCrossword = function (local) {
+deleteHandler.deleteCrossword = function () {
   // Check we've specified an id
   if (deleteHandler.idToDelete == null) {
     alert("Could not delete crossword. Please try again later.");
     return;
   }
   deleteHandler.url =
-    "~ROOT~/crossword/*/delete?domain=ajax&crossword_id=" +
-    deleteHandler.idToDelete;
+    "~ROOT~/crossword/*/delete/"+deleteHandler.idToDelete
+      +"?domain=ajax";
   deleteHandler.ajaxOptions = {
     async: true,
     cache: false,
@@ -25,7 +25,7 @@ deleteHandler.deleteCrossword = function (local) {
     timeout: 10000,
     complete: deleteHandler.reportOnDelete,
     data: {
-      deleteLocal: local,
+      crossword_id: deleteHandler.idToDelete,
     },
   };
   $("html, html *").css("cursor", "wait"); // Wait cursor
@@ -33,8 +33,9 @@ deleteHandler.deleteCrossword = function (local) {
 };
 
 $(document).ready(function () {
-  $("#deleteHere").click(function () {
+  $("#deleteConfirm").on('click',function () {
     deleteHandler.deleteCrossword();
+    return false;
   });
 
   // When modal is about to show

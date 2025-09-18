@@ -159,15 +159,14 @@ if (count($my_crosswords)==0) {
             <div class="modal-body">
                 <div class="row">
                     <div class="col-12">
-                        <!-- Where would you like to delete the playlist from? -->Are you sure you want to delete the
-                        crossword?
+                        Are you sure you want to delete the crossword?
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-6-md p-2">
-                        <a class='btn btn-md btn-danger' id='deleteHere' style='width: 100%;'>Yes</a>
+                    <div class="col-md-6 p-2">
+                        <a class='btn btn-md btn-danger' id='deleteConfirm' style='width: 100%;'>Yes</a>
                     </div>
-                    <div class="col-6-md p-2">
+                    <div class="col-md-6 p-2">
                         <button class='btn btn-md btn-success' id='deleteCancel' data-bs-dismiss="modal"
                             style='width: 100%;'>Cancel</button>
                     </div>
@@ -175,3 +174,4 @@ if (count($my_crosswords)==0) {
             </div>
         </div>
     </div>
+</div>
