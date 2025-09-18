@@ -137,7 +137,7 @@ END_HTML;
 </script>
 <!-- Dictionary mgmt -->
 <script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/dexie/4.0.8/dexie.min.js'></script>
-<!-- TODO - consider using ES6 modules so we don't have to include each js file -->
+<!-- TODO LOW - consider using ES6 modules so we don't have to include each js file -->
 <script type="text/javascript" src='~ROOT~/js/class/Tome.js'></script>
 <script type="text/javascript" src='~ROOT~/js/class/TomeEntry.js'></script>
 <script type="text/javascript" src='~ROOT~/js/dict_master.js'></script>
