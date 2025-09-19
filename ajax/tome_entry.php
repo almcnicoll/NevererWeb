@@ -97,7 +97,6 @@ switch ($action) {
         ];
         die(json_encode($return_value));
     case 'lookup':
-        // TODO - HIGH - test this
         $errors = [];
         // Called as /ajax/tome_entry/*/lookup?pattern=...
         $pattern = ''; $limit = null; $offset = null;
