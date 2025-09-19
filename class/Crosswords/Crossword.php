@@ -274,7 +274,7 @@ END_SQL;
                 $pcReflect180 = $newClue->getRotatedClue(180);
                 // Now check for clashes with existing clues
                 if (count($this->getOverlapClues($pcReflect180, true))>0) {
-                    // TODO - HIGH this is throwing an error when a clue is created on the axis of symmetry
+                    // TODO #6 - HIGH this is throwing an error when a clue is created on the axis of symmetry
                     throw new IllegalClueOverlapException("2-fold symmetry clue overlaps illegally");
                 }
                 // If no clashes with existing clues, check it doesn't overlap itself

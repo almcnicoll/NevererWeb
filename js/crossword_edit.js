@@ -67,7 +67,7 @@ function serializeForm(selector, stripPrefix = false) {
 //#endregion
 
 //#region Ajax handling
-// TODO - consider prompting an internet connection check if makeAjaxCall is regularly returning fails (we have a makeToast() javascript function if we can get the messages there)
+// TODO #9 - consider prompting an internet connection check if makeAjaxCall is regularly returning fails (we have a makeToast() javascript function if we can get the messages there)
 
 /**
  *
@@ -155,7 +155,7 @@ function handleAjaxReturn(arg1, textStatus, arg3) {
  */
 function displayAjaxError(json) {
   // Do nothing for the moment
-  // TODO - need code here - (we have a makeToast() javascript function if we can get the messages there)
+  // TODO #7 - need code here - (we have a makeToast() javascript function if we can get the messages there)
 }
 
 //#endregion
@@ -501,6 +501,7 @@ function populateEditForm(data) {
     }
     // This should ensure we use the right part of the intersecting clue, even if there's punctuation and spaces in it
     // TODO - work out how to put it into the right place in c.answer, allowing for punctuation and spaces (harder!)
+    // TODO #5 - stop substituting blank letters over filed-in letters
     c.answer =
       c.answer.substr(0, destPos) +
       intClue.clue.bare_letters.substr(srcPos, 1).toUpperCase() +

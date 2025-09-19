@@ -151,7 +151,7 @@ if (!isset($_SESSION['PAGE_LOADCOUNTS'])) {
     <script type='text/javascript'>
     // Variables from PHP script
     <?php
-        // TODO - MEDIUM this is going to start failing when CSP becomes common - write a short library for getting variables into application/json and parsing them in JS
+        // TODO #8 - MEDIUM this is going to start failing when CSP becomes common - write a short library for getting variables into application/json and parsing them in JS
         echo "\t\tvar root_path = \"{$config['root_path']}\";\n";
         ?>
     // Stub for debug (stub functions so that code can call these without throwing exceptions)
