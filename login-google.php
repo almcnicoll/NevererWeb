@@ -37,7 +37,7 @@
         $userInfo = $oauth2->userinfo->get();
         $google_name = $userInfo->name;
         $google_email = $userInfo->email;
-        //TODO - code to either create or look up account
+        // Either create or look up account
         $foundUser = User::findFirst(['identifier','=',$google_email]);
         if ($foundUser == null) {
             $user = new User();
