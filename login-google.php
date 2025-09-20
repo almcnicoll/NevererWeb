@@ -1,13 +1,15 @@
 <?php
+    require_once('autoload.php');
+    require_once('vendor/autoload.php');
     use Security\User;
     use Security\AuthMethod;
-    require_once('vendor/autoload.php');
-    require_once('autoload.php');
+    use Google\Client;
+    use Google\Service\Oauth2;
 
     $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
     $redirect_uri = $protocol . $_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF'];
 
-    $client = new Google\Client();
+    $client = new \Google\Client();
     $client->setApplicationName("NevererWeb");
     $client->setClientId($config['GOOGLE_CLIENTID']);
     $client->setClientSecret($config['GOOGLE_CLIENTSECRET']);

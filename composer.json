@@ -24,7 +24,7 @@
   },
   "extra": {
     "google/apiclient-services": [
-      "Oauth2"
+      "Oauth2" 
     ]
   }
 }
