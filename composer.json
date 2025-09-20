@@ -16,6 +16,15 @@
   ],
   "require": {
     "firebase/php-jwt": "^6.10",
-    "mpdf/mpdf": "^8.2"
+    "mpdf/mpdf": "^8.2",
+    "google/apiclient": "^2.18"
+  },
+  "scripts": {
+    "pre-autoload-dump": "Google\\Task\\Composer::cleanup"
+  },
+  "extra": {
+    "google/apiclient-services": [
+      "Oauth2"
+    ]
   }
 }
