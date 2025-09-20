@@ -70,16 +70,20 @@ namespace Dictionaries {
          * @return ?DateTime the last_modified date
          */
         public function getLastUpdated():?DateTime {
-            // TODO - HIGH - needs casting, surely?
-            return $this->last_updated;
+            try {
+                $d = new DateTime($this->last_updated);
+                return $d;
+            } catch (Exception $ex) {
+                return null;
+            }
         }
 
         /**
          * Updates the last_modified field to be the maximum of created/modified from all its TomeEntries, or its own created field if there are no entries
          * NB - we don't want to run this on TomeEntry save as it would run multiple times on bulk inserts, which is unnecessary.
          */
-        public function updateLastModified() {
-            // TODO - implement this - should be easy SQL
+        public function updateLastUpdated() {
+            // TODO #10 - implement this - should be easy SQL
         }
 
         /**

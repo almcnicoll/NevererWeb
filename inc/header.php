@@ -55,12 +55,12 @@ use UI\DisplayMessage;
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
                             aria-expanded="false">
-                            <span class='d-none d-md-inline'><?= $_SESSION['USER']->display_name ?></span>
+                            <span class='d-none d-md-inline'><?= $user->display_name ?></span>
                             <span
-                                class='d-md-none initial-display'><?= substr($_SESSION['USER']->display_name,0,1) ?></span>
+                                class='d-md-none initial-display'><?= substr($user->display_name,0,1) ?></span>
                         </a>
                         <ul class="dropdown-menu">
-                            <?php if ($_SESSION['USER']->identifier == 'almcnicoll'): ?><li><a class="dropdown-item"
+                            <?php if ($user->identifier == 'almcnicoll'): ?><li><a class="dropdown-item"
                                     href="<?= $config['root_path'] ?>/admin/dashboard">Admin</a></li><?php endif; ?>
                             <li><a class="dropdown-item" href="<?= $config['root_path'] ?>/account/manage">My
                                     account</a></li>

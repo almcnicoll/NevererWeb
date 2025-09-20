@@ -12,6 +12,7 @@ $(document).ready(function () {
   Dropzone.options.myDropzone = {
     importDropzone: {
       paramName: "import.json",
+      acceptedFiles: "application/json,*.json,*.neverer",
       maxFilesize: 1, // MB
       init: function () {
         // Add event listeners here if needed
