@@ -5,8 +5,3 @@ php_errors.log
 *.log
 phpinfo.php
 .vscode/launch.json
-
-/vendor/*
-!/vendor/autoload.php
-!/vendor/composer/
-!/vendor/google/
