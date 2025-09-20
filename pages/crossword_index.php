@@ -67,6 +67,7 @@ $my_crosswords = Crossword::find($criteriaMine);
 
 if (count($my_crosswords)==0) {
     // No crosswords of our own
+    // TODO #13 - HIGH add import button here
 ?>
 
         <h2 class='card-title'>Your crosswords</h2>
@@ -74,7 +75,8 @@ if (count($my_crosswords)==0) {
             <div class="col-12">
                 <h3>You don't have any crosswords. How sad!</h3>
                 <h4>Click below to create one.</h4>
-                <a class="btn btn-primary" href="crossword/create">Create</a>
+                <a class="btn btn-primary" href="crossword/create">Create</a><br />
+                <a class="btn btn-secondary" href="crossword/import">Import</a>
             </div>
         </div>
         <?php
