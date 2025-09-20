@@ -1,20 +1,29 @@
 <?php
+    use Security\User;
+    use Security\AuthMethod;
     require_once('vendor/autoload.php');
     require_once('autoload.php');
+
+    $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+    $redirect_uri = $protocol . $_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF'];
 
     $client = new Google\Client();
     $client->setApplicationName("NevererWeb");
     $client->setClientId($config['GOOGLE_CLIENTID']);
     $client->setClientSecret($config['GOOGLE_CLIENTSECRET']);
-    //$client->setDeveloperKey("...");
+    $client->setRedirectUri($redirect_uri);
+    $client->addScope('email');
+    $client->addScope('profile');
+    
     if (isset($_GET['code'])) {
-        // First return from Google - has auth code
+        // Return from Google - we have an auth code
         $token = $client->fetchAccessTokenWithAuthCode($_GET['code']);
-            
+        
         // Check if the token was successfully fetched.
         if (isset($token['error'])) {
             // Handle the error (e.g., the user denied access).
             echo 'Authentication failed: ' . $token['error']; // TODO Do this better
+            echo "<pre>".print_r($token,true)."</pre>";
             exit;
         }
         
@@ -27,14 +36,43 @@
         $google_name = $userInfo->name;
         $google_email = $userInfo->email;
         //TODO - code to either create or look up account
-
+        $foundUser = User::findFirst(['identifier','=',$google_email]);
+        if ($foundUser == null) {
+            $user = new User();
+            $user->setAuthmethod_id(AuthMethod::findFirst(['methodName', '=', 'google'])->id);
+            $user->identifier = $google_email;
+            $user->email = $google_email;
+            $user->display_name = $google_name;
+            //echo "<pre>".print_r($user,true)."</pre>";
+            $user->save();
+            // Log them in
+            $_SESSION['USER_ID'] = $user->id;
+            $_SESSION['USER'] = serialize($user);
+            $_SESSION['USER_AUTHMETHOD_ID'] = $user->authmethod_id;
+            $_SESSION['USER_ACCESSTOKEN'] = null;
+            $_SESSION['USER_REFRESHTOKEN'] = null;
+            $_SESSION['USER_REFRESHNEEDED'] = strtotime('2100-01-01 00:00:00'); // Never expire
+            //echo "<pre>Session:\n".print_r($_SESSION,true)."</pre>";
+        } else {
+            $_SESSION['USER_ID'] = $foundUser->id;
+            $_SESSION['USER'] = serialize($foundUser);
+            $_SESSION['USER_AUTHMETHOD_ID'] = $foundUser->authmethod_id;
+            $_SESSION['USER_ACCESSTOKEN'] = $token;
+            $_SESSION['USER_REFRESHTOKEN'] = null; // TODO - get and store this?
+            $_SESSION['USER_REFRESHNEEDED'] = strtotime('2100-01-01 00:00:00'); // Never expire
+        }
+            session_write_close();
+            // redirect is getting problematic... it triggers when all kinds of resources are requested, and therefore redirects us to e.g. stylesheets on logon! //TODO - fix this!
+            // if (isset($_SESSION['redirect_url_once'])) {
+            //     header('Location: '.$_SESSION['redirect_url_once']);
+            //     unset($_SESSION['redirect_url_once']);
+            // } else {
+            //     header('Location: ./');
+            // }
+            header('Location: ./');
+            die();
     } else {
         // Initial page load
-        $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
-        $redirect_uri = $protocol . $_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF'];
-        $client->setRedirectUri($redirect_uri);
-        $client->addScope('email');
-        $client->addScope('profile');
         // Generate the authorization URL.
         $authUrl = $client->createAuthUrl();
         // Redirect the user to the authorization URL.
@@ -50,11 +88,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
     <link href="css/app.css" rel="stylesheet">
 </head>
-<body>    
-<pre>
-<?php
-print_r($_REQUEST);
-?>
-</pre>
+<body>
 </body>
 </html>

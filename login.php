@@ -2,6 +2,7 @@
 require_once('autoload.php');
 
 use Security\AuthMethod;
+use Security\User;
 
 if (isset($_REQUEST['redirect_url'])) {
     $_SESSION['redirect_url_once'] = $_REQUEST['redirect_url'];
@@ -21,6 +22,18 @@ if (isset($_REQUEST['redirect_url'])) {
 </head>
 <body>    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+<?php
+    if (User::loginCheck(false)) {
+        // We don't need to log in really
+        echo <<<END_HTML
+        <div class="row text-center">
+            <div class="col-12">
+                <h2 class='bg-primary text-light'>You are already signed in. Click <a href='~ROOT~\crossword'>here</a> to continue.</h2>
+            </div>
+        </div>
+END_HTML;
+    }
+?>
     <div class="row text-center">
         <div class="col-12">
             <h1>Login page</h1>
@@ -50,6 +63,7 @@ endif;
             echo "</div>\n";
         }
     }
+    //echo "<pre>".print_r($_SESSION,true)."</pre>";
     ?>
 </body>
 </html>

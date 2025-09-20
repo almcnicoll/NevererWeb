@@ -104,9 +104,6 @@ namespace Security {
 
             $currentUrl = (empty($_SERVER['HTTPS']) ? 'http' : 'https') . "://{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}";
 
-            // Check if user is on developer dashboard list - we can lose this if we move to Production Mode
-            $userCheckedOnList = (isset($_SESSION['USER_CHECKEDONLIST']) && ($_SESSION['USER_CHECKEDONLIST'] === true));
-
             // Determine if we have a valid session - need most USER vars and either ACCESS_TOKEN or REFRESH_TOKEN and REFRESHNEEDED
             $valid_session = true;
             $valid_session &= isset($_SESSION['USER']);
@@ -151,7 +148,16 @@ namespace Security {
                 
                 // Otherwise, everything is OK! Just ensure that USER property is correctly populated as a User object
                 $discard = new User(); // Ensure that User class is autoloaded
-                $user = unserialize($_SESSION['USER']);
+                try {
+                    $user = unserialize($_SESSION['USER']);
+                } catch (Exception) {
+                    try {
+                        $user = unserialize(serialize($_SESSION['USER']));
+                    } catch (Exception) {
+                        // Nope - haven't even set it wrong - just no good
+                        return false;
+                    }
+                }
                 $_SESSION['USER'] = serialize($user);
                 return true;
             }

@@ -369,3 +369,7 @@ VALUES ("What does 'synchronising words' mean, and why is it taking so long?","T
 /* UPDATE */
 /* VERSION 29 */
 /*include 29_name_tome.sql*/
+/* UPDATE */
+/* VERSION 30 */
+INSERT INTO `authmethods` (`methodName`,`handler`,`image`,`created`,`modified`)
+VALUES ('google','login-google.php','img/logins/google.png',NOW(),NOW());
