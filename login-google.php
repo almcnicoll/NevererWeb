@@ -24,8 +24,8 @@
         // Check if the token was successfully fetched.
         if (isset($token['error'])) {
             // Handle the error (e.g., the user denied access).
-            echo 'Authentication failed: ' . $token['error']; // TODO Do this better
-            echo "<pre>".print_r($token,true)."</pre>";
+            echo "<div class='php-toast'>Authentication failed: {$token['error']}</div>";
+            echo "<pre style='display:none;'>".print_r($token,true)."</pre>"; // For debugging
             exit;
         }
         
@@ -60,17 +60,9 @@
             $_SESSION['USER'] = serialize($foundUser);
             $_SESSION['USER_AUTHMETHOD_ID'] = $foundUser->authmethod_id;
             $_SESSION['USER_ACCESSTOKEN'] = $token;
-            $_SESSION['USER_REFRESHTOKEN'] = null; // TODO - get and store this?
             $_SESSION['USER_REFRESHNEEDED'] = strtotime('2100-01-01 00:00:00'); // Never expire
         }
             session_write_close();
-            // redirect is getting problematic... it triggers when all kinds of resources are requested, and therefore redirects us to e.g. stylesheets on logon! //TODO - fix this!
-            // if (isset($_SESSION['redirect_url_once'])) {
-            //     header('Location: '.$_SESSION['redirect_url_once']);
-            //     unset($_SESSION['redirect_url_once']);
-            // } else {
-            //     header('Location: ./');
-            // }
             header('Location: ./');
             die();
     } else {
@@ -84,12 +76,17 @@
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><?= (substr(@$config['root_path'],0,strlen('http://localhost'))=='http://localhost' ? 'LOCAL ':'') ?>Login to Neverer Web</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <title><?= (substr(@$config['root_path'],0,strlen('http://localhost'))=='http://localhost' ? 'LOCAL ':'') ?>Login to
+        Neverer Web</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
     <link href="css/app.css" rel="stylesheet">
 </head>
+
 <body>
 </body>
+
 </html>

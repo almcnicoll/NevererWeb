@@ -295,3 +295,6 @@ ul.context-menu a:hover {
   border-radius: 0px;
   --webkit-border-radius: 0px;
 }
+.php-toast {
+  display: none;
+}

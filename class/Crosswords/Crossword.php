@@ -467,16 +467,20 @@ END_SQL;
          * Retrieve a crossword from a JSON dump
          * @param string $json the JSON string from which to hydrate
          * @param bool $saveToDb - if true, the crossword and all underlying entities will be saved to the database, generating IDs. If not, this will need to be done manually
+         * @return the hydrated Crossword, or null if hydration fails
          */
-        public static function hydrate(string $json, bool $saveToDb = true) : Crossword {
+        public static function hydrate(string $json, bool $saveToDb = true) : ?Crossword {
             // @var Security\User
             global $user;
             if (empty($json)) {
                 throw new Exception("No JSON passed to hydration function");
             }
-            // TODO - try / catch
-            $data = json_decode($json);
-            $crossword = Crossword::hydrateNewFrom($data, true);
+            try {
+                $data = json_decode($json);
+                $crossword = Crossword::hydrateNewFrom($data, true);
+            } catch (Exception) {
+                return null;
+            }
             $crossword->user_id = $user->id;
             $placedClues = [];
             foreach ($data->PlacedClue as $pcData) {

@@ -154,8 +154,23 @@ function handleAjaxReturn(arg1, textStatus, arg3) {
  * @param {string} json the error(s) to display, as JSON
  */
 function displayAjaxError(json) {
-  // Do nothing for the moment
-  // TODO #7 - need code here - (we have a makeToast() javascript function if we can get the messages there)
+  let obj;
+  // Parse if json is a string
+  if (typeof json === "string") {
+    obj = JSON.parse(json);
+  } else {
+    obj = json;
+  }
+  // Get the properties and build a string
+  let text = "";
+  for (var prop in obj) {
+    if (text != "") {
+      text += "\n";
+    }
+    text += prop + ": " + obj[prop];
+  }
+  // Now show the toast
+  makeToast(text);
 }
 
 //#endregion

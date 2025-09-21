@@ -31,9 +31,9 @@ db.version(2).stores({
 // #endregion
 
 // #region VARIABLES
-let pattern = '';
-let destination = '';
-let format = '';
+let pattern = "";
+let destination = "";
+let format = "";
 let length = 0;
 let offset = 0;
 let limit = Infinity;
@@ -126,7 +126,7 @@ self.onmessage = function (e) {
       break;
     case "lookupByPattern":
       ({
-        pattern = '',
+        pattern = "",
         destination,
         format,
         length,
@@ -187,9 +187,9 @@ async function parseTomeList(success, payload) {
   obsoleteTomeIds = [...localTomeIds].filter((id) => !serverTomeIds.has(id));
 
   // Update tomes and remove obsolete ones
-  db.transaction("rw", db.tomes, db.entries, async function() {
+  db.transaction("rw", db.tomes, db.entries, async function () {
     // Bulk insert/update tomes
-    await db.tomes.bulkPut(serverTomes); // TODO VHIGH- these are using vars from the previous function - that doesn't work!
+    await db.tomes.bulkPut(serverTomes);
 
     // Bulk delete tomes and their entries that are no longer on the server
     if (obsoleteTomeIds.length > 0) {
@@ -200,8 +200,7 @@ async function parseTomeList(success, payload) {
         await db.entries.where("tome_id").equals(id).delete(); // can't bulkDelete on compound index
       }
     }
-  })
-  .then( function() {
+  }).then(function () {
     // Now tell the main process that we're done with this part
     var msgId = generateId();
     var msgData = {
@@ -210,11 +209,11 @@ async function parseTomeList(success, payload) {
       msgId,
     };
     self.postMessage(msgData);
-  } );
+  });
 }
 
 async function fetchMetadata(payload) {
-  meta = await (db.sync_meta.get("entries")) || {};
+  meta = (await db.sync_meta.get("entries")) || {};
   meta.last_sync = meta.last_sync || "1970-01-01T00:00:00Z";
   meta.last_offset = meta.last_offset || 0; // Could be null if it's our first sync or if our last sync completed all rows
   // Tell the main thread that we're done here
@@ -286,7 +285,7 @@ function doSync() {
         // Update sync metadata
         if (nextOffset == null) {
           // We're done
-            // Update the date
+          // Update the date
           meta.last_offset = null;
           meta.last_sync = thisSyncStamp;
           await db.sync_meta.put({
@@ -299,7 +298,7 @@ function doSync() {
           self.postMessage({ type: "syncComplete", msgId });
         } else {
           // There's more to retrieve
-            // Don't update the date            
+          // Don't update the date
           meta.last_offset = nextOffset;
           await db.sync_meta.put({
             key: "entries",
