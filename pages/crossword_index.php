@@ -67,7 +67,6 @@ $my_crosswords = Crossword::find($criteriaMine);
 
 if (count($my_crosswords)==0) {
     // No crosswords of our own
-    // TODO #13 - HIGH add import button here
 ?>
 
         <h2 class='card-title'>Your crosswords</h2>
