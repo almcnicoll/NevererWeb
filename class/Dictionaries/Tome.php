@@ -82,8 +82,20 @@ namespace Dictionaries {
          * Updates the last_modified field to be the maximum of created/modified from all its TomeEntries, or its own created field if there are no entries
          * NB - we don't want to run this on TomeEntry save as it would run multiple times on bulk inserts, which is unnecessary.
          */
-        public function updateLastUpdated() {
-            // TODO #10 - implement this - should be easy SQL
+        public static function updateLastUpdated() {
+            $sql = <<<END_HTML
+                UPDATE tomes t
+                INNER JOIN (
+                SELECT tome_id, MAX(modified) AS max_date
+                FROM tome_entries
+                GROUP BY tome_id
+                ) e ON t.id = e.tome_id
+                SET t.last_updated = e.max_date;
+END_HTML;
+            $pdo = db::getPDO();
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute();
+            $stmt->closeCursor();
         }
 
         /**
@@ -160,6 +172,9 @@ END_SQL;
             return static::writeableBy($this->id,$user_id);
         }
 
+        /**
+         * Updates letter counts for words that have not yet got them
+         */
         public static function updateLetterCounts() {
             $sql = "CALL PopulateLetterCounts();";
             $pdo = db::getPDO();
@@ -167,6 +182,15 @@ END_SQL;
             $stmt->execute();
             // Close the cursor - prevents error #2014 "Cannot execute queries while there are pending result sets"
             $stmt->closeCursor();
+        }
+
+        /**
+         * Saves the tome, after updating its last_updated field
+         * @return ?int the id of the tome
+         */
+        public function save() : ?int {
+            static::updateLastUpdated();
+            return parent::save();
         }
     }
 }
