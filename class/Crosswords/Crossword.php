@@ -9,6 +9,11 @@ namespace Crosswords {
     use Logging\LoggedError;
 
     class Crossword extends Model {
+        // File version not saved to database, but used when serializing / deserializing
+        //  in case of breaking changes or missing properties that need populating
+        // Will need to add an upgrade() function or similar if that occurs
+        public int $file_version = 1;
+
         public int $user_id;
         public ?string $title = null;
         public ?int $rows = null;
