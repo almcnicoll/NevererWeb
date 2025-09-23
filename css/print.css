@@ -43,3 +43,7 @@ tr#clues-down th {
   background-color: #fff;
   color: #000;
 }
+td.crossword-grid-square.ui-select,
+tr.ui-select.clue-row > td {
+  background-color: #fff;
+}
