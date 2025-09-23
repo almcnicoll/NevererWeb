@@ -373,3 +373,7 @@ VALUES ("What does 'synchronising words' mean, and why is it taking so long?","T
 /* VERSION 30 */
 INSERT INTO `authmethods` (`methodName`,`handler`,`image`,`created`,`modified`)
 VALUES ('google','login-google.php','img/logins/google.png',NOW(),NOW());
+/* UPDATE */
+/* VERSION 31 */
+INSERT INTO `faqs` (`question`,`answer`,`rank`,`created`,`modified`)
+VALUES ("Can I save my crossword as a PDF?","A PDF is a great way to distribute a crossword. However, making PDFs look 'just right' can be time-consuming and requires use of third-party code that has limitations.<br /><br />Most modern browsers have the option to print to PDF, so effort has been put into making the crossword print well. To produce a PDF, click the print icon (top-right when editing) and choose 'Save to PDF' (or similar).<br /><br />See <a href='https://xodo.com/blog/how-to-save-webpage-as-pdf' target='_blank'>this link</a> for more details. <em>(try <a href='https://web.archive.org/web/20250627063533/https://xodo.com/blog/how-to-save-webpage-as-pdf' target='_blank'>here</a> if that link is dead)</em>",20,NOW(),NOW());

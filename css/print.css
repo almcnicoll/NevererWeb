@@ -1,0 +1,45 @@
+@page {
+  size: A4 landscape;
+  margin: 1cm;
+}
+body {
+  width: 100%;
+}
+iframe {
+  display: none;
+}
+th,
+td {
+  -webkit-print-color-adjust: exact; /* Chrome/Safari */
+  print-color-adjust: exact; /* Firefox/Edge */
+}
+.footer {
+  display: none;
+}
+.crossword-grid-square .letter-holder {
+  visibility: hidden;
+}
+button,
+button.btn {
+  display: none;
+}
+table#clue-list {
+  width: 100%;
+  border: 0px;
+}
+#clue-list tr.clue-row {
+  vertical-align: top;
+  border: 0px;
+}
+#clue-list td.clue-number,
+#clue-list td.clue-question {
+  vertical-align: top;
+  border: 0px;
+  width: auto;
+}
+tr#clues-across th,
+tr#clues-down th {
+  text-align: left;
+  background-color: #fff;
+  color: #000;
+}

@@ -147,6 +147,8 @@ END_HTML;
 </div>
 <!-- Title etc -->
 <div style="float:right;">
+    <button type="button" id="print__Trigger" class="btn btn-success"><span class="bi bi-printer-fill"
+            aria-hidden="true"></span></button>
     <?= $modal_edit_settings->getTriggerHtml(); ?>
 </div>
 <h2 class="text-center">

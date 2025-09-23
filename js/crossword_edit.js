@@ -214,6 +214,10 @@ $(document).ready(
       gridSquareMenuClickHandler
     );
     $(".alters-trim").on("change", updateTrims);
+    $("#print__Trigger").on("click", function () {
+      window.print();
+    });
+
     // Word-list updaters
     $("input#new-clue-answer").on("change", checkForSuggestWordListRefresh);
     $("input#edit-clue-answer").on("change", checkForSuggestWordListRefresh);
