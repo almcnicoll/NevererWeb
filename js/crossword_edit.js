@@ -341,7 +341,11 @@ function updateClueList(json, removeMissing = true) {
       if (pClue.clue.question == null || pClue.clue.question == "") {
         clueRow.find(".clue-question").html("<i>" + pClue.clue.answer + "</i>"); // Update question text with answer in italics
       } else {
-        clueRow.find(".clue-question").text(pClue.clue.question); // Update question text
+        clueRow
+          .find(".clue-question")
+          .html(
+            `<span class="clue-question">${pClue.clue.question}</span><span class="clue-pattern"> ${pClue.clue.pattern}</span>`
+          ); // Update question text
       }
       //unusedIds.removeByValue(id); // And remove it from unused list
       removeFromArray(unusedIds, id);
@@ -371,7 +375,11 @@ function updateClueList(json, removeMissing = true) {
       if (pClue.clue.question == null || pClue.clue.question == "") {
         newRow.find(".clue-question").html("<i>" + pClue.clue.answer + "</i>"); // Update question text with answer in italics
       } else {
-        newRow.find(".clue-question").text(pClue.clue.question); // Update question text
+        newRow
+          .find(".clue-question")
+          .html(
+            `<span class="clue-question">${pClue.clue.question}</span><span class="clue-pattern"> ${pClue.clue.pattern}</span>`
+          ); // Update question text
       }
       if (insertBefore === false) {
         // No clues to put before, so add it at the end

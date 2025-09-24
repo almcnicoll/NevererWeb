@@ -137,6 +137,7 @@ namespace Crosswords {
         public function expose() : mixed {
             $output = parent::expose();
             $output['bare_letters'] = $this->getAnswerLetters();
+            $output['pattern'] = Clue::getPattern($this->answer);
             return $output;
         }
     }
