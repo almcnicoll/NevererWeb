@@ -4,6 +4,7 @@ var cols = 0;
 var selectedClue = 0;
 var ajaxCallId = 0;
 var ajaxCalls = new Object();
+var ajaxErrorsCount = 0;
 
 // Constants
 const FLAG_CONFLICT = 1;
@@ -67,7 +68,6 @@ function serializeForm(selector, stripPrefix = false) {
 //#endregion
 
 //#region Ajax handling
-// TODO #9 - consider prompting an internet connection check if makeAjaxCall is regularly returning fails (we have a makeToast() javascript function if we can get the messages there)
 
 /**
  *
@@ -140,7 +140,15 @@ function handleAjaxReturn(arg1, textStatus, arg3) {
   // Manage success/failure in UI
   switch (textStatus) {
     case "failure":
+      ajaxErrorsCount++;
+      if (ajaxErrorsCount > 5) {
+        var newline = "\n";
+        errorThrown = `Please check your internet connection.${newline}${errorThrown}`;
+      }
       makeToast(errorThrown, "error");
+      break;
+    case "success":
+      ajaxErrorsCount = 0;
       break;
   }
   // Remove UI cue
