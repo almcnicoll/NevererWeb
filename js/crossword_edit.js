@@ -65,6 +65,25 @@ function serializeForm(selector, stripPrefix = false) {
   }
   return data;
 }
+
+/**
+ * Used to work out how much to increase destPos by in the light of spaces/hyphens/etc in the string
+ * @param {*} spaced
+ * @param {*} destPos
+ * @returns
+ */
+function increaseSpacedPos(spaced, destPos) {
+  let count = 0; // number of letters we've matched so far
+  for (let i = 0; i < spaced.length; i++) {
+    if (spaced[i].toLowerCase() >= "a" && spaced[i].toLowerCase() <= "z") {
+      if (count === destPos) {
+        return i; // index in spaced string
+      }
+      count++;
+    }
+  }
+  return spaced.length; // if destPos is at the end
+}
 //#endregion
 
 //#region Ajax handling
@@ -534,13 +553,21 @@ function populateEditForm(data) {
       srcPos = pc.x - intClue.x;
       destPos = intClue.y - pc.y;
     }
-    // This should ensure we use the right part of the intersecting clue, even if there's punctuation and spaces in it
-    // TODO - work out how to put it into the right place in c.answer, allowing for punctuation and spaces (harder!)
-    // TODO #5 - stop substituting blank letters over filed-in letters
-    c.answer =
-      c.answer.substr(0, destPos) +
-      intClue.clue.bare_letters.substr(srcPos, 1).toUpperCase() +
-      c.answer.substr(destPos + 1);
+
+    // Work outwhere to put it in c.answer, allowing for punctuation and spaces
+    destPos = increaseSpacedPos(intClue.clue.answer, destPos);
+
+    // Only do the replacement if we've got an actual letter (not a question mark etc.) - should resolve #5 // TODO - not quite!
+    var intersectLetter = intClue.clue.bare_letters
+      .substr(srcPos, 1)
+      .toUpperCase();
+    if (intersectLetter >= "A" && intersectLetter <= "Z") {
+      // This should ensure we use the right part of the intersecting clue, even if there's punctuation and spaces in it
+      c.answer =
+        c.answer.substr(0, destPos) +
+        intClue.clue.bare_letters.substr(srcPos, 1).toUpperCase() +
+        c.answer.substr(destPos + 1);
+    }
   }
 
   // Put those variables into the modal form
