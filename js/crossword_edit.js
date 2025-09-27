@@ -808,7 +808,7 @@ function refreshSuggestedWordList(context) {
           "&limit=null&offset=null";
         makeAjaxCall("get", url, null, function (data) {
           parsedData = JSON.parse(data);
-          populateSuggestedWords(
+          dictionary.populateSuggestedWords(
             parsedData,
             parsedData.length,
             "#new-clue-suggested-words-tbody",
