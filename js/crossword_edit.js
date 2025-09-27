@@ -75,7 +75,8 @@ function serializeForm(selector, stripPrefix = false) {
 function increaseSpacedPos(spaced, destPos) {
   let count = 0; // number of letters we've matched so far
   for (let i = 0; i < spaced.length; i++) {
-    if (spaced[i].toLowerCase() >= "a" && spaced[i].toLowerCase() <= "z") {
+    let chkLetter = spaced[i].toLowerCase();
+    if (chkLetter == "?" || (chkLetter >= "a" && chkLetter <= "z")) {
       if (count === destPos) {
         return i; // index in spaced string
       }
@@ -762,6 +763,7 @@ function getAnswerPattern(answer) {
  * @param {object} e the jQuery event object
  */
 function checkForSuggestWordListRefresh(e) {
+  $(this).val($(this).val().trim()); // Lose leading / trailing spaces
   var oldVal = $(this).data("old-answer");
   var newVal = $(this).val();
   if (newVal != oldVal) {
@@ -787,11 +789,14 @@ function checkForSuggestWordListRefresh(e) {
 function refreshSuggestedWordList(context) {
   /** @type {string} */
   var pattern = "";
+  var reNonAlphaQ = /[^A-Za-z?]+/gi;
 
   // Handle according to where/how it was called
   switch (context) {
     case "new":
-      pattern = $("#new-clue input#new-clue-answer").val();
+      pattern = $("#new-clue input#new-clue-answer")
+        .val()
+        .replace(reNonAlphaQ, "");
       $("#new-clue-suggested-words-pattern").text(pattern);
       $("table.word-list tbody td").remove();
       // Handle possibility of dictionary sync not yet being complete
@@ -826,7 +831,9 @@ function refreshSuggestedWordList(context) {
         break;
       }
     case "edit":
-      pattern = $("#edit-clue input#edit-clue-answer").val();
+      pattern = $("#edit-clue input#edit-clue-answer")
+        .val()
+        .replace(reNonAlphaQ, "");
       $("#edit-clue-suggested-words-pattern").text(pattern);
       $("table.word-list tbody td").remove();
       // Handle possibility of dictionary sync not yet being complete
