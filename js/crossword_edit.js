@@ -544,8 +544,8 @@ function populateEditForm(data) {
   for (var ii = 0; ii < intCluesList.length; ii++) {
     // Work out where it overlaps
     var intClue = intCluesList[ii];
-    var srcPos;
-    var destPos;
+    var srcPos; // 0-based position in the source/donor (intersecting) clue
+    var destPos; // 0-based position in the dest/target (editing) clue
     if (pc.orientation == "across" && intClue.orientation == "down") {
       srcPos = pc.y - intClue.y;
       destPos = intClue.x - pc.x;
@@ -554,14 +554,13 @@ function populateEditForm(data) {
       destPos = intClue.y - pc.y;
     }
 
-    // Work outwhere to put it in c.answer, allowing for punctuation and spaces
-    destPos = increaseSpacedPos(intClue.clue.answer, destPos);
-
-    // Only do the replacement if we've got an actual letter (not a question mark etc.) - should resolve #5 // TODO - not quite!
+    // Only do the replacement if we've got an actual letter (not a question mark etc.)
     var intersectLetter = intClue.clue.bare_letters
       .substr(srcPos, 1)
       .toUpperCase();
     if (intersectLetter >= "A" && intersectLetter <= "Z") {
+      // Work outwhere to put it in c.answer, allowing for punctuation and spaces
+      destPos = increaseSpacedPos(c.answer, destPos);
       // This should ensure we use the right part of the intersecting clue, even if there's punctuation and spaces in it
       c.answer =
         c.answer.substr(0, destPos) +
