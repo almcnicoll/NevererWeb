@@ -45,7 +45,7 @@
     $form_new_clue->addField('row')->setLabel('Starting row')->setType("number")->setDivClass('mb-3')->setClass('focussed-input border-secondary')->setStyle('max-width: 10em;')->setAdditionalAttributes(['min'=>0,'max'=>$crossword->rows-1])->setHelp("(starting at row 0)");
     $form_new_clue->addField('col')->setLabel('Starting column')->setType("number")->setDivClass('mb-3')->setClass('border-secondary')->setStyle('max-width: 10em;')->setAdditionalAttributes(['min'=>0,'max'=>$crossword->cols-1])->setHelp("(starting at column 0)");
     $form_new_clue->addField('orientation')->setLabel('Orientation')->setType('select')->setDivClass('border-bottom mb-3')->setClass('border-secondary')->setOptions([PlacedClue::ACROSS=>'Across',PlacedClue::DOWN=>'Down'])->setValue('Across'); /*->setHelp("Across or Down")*/
-    $form_new_clue->addField('answer')->setLabel('Answer')->setDivClass('mb-3')->setClass('border-secondary')->setStyle("text-transform:uppercase"); /*->setHelp("The answer to the cryptic clue, including spaces, punctuation, etc.")*/
+    $form_new_clue->addField('answer')->setLabel('Answer')->setDivClass('mb-3')->setClass('border-secondary no-mobile-auto')->setStyle("text-transform:uppercase"); /*->setHelp("The answer to the cryptic clue, including spaces, punctuation, etc.")*/
     $form_new_clue->addField('pattern')->setLabel('')->setType('hidden');
     $form_new_clue->addField('clue')->setLabel('Clue')->setDivClass('mb-3')->setClass('border-secondary'); /*->setHelp("The clue text")*/
     $form_new_clue->addField('explanation')->setLabel('Explanation')->setClass('border-secondary'); /*->setHelp("An explanation of the working of the clue (optional, will not show on crossword output)")*/
@@ -77,7 +77,7 @@ END_HTML;
     $form_edit_clue->addField('row')->setLabel('Starting row')->setType("number")->setDivClass('mb-3')->setClass('focussed-input border-secondary')->setStyle('max-width: 10em;')->setAdditionalAttributes(['min'=>0,'max'=>$crossword->rows-1])->setHelp("(starting at row 0)");
     $form_edit_clue->addField('col')->setLabel('Starting column')->setType("number")->setDivClass('mb-3')->setClass('border-secondary')->setStyle('max-width: 10em;')->setAdditionalAttributes(['min'=>0,'max'=>$crossword->cols-1])->setHelp("(starting at column 0)");
     $form_edit_clue->addField('orientation')->setLabel('Orientation')->setType('select')->setDivClass('border-bottom mb-3')->setClass('border-secondary')->setOptions([PlacedClue::ACROSS=>'Across',PlacedClue::DOWN=>'Down'])->setValue('Across'); /*->setHelp("Across or Down")*/
-    $form_edit_clue->addField('answer')->setLabel('Answer')->setDivClass('mb-3')->setClass('border-secondary')->setStyle("text-transform:uppercase"); /*->setHelp("The answer to the cryptic clue, including spaces, punctuation, etc.")*/
+    $form_edit_clue->addField('answer')->setLabel('Answer')->setDivClass('mb-3')->setClass('border-secondary no-mobile-auto')->setStyle("text-transform:uppercase"); /*->setHelp("The answer to the cryptic clue, including spaces, punctuation, etc.")*/
     $form_edit_clue->addField('pattern')->setLabel('')->setType('hidden');
     $form_edit_clue->addField('clue')->setLabel('Clue')->setDivClass('mb-3')->setClass('border-secondary'); /*->setHelp("The clue text")*/
     $form_edit_clue->addField('explanation')->setLabel('Explanation')->setClass('border-secondary'); /*->setHelp("An explanation of the working of the clue (optional, will not show on crossword output)")*/
