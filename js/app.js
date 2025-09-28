@@ -15,6 +15,12 @@ $(document).ready(function () {
     let toastText = $(this).text();
     makeToast(toastText, toastClass, toastTitle, toastTime);
   });
+  // Handle mobile behaviour on any letter-input fields
+  $("input.no-mobile-auto, textarea.no-mobile-auto").attr({
+    autocapitalize: "off",
+    autocorrect: "off",
+    spellcheck: "false",
+  });
 });
 
 let toastClasses = {
