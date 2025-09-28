@@ -55,11 +55,6 @@ echo '<script type="application/json" class="data-transfer" data-scope="window">
     echo json_encode($data);
     echo '</script>';
 ?>
-<!-- Dictionary mgmt -->
-<script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/dexie/4.0.8/dexie.min.js'></script>
-<script type="text/javascript" src='~ROOT~/js/class/Tome.js'></script>
-<script type="text/javascript" src='~ROOT~/js/class/TomeEntry.js'></script>
-<script type="text/javascript" src='~ROOT~/js/dict_master.js'></script>
 
 <!-- Ajax cue -->
 <div id="ajaxCue">
@@ -69,7 +64,6 @@ echo '<script type="application/json" class="data-transfer" data-scope="window">
 <div style="float:right;">
     <button type="button" id="print__Trigger" class="btn btn-success"><span class="bi bi-printer-fill"
             aria-hidden="true"></span></button>
-    <?= $modal_edit_settings->getTriggerHtml(); ?>
 </div>
 <h2 class="text-center">
     <?= $crossword->title ?>
@@ -94,24 +88,14 @@ if ($fatal_error) {
 
 <!-- CONTEXT MENUS -->
 <?php
-    $menu_grid_square = new UI\BootstrapContextMenu('menu-grid-square');
-    $menu_grid_square->setItems( new UI\BootstrapMenuItem_List( [
-        new UI\BootstrapMenuItem('new-clue-across',"New across clue"),
-        new UI\BootstrapMenuItem('edit-clue-across',"Edit across clue"),
-        new UI\BootstrapMenuItem('delete-clue-across', "Delete across clue"),
-        new UI\BootstrapMenuItem('new-clue-down', "New down clue"),
-        new UI\BootstrapMenuItem('edit-clue-down', "Edit down clue"),
-        new UI\BootstrapMenuItem('delete-clue-down', "Delete down clue"),
-        new UI\BootstrapMenuItem('clear-grid-square', "Clear this square"),
-    ] ) );
-    echo $menu_grid_square->getHtml();
+    // None at the moment
 ?>
 
 <div class='row'>
     <div class='col-md-6'>
         <div class='crossword-container'>
             <?php
-        echo $crossword->getGridHtml(true);
+        echo $crossword->getGridHtml(false);
         ?>
         </div>
     </div>
@@ -123,7 +107,7 @@ if ($fatal_error) {
             </tr>
         </table>
         <div>
-            <?= $modal_new_clue->getTriggerHtml(); ?>
+            &nbsp;
         </div>
         <div class='clue-container'>
             <?= $crossword->getCluesHtml(true); ?>
