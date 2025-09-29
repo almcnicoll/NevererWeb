@@ -83,11 +83,11 @@ dictionary.launchFetch = function (msg) {
     msg.method,
     "~ROOT~/" + url + "?domain=ajax",
     msg.data,
-    dictionary.fetchSuccess.bind(null,msg.id),
-    dictionary.fetchFailure.bind(null,msg.id)
+    dictionary.fetchSuccess.bind(null, msg.id),
+    dictionary.fetchFailure.bind(null, msg.id)
   );
 };
-dictionary.fetchSuccess = function (msgId,response) {
+dictionary.fetchSuccess = function (msgId, response) {
   // Success callback
   dictionary.worker.postMessage({
     type: "fetched",
@@ -96,7 +96,7 @@ dictionary.fetchSuccess = function (msgId,response) {
     payload: response,
   });
 };
-dictionary.fetchFailure = function (msgId,error) {
+dictionary.fetchFailure = function (msgId, error) {
   // Failure callback
   dictionary.worker.postMessage({
     type: "fetched",
@@ -125,12 +125,16 @@ dictionary.populateSuggestedWords = function (
   var output = "";
   switch (format) {
     case "table-row":
-      output =
-        "<tr><td class='suggested-word-list-item'>" +
-        matches.results
-          .map((o) => o.word)
-          .join("</td></tr>\n<tr><td class='suggested-word-list-item'>") +
-        "</td></tr>";
+      if (matches.results.length == 0) {
+        output = "<h5>No matches</h5>";
+      } else {
+        output =
+          "<tr><td class='suggested-word-list-item'>" +
+          matches.results
+            .map((o) => o.word)
+            .join("</td></tr>\n<tr><td class='suggested-word-list-item'>") +
+          "</td></tr>";
+      }
       break;
     case "text":
       output = matches.results.map((o) => o.bare_letters).join("\n");

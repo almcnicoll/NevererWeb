@@ -4,6 +4,7 @@ var cols = 0;
 var selectedClue = 0;
 var ajaxCallId = 0;
 var ajaxCalls = new Object();
+var ajaxErrorsCount = 0;
 
 // Constants
 const FLAG_CONFLICT = 1;
@@ -64,10 +65,29 @@ function serializeForm(selector, stripPrefix = false) {
   }
   return data;
 }
+
+/**
+ * Used to work out how much to increase destPos by in the light of spaces/hyphens/etc in the string
+ * @param {*} spaced
+ * @param {*} destPos
+ * @returns
+ */
+function increaseSpacedPos(spaced, destPos) {
+  let count = 0; // number of letters we've matched so far
+  for (let i = 0; i < spaced.length; i++) {
+    let chkLetter = spaced[i].toLowerCase();
+    if (chkLetter == "?" || (chkLetter >= "a" && chkLetter <= "z")) {
+      if (count === destPos) {
+        return i; // index in spaced string
+      }
+      count++;
+    }
+  }
+  return spaced.length; // if destPos is at the end
+}
 //#endregion
 
 //#region Ajax handling
-// TODO #9 - consider prompting an internet connection check if makeAjaxCall is regularly returning fails (we have a makeToast() javascript function if we can get the messages there)
 
 /**
  *
@@ -140,7 +160,15 @@ function handleAjaxReturn(arg1, textStatus, arg3) {
   // Manage success/failure in UI
   switch (textStatus) {
     case "failure":
+      ajaxErrorsCount++;
+      if (ajaxErrorsCount > 5) {
+        var newline = "\n";
+        errorThrown = `Please check your internet connection.${newline}${errorThrown}`;
+      }
       makeToast(errorThrown, "error");
+      break;
+    case "success":
+      ajaxErrorsCount = 0;
       break;
   }
   // Remove UI cue
@@ -517,8 +545,8 @@ function populateEditForm(data) {
   for (var ii = 0; ii < intCluesList.length; ii++) {
     // Work out where it overlaps
     var intClue = intCluesList[ii];
-    var srcPos;
-    var destPos;
+    var srcPos; // 0-based position in the source/donor (intersecting) clue
+    var destPos; // 0-based position in the dest/target (editing) clue
     if (pc.orientation == "across" && intClue.orientation == "down") {
       srcPos = pc.y - intClue.y;
       destPos = intClue.x - pc.x;
@@ -526,13 +554,20 @@ function populateEditForm(data) {
       srcPos = pc.x - intClue.x;
       destPos = intClue.y - pc.y;
     }
-    // This should ensure we use the right part of the intersecting clue, even if there's punctuation and spaces in it
-    // TODO - work out how to put it into the right place in c.answer, allowing for punctuation and spaces (harder!)
-    // TODO #5 - stop substituting blank letters over filed-in letters
-    c.answer =
-      c.answer.substr(0, destPos) +
-      intClue.clue.bare_letters.substr(srcPos, 1).toUpperCase() +
-      c.answer.substr(destPos + 1);
+
+    // Only do the replacement if we've got an actual letter (not a question mark etc.)
+    var intersectLetter = intClue.clue.bare_letters
+      .substr(srcPos, 1)
+      .toUpperCase();
+    if (intersectLetter >= "A" && intersectLetter <= "Z") {
+      // Work outwhere to put it in c.answer, allowing for punctuation and spaces
+      destPos = increaseSpacedPos(c.answer, destPos);
+      // This should ensure we use the right part of the intersecting clue, even if there's punctuation and spaces in it
+      c.answer =
+        c.answer.substr(0, destPos) +
+        intClue.clue.bare_letters.substr(srcPos, 1).toUpperCase() +
+        c.answer.substr(destPos + 1);
+    }
   }
 
   // Put those variables into the modal form
@@ -728,6 +763,7 @@ function getAnswerPattern(answer) {
  * @param {object} e the jQuery event object
  */
 function checkForSuggestWordListRefresh(e) {
+  $(this).val($(this).val().trim()); // Lose leading / trailing spaces
   var oldVal = $(this).data("old-answer");
   var newVal = $(this).val();
   if (newVal != oldVal) {
@@ -753,11 +789,14 @@ function checkForSuggestWordListRefresh(e) {
 function refreshSuggestedWordList(context) {
   /** @type {string} */
   var pattern = "";
+  var reNonAlphaQ = /[^A-Za-z?]+/gi;
 
   // Handle according to where/how it was called
   switch (context) {
     case "new":
-      pattern = $("#new-clue input#new-clue-answer").val();
+      pattern = $("#new-clue input#new-clue-answer")
+        .val()
+        .replace(reNonAlphaQ, "");
       $("#new-clue-suggested-words-pattern").text(pattern);
       $("table.word-list tbody td").remove();
       // Handle possibility of dictionary sync not yet being complete
@@ -774,7 +813,7 @@ function refreshSuggestedWordList(context) {
           "&limit=null&offset=null";
         makeAjaxCall("get", url, null, function (data) {
           parsedData = JSON.parse(data);
-          populateSuggestedWords(
+          dictionary.populateSuggestedWords(
             parsedData,
             parsedData.length,
             "#new-clue-suggested-words-tbody",
@@ -792,7 +831,9 @@ function refreshSuggestedWordList(context) {
         break;
       }
     case "edit":
-      pattern = $("#edit-clue input#edit-clue-answer").val();
+      pattern = $("#edit-clue input#edit-clue-answer")
+        .val()
+        .replace(reNonAlphaQ, "");
       $("#edit-clue-suggested-words-pattern").text(pattern);
       $("table.word-list tbody td").remove();
       // Handle possibility of dictionary sync not yet being complete
