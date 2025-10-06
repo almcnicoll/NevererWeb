@@ -23,6 +23,10 @@
             $error_messages[] = "You can only solve crosswords that you created or that have been shared publicly.";
             //DisplayMessage::add("You can only edit crosswords that you created.", DisplayMessage::LVL_ERROR, 1);
             $fatal_error = true;
+        } elseif (!$crossword->isComplete()) {
+            $error_messages[] = "That crossword is not complete, so cannot be solved.";
+            //DisplayMessage::add("This crossword is not complete, so cannot be solved.", DisplayMessage::LVL_ERROR, 1);
+            $fatal_error = true;
         }
     }
 
@@ -55,6 +59,8 @@ echo '<script type="application/json" class="data-transfer" data-scope="window">
     echo json_encode($data);
     echo '</script>';
 ?>
+<!-- dexie for local progress storage -->
+<script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/dexie/4.0.8/dexie.min.js'></script>
 
 <!-- Ajax cue -->
 <div id="ajaxCue">
@@ -95,8 +101,11 @@ if ($fatal_error) {
     <div class='col-md-6'>
         <div class='crossword-container'>
             <?php
-        echo $crossword->getGridHtml(false);
-        ?>
+                echo $crossword->getGridHtml(false);
+            ?>
+        </div>
+        <div class='answer-entry mt-3'>
+            <input class='form-control border-secondary' id='answer-entry' readonly />
         </div>
     </div>
     <div class='col-md-6'>
