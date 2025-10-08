@@ -13,39 +13,51 @@ const FLAG_NOMATCHES = 4;
 
 //#region Dexie.js
 // Define the database
-var db = new Dexie("crosswordCache");
+var SolveCache = {};
 
-db.version(1).stores({
-  crosswords: "id", // primary key: crossword id
-});
+SolveCache.initDb = function () {
+  SolveCache.db = new Dexie("crosswordCache");
+
+  SolveCache.db.version(1).stores({
+    crosswords: "id", // primary key: crossword id
+  });
+};
 
 // Save crossword progress
-function saveCrosswordProgress(id, width, height, letters) {
+SolveCache.saveCrosswordProgress = function (id, width, height, letters) {
   return db.crosswords.put({
     id: id,
     width: width,
     height: height,
     letters: letters,
   });
-}
+};
+SolveCache.saveCrosswordProgressArr = function (id, width, height, grid) {
+  var letters = grid
+    .map(function (row) {
+      return row.join("");
+    })
+    .join("");
+  return saveCrosswordProgress(id, width, height, letters);
+};
 
 // Load crossword grid (returns a Promise resolving to 2D array)
-function loadCrosswordGrid(id) {
-  return db.crosswords.get(id).then(function (entry) {
+SolveCache.loadCrosswordGrid = function (id) {
+  return SolveCache.db.crosswords.get(id).then(function (entry) {
     if (!entry) return null;
 
     var width = entry.width;
     var height = entry.height;
     var letters = entry.letters;
 
-    var grid = [];
+    SolveCache.grid = [];
     for (var r = 0; r < height; r++) {
       var start = r * width;
-      grid.push(letters.slice(start, start + width).split(""));
+      SolveCache.grid.push(letters.slice(start, start + width).split(""));
     }
-    return grid;
+    return SolveCache.grid;
   });
-}
+};
 //#endregion
 
 //#region Utility methods
@@ -179,34 +191,6 @@ function displayAjaxError(json) {
   makeToast(text);
 }
 
-//#endregion
-
-//#region startup
-$(
-  /** On-load actions here */
-  function () {
-    // Set variables
-    rows = $("#crossword-edit tr").length;
-    cols = $("#crossword-edit tr").first().children("td").length;
-
-    // Individual actions
-    $("td.crossword-grid-square").on("click", toggleSelect);
-    $("#print__Trigger").on("click", function () {
-      window.print();
-    });
-
-    // Refresh data
-    refreshGrid();
-    refreshClueList();
-
-    // Load existing answers
-    // TODO HIGH - build local storage mgmt from here
-    loadCrosswordGrid(123).then(function (grid) {
-      if (grid) console.log("Loaded grid:", grid);
-      else console.log("No data found for crossword 123");
-    });
-  }
-);
 //#endregion
 
 //#region page-refreshing
@@ -873,13 +857,17 @@ function selectClue(id = 0) {
   $(".crossword-grid-square").removeClass("ui-select");
   $(".clue-row").removeClass("ui-select");
   if (id == 0) {
+    setAnswerEntry("");
     return;
   } // Nothing more to do if we're just deselecting - save some unneeded looping
   // Add selection classes
   // Grid squares
+  let cachedAnswer = "";
   $(".crossword-grid-square").each(function () {
     if (reSel.test($(this).data("placed-clue-ids"))) {
       $(this).addClass("ui-select");
+      let [junk, y, x] = $(this).attr("id").split("-");
+      cachedAnswer += SolveCache.grid[y][x];
     }
   });
   // Clue list
@@ -888,6 +876,7 @@ function selectClue(id = 0) {
       $(this).addClass("ui-select");
     }
   });
+  setAnswerEntry(cachedAnswer);
 }
 
 /**
@@ -1056,4 +1045,70 @@ function gridSquareMenuClickHandler(eventObject) {
   // Hide menu
   $("#context-menu-menu-grid-square").hide();
 }
+
+function setAnswerEntry(newValue, pcId = null, pcOrientation = null) {
+  $("#answer-entry").val(newValue);
+  if (newValue.trim().length == 0) {
+    $("#answer-entry").attr("disabled", "disabled");
+    $("#answer-entry").data("placed-clue-id", "");
+    $("#answer-entry").data("orientation", "");
+  } else {
+    $("#answer-entry").removeAttr("disabled");
+    $("#answer-entry").data("placed-clue-id", pcId);
+    $("#answer-entry").data("orientation", pcOrientation);
+    $("#answer-entry")[0].focus();
+  }
+}
+
+function saveAnswerEntry(e) {
+  //
+}
+//#endregion
+
+//#region startup
+$(
+  /** On-load actions here */
+  function () {
+    // Set variables
+    rows = $("#crossword-edit tr").length;
+    cols = $("#crossword-edit tr").first().children("td").length;
+
+    // Individual actions
+    $("td.crossword-grid-square").on("click", toggleSelect);
+    $("#print__Trigger").on("click", function () {
+      window.print();
+    });
+
+    // Refresh data
+    refreshGrid();
+    refreshClueList();
+
+    // Watch for answer entry
+    setAnswerEntry("");
+    $("#answer-entry").on("change", saveAnswerEntry);
+
+    // Load existing answers
+    SolveCache.initDb();
+
+    SolveCache.loadCrosswordGrid(window.crossword_id).then(function (grid) {
+      if (!grid) {
+        console.log("No data found for crossword " + window.crossword_id);
+        for (let y = 0; y < window.rows; y++) {
+          grid[y] = [];
+          for (let x = 0; x < window.cols; x++) {
+            grid[y][x] = " ";
+          }
+        }
+        SolveCache.saveCrosswordProgressArr(
+          window.crossword_id,
+          window.cols,
+          window.rows,
+          grid
+        );
+      } else {
+        console.log("Loaded grid:", grid);
+      }
+    });
+  }
+);
 //#endregion

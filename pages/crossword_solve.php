@@ -54,6 +54,8 @@ echo '<script type="application/json" class="data-transfer" data-scope="window">
     $data = [
         'root_path' => $config['root_path'],
         'crossword_id' => $crossword->id,
+        'rows' => $crossword->rows,
+        'cols' => $crossword->cols,
         'user_id' => $user->id,
     ];
     echo json_encode($data);
