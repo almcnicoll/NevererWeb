@@ -21,6 +21,8 @@ SolveCache.initDb = function () {
   SolveCache.db.version(1).stores({
     crosswords: "id", // primary key: crossword id
   });
+
+  SolveCache.db.open();
 };
 
 // Save crossword progress
@@ -1048,12 +1050,14 @@ function gridSquareMenuClickHandler(eventObject) {
 
 function setAnswerEntry(newValue, pcId = null, pcOrientation = null) {
   $("#answer-entry").val(newValue);
-  if (newValue.trim().length == 0) {
+  if (newValue.length == 0) {
     $("#answer-entry").attr("disabled", "disabled");
+    $("#answer-entry").attr("readonly", "readonly");
     $("#answer-entry").data("placed-clue-id", "");
     $("#answer-entry").data("orientation", "");
   } else {
     $("#answer-entry").removeAttr("disabled");
+    $("#answer-entry").removeAttr("readonly");
     $("#answer-entry").data("placed-clue-id", pcId);
     $("#answer-entry").data("orientation", pcOrientation);
     $("#answer-entry")[0].focus();
@@ -1093,12 +1097,14 @@ $(
     SolveCache.loadCrosswordGrid(window.crossword_id).then(function (grid) {
       if (!grid) {
         console.log("No data found for crossword " + window.crossword_id);
+        grid = [];
         for (let y = 0; y < window.rows; y++) {
           grid[y] = [];
           for (let x = 0; x < window.cols; x++) {
             grid[y][x] = " ";
           }
         }
+        SolveCache.grid = grid;
         SolveCache.saveCrosswordProgressArr(
           window.crossword_id,
           window.cols,

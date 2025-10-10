@@ -107,7 +107,7 @@ if ($fatal_error) {
             ?>
         </div>
         <div class='answer-entry mt-3'>
-            <input class='form-control border-secondary' id='answer-entry' readonly />
+            <input class='form-control border-secondary text-center' id='answer-entry' readonly />
         </div>
     </div>
     <div class='col-md-6'>
