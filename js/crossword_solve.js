@@ -853,6 +853,8 @@ function toggleSelect() {
  */
 function selectClue(id = 0) {
   // Set variables
+  let startX = null;
+  let startY = null;
   selectedClue = id;
   var reSel = new RegExp("\\b" + id + "\\b"); // To allow for standalone numbers and comma-delimited ones, but not digits within larger numbers
   // Remove selection classes
@@ -870,15 +872,24 @@ function selectClue(id = 0) {
       $(this).addClass("ui-select");
       let [junk, y, x] = $(this).attr("id").split("-");
       cachedAnswer += SolveCache.grid[y][x];
+      // Set start pos from clue
+      if (startX == null) {
+        startX = x;
+      }
+      if (startY == null) {
+        startY = y;
+      }
     }
   });
   // Clue list
+  let pcOrientation;
   $(".clue-row").each(function () {
     if ($(this).data("placed-clue-id") == id) {
       $(this).addClass("ui-select");
+      pcOrientation = $(this).data("clue-orientation");
     }
   });
-  setAnswerEntry(cachedAnswer);
+  setAnswerEntry(cachedAnswer, id, pcOrientation, startX, startY);
 }
 
 /**
@@ -1048,30 +1059,63 @@ function gridSquareMenuClickHandler(eventObject) {
   $("#context-menu-menu-grid-square").hide();
 }
 
-function setAnswerEntry(newValue, pcId = null, pcOrientation = null) {
+function setAnswerEntry(
+  newValue,
+  pcId = null,
+  pcOrientation = null,
+  startX = 0,
+  startY = 0
+) {
   $("#answer-entry").val(newValue);
   if (newValue.length == 0) {
     $("#answer-entry").attr("disabled", "disabled");
     $("#answer-entry").attr("readonly", "readonly");
     $("#answer-entry").data("placed-clue-id", "");
-    $("#answer-entry").data("orientation", "");
+    $("#answer-entry").data("clue-orientation", "");
+    $("#answer-entry").data("clue-startX", 0);
+    $("#answer-entry").data("clue-startY", 0);
   } else {
     $("#answer-entry").removeAttr("disabled");
     $("#answer-entry").removeAttr("readonly");
     $("#answer-entry").data("placed-clue-id", pcId);
-    $("#answer-entry").data("orientation", pcOrientation);
+    $("#answer-entry").data("clue-orientation", pcOrientation);
+    $("#answer-entry").data("clue-startX", startX);
+    $("#answer-entry").data("clue-startY", startY);
     $("#answer-entry")[0].focus();
+    $("#answer-entry")[0].select();
   }
 }
 
-function saveAnswerEntry(e) {
-  //
+function handleAnswerKeyPress(e) {
+  // Get the vars
+  let word = $("#answer-entry").val();
+  let orientation = $("#answer-entry").data("clue-orientation");
+  let startX = $("#answer-entry").data("clue-startX");
+  let startY = $("#answer-entry").data("clue-startY");
+  // Display letters on grid
+  for (var i = 0; i < word.length; i++) {
+    switch (orientation) {
+      case "down":
+        $(`#square-${startY + i}-${startX} .letter-holder`).text(
+          word[i].toUpperCase()
+        );
+        break;
+      case "across":
+        $(`#square-${startY}-${startX + 1} .letter-holder`).text(
+          word[i].toUpperCase()
+        );
+        break;
+      default:
+        console.log($`unknown clue orientation ${orientation}`);
+    }
+  }
+  // Save letters to db
 }
 //#endregion
 
 //#region startup
 $(
-  /** On-load actions here */
+  // On-load actions here
   function () {
     // Set variables
     rows = $("#crossword-edit tr").length;
@@ -1089,7 +1133,7 @@ $(
 
     // Watch for answer entry
     setAnswerEntry("");
-    $("#answer-entry").on("change", saveAnswerEntry);
+    $("#answer-entry").on("keypress", handleAnswerKeyPress);
 
     // Load existing answers
     SolveCache.initDb();
