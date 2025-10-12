@@ -27,7 +27,7 @@ SolveCache.initDb = function () {
 
 // Save crossword progress
 SolveCache.saveCrosswordProgress = function (id, width, height, letters) {
-  return db.crosswords.put({
+  return SolveCache.db.crosswords.put({
     id: id,
     width: width,
     height: height,
@@ -40,7 +40,7 @@ SolveCache.saveCrosswordProgressArr = function (id, width, height, grid) {
       return row.join("");
     })
     .join("");
-  return saveCrosswordProgress(id, width, height, letters);
+  return SolveCache.saveCrosswordProgress(id, width, height, letters);
 };
 
 // Load crossword grid (returns a Promise resolving to 2D array)
@@ -1099,17 +1099,25 @@ function handleAnswerKeyPress(e) {
         $(`#square-${+startY + +i}-${startX} .letter-holder`).text(
           word[i].toUpperCase()
         );
+        SolveCache.grid[+startY + +i][+startX] = word[i].toUpperCase();
         break;
       case "across":
         $(`#square-${startY}-${+startX + +i} .letter-holder`).text(
           word[i].toUpperCase()
         );
+        SolveCache.grid[+startY][+startX + +i] = word[i].toUpperCase();
         break;
       default:
         console.log($`unknown clue orientation ${orientation}`);
     }
   }
   // Save letters to db
+  SolveCache.saveCrosswordProgressArr(
+    crossword_id,
+    cols,
+    rows,
+    SolveCache.grid
+  );
 }
 //#endregion
 
@@ -1130,6 +1138,8 @@ $(
     // Refresh data
     refreshGrid();
     refreshClueList();
+
+    // Populate from db / Solvecache.grid
 
     // Watch for answer entry
     setAnswerEntry("");

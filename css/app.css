@@ -298,3 +298,8 @@ ul.context-menu a:hover {
 .php-toast {
   display: none;
 }
+input#answer-entry {
+  text-transform: uppercase;
+  font-family: monospace;
+  font-size: 250%;
+}
