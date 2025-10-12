@@ -1096,12 +1096,12 @@ function handleAnswerKeyPress(e) {
   for (var i = 0; i < word.length; i++) {
     switch (orientation) {
       case "down":
-        $(`#square-${startY + i}-${startX} .letter-holder`).text(
+        $(`#square-${+startY + +i}-${startX} .letter-holder`).text(
           word[i].toUpperCase()
         );
         break;
       case "across":
-        $(`#square-${startY}-${startX + 1} .letter-holder`).text(
+        $(`#square-${startY}-${+startX + +i} .letter-holder`).text(
           word[i].toUpperCase()
         );
         break;
@@ -1133,7 +1133,7 @@ $(
 
     // Watch for answer entry
     setAnswerEntry("");
-    $("#answer-entry").on("keypress", handleAnswerKeyPress);
+    $("#answer-entry").on("input", handleAnswerKeyPress);
 
     // Load existing answers
     SolveCache.initDb();
