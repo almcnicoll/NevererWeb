@@ -779,8 +779,10 @@ function selectClue(id = 0) {
   // Add selection classes
   // Grid squares
   let cachedAnswer = "";
+  let characterCount = 0;
   $(".crossword-grid-square").each(function () {
     if (reSel.test($(this).data("placed-clue-ids"))) {
+      characterCount++;
       $(this).addClass("ui-select");
       let [junk, y, x] = $(this).attr("id").split("-");
       cachedAnswer += SolveCache.grid[y][x];
@@ -801,7 +803,14 @@ function selectClue(id = 0) {
       pcOrientation = $(this).data("clue-orientation");
     }
   });
-  setAnswerEntry(cachedAnswer, id, pcOrientation, startX, startY);
+  setAnswerEntry(
+    cachedAnswer,
+    id,
+    pcOrientation,
+    startX,
+    startY,
+    characterCount
+  );
 }
 
 /**
@@ -970,13 +979,16 @@ function gridSquareMenuClickHandler(eventObject) {
   // Hide menu
   $("#context-menu-menu-grid-square").hide();
 }
+//#endregion
 
+//#region Solve cache functions
 function setAnswerEntry(
   newValue,
   pcId = null,
   pcOrientation = null,
   startX = 0,
-  startY = 0
+  startY = 0,
+  maxLength = 0
 ) {
   newValue = newValue.replaceAll(" ", "?");
   $("#answer-entry").val(newValue);
@@ -987,6 +999,7 @@ function setAnswerEntry(
     $("#answer-entry").data("clue-orientation", "");
     $("#answer-entry").data("clue-startX", 0);
     $("#answer-entry").data("clue-startY", 0);
+    $("#answer-entry").attr("maxlength", 0);
   } else {
     $("#answer-entry").removeAttr("disabled");
     $("#answer-entry").removeAttr("readonly");
@@ -994,6 +1007,11 @@ function setAnswerEntry(
     $("#answer-entry").data("clue-orientation", pcOrientation);
     $("#answer-entry").data("clue-startX", startX);
     $("#answer-entry").data("clue-startY", startY);
+    if (maxLength == 0) {
+      $("#answer-entry").removeAttr("maxlength");
+    } else {
+      $("#answer-entry").attr("maxlength", maxLength);
+    }
     $("#answer-entry")[0].focus();
     $("#answer-entry")[0].select();
   }
