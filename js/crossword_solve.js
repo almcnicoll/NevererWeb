@@ -31,7 +31,7 @@ SolveCache.saveCrosswordProgress = function (id, width, height, letters) {
     id: id,
     width: width,
     height: height,
-    letters: letters,
+    letters: letters.replaceAll("?", " "),
   });
 };
 SolveCache.saveCrosswordProgressArr = function (id, width, height, grid) {
@@ -56,6 +56,11 @@ SolveCache.loadCrosswordGrid = function (id) {
     for (var r = 0; r < height; r++) {
       var start = r * width;
       SolveCache.grid.push(letters.slice(start, start + width).split(""));
+      for (var c = 0; c < width; c++) {
+        $(`#square-${r}-${c} .letter-holder`).text(
+          SolveCache.grid[r][c].toUpperCase()
+        );
+      }
     }
     return SolveCache.grid;
   });
@@ -259,6 +264,30 @@ function updateGridSquares(json) {
       sq.children(".letter-holder").html("&nbsp;");
     }
   }
+
+  // Load answers from cache
+  SolveCache.loadCrosswordGrid(window.crossword_id).then(function (grid) {
+    if (!grid) {
+      console.log("No data found for crossword " + window.crossword_id);
+      grid = [];
+      for (let y = 0; y < window.rows; y++) {
+        grid[y] = [];
+        for (let x = 0; x < window.cols; x++) {
+          grid[y][x] = " ";
+          $(`#square-${y}-${x} .letter-holder`).text(grid[y][x].toUpperCase());
+        }
+      }
+      SolveCache.grid = grid;
+      SolveCache.saveCrosswordProgressArr(
+        window.crossword_id,
+        window.cols,
+        window.rows,
+        grid
+      );
+    } else {
+      console.log("Loaded grid:", grid);
+    }
+  });
 
   if (selectedClue != 0) {
     selectClue(selectedClue);
@@ -692,123 +721,6 @@ function getAnswerPattern(answer) {
   }
   return "(" + pattern_parts.join(",") + ")";
 }
-
-/**
- * Checks the correct input to determine if a refresh is needed, and triggers it if so
- * @param {object} e the jQuery event object
- */
-function checkForSuggestWordListRefresh(e) {
-  $(this).val($(this).val().trim()); // Lose leading / trailing spaces
-  var oldVal = $(this).data("old-answer");
-  var newVal = $(this).val();
-  if (newVal != oldVal) {
-    $(this).data("old-answer", newVal);
-    if (
-      newVal !== null &&
-      typeof newVal === "string" &&
-      newVal.trim() !== "" &&
-      getAnswerPattern(newVal) !== null
-    ) {
-      var id = $(this).attr("id");
-      var parts = id.split("-");
-      var context = parts[0];
-      refreshSuggestedWordList(context);
-    }
-  }
-}
-
-/**
- * Updates the suggested word list based on the pattern
- * @param {string} context the modal context in which to refresh (new or edit)
- */
-function refreshSuggestedWordList(context) {
-  /** @type {string} */
-  var pattern = "";
-  var reNonAlphaQ = /[^A-Za-z?]+/gi;
-
-  // Handle according to where/how it was called
-  switch (context) {
-    case "new":
-      pattern = $("#new-clue input#new-clue-answer")
-        .val()
-        .replace(reNonAlphaQ, "");
-      $("#new-clue-suggested-words-pattern").text(pattern);
-      $("table.word-list tbody td").remove();
-      // Handle possibility of dictionary sync not yet being complete
-      if (!dictionary.sync_complete) {
-        // Offload to server method until dict sync complete
-        $("#new-clue-suggested-words-tbody").html(
-          "<h5>Retrieving words will be slower while dictionary sync underway</h5>"
-        );
-        const url =
-          root_path +
-          "/tome_entry/*/lookup?domain=ajax" +
-          "&pattern=" +
-          pattern +
-          "&limit=null&offset=null";
-        makeAjaxCall("get", url, null, function (data) {
-          parsedData = JSON.parse(data);
-          dictionary.populateSuggestedWords(
-            parsedData,
-            parsedData.length,
-            "#new-clue-suggested-words-tbody",
-            "table-row"
-          );
-        });
-        return;
-      } else {
-        dictionary.lookupWordsByPattern(
-          pattern,
-          pattern.length,
-          "#new-clue-suggested-words-tbody",
-          "table-row"
-        );
-        break;
-      }
-    case "edit":
-      pattern = $("#edit-clue input#edit-clue-answer")
-        .val()
-        .replace(reNonAlphaQ, "");
-      $("#edit-clue-suggested-words-pattern").text(pattern);
-      $("table.word-list tbody td").remove();
-      // Handle possibility of dictionary sync not yet being complete
-      if (!dictionary.sync_complete) {
-        // Offload to server method until dict sync complete
-        $("#edit-clue-suggested-words-tbody").html(
-          "<h5>Retrieving words will be slower while dictionary sync underway</h5>"
-        );
-        const url =
-          root_path +
-          "/tome_entry/*/lookup?domain=ajax" +
-          "&pattern=" +
-          pattern +
-          "&limit=null&offset=null";
-        makeAjaxCall("get", url, null, function (data) {
-          parsedData = JSON.parse(data);
-          dictionary.populateSuggestedWords(
-            parsedData,
-            parsedData.length,
-            "#edit-clue-suggested-words-tbody",
-            "table-row"
-          );
-        });
-        return;
-      } else {
-        dictionary.lookupWordsByPattern(
-          pattern,
-          pattern.length,
-          "#edit-clue-suggested-words-tbody",
-          "table-row"
-        );
-        break;
-      }
-    default:
-      throw new Exception(
-        "Invalid context '" + context + "' for refreshSuggestedWordList."
-      );
-      break;
-  }
-}
 //#endregion
 
 //#region UI-interaction
@@ -1066,6 +978,7 @@ function setAnswerEntry(
   startX = 0,
   startY = 0
 ) {
+  newValue = newValue.replaceAll(" ", "?");
   $("#answer-entry").val(newValue);
   if (newValue.length == 0) {
     $("#answer-entry").attr("disabled", "disabled");
@@ -1086,7 +999,22 @@ function setAnswerEntry(
   }
 }
 
-function handleAnswerKeyPress(e) {
+function handleAnswerKeydown(e) {
+  if (e.key === " ") {
+    // detect space bar
+    e.preventDefault(); // stop the space being added
+    const start = this.selectionStart;
+    const end = this.selectionEnd;
+    const val = this.value;
+    this.value = val.slice(0, start) + "?" + val.slice(end);
+    this.setSelectionRange(start + 1, start + 1);
+    window.setTimeout(() => {
+      $(this).trigger("input");
+    }, 250);
+  }
+}
+
+function handleAnswerInput(e) {
   // Get the vars
   let word = $("#answer-entry").val();
   let orientation = $("#answer-entry").data("clue-orientation");
@@ -1097,15 +1025,19 @@ function handleAnswerKeyPress(e) {
     switch (orientation) {
       case "down":
         $(`#square-${+startY + +i}-${startX} .letter-holder`).text(
-          word[i].toUpperCase()
+          word[i].toUpperCase().replaceAll("?", " ")
         );
-        SolveCache.grid[+startY + +i][+startX] = word[i].toUpperCase();
+        SolveCache.grid[+startY + +i][+startX] = word[i]
+          .toUpperCase()
+          .replaceAll("?", " ");
         break;
       case "across":
         $(`#square-${startY}-${+startX + +i} .letter-holder`).text(
           word[i].toUpperCase()
         );
-        SolveCache.grid[+startY][+startX + +i] = word[i].toUpperCase();
+        SolveCache.grid[+startY][+startX + +i] = word[i]
+          .toUpperCase()
+          .replaceAll("?", " ");
         break;
       default:
         console.log($`unknown clue orientation ${orientation}`);
@@ -1143,32 +1075,11 @@ $(
 
     // Watch for answer entry
     setAnswerEntry("");
-    $("#answer-entry").on("input", handleAnswerKeyPress);
+    $("#answer-entry").on("input", handleAnswerInput);
+    $("#answer-entry").on("keydown", handleAnswerKeydown);
 
-    // Load existing answers
+    // Initialise solving cache
     SolveCache.initDb();
-
-    SolveCache.loadCrosswordGrid(window.crossword_id).then(function (grid) {
-      if (!grid) {
-        console.log("No data found for crossword " + window.crossword_id);
-        grid = [];
-        for (let y = 0; y < window.rows; y++) {
-          grid[y] = [];
-          for (let x = 0; x < window.cols; x++) {
-            grid[y][x] = " ";
-          }
-        }
-        SolveCache.grid = grid;
-        SolveCache.saveCrosswordProgressArr(
-          window.crossword_id,
-          window.cols,
-          window.rows,
-          grid
-        );
-      } else {
-        console.log("Loaded grid:", grid);
-      }
-    });
   }
 );
 //#endregion
