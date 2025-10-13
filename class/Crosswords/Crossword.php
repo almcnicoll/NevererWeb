@@ -377,6 +377,10 @@ END_SQL;
             return $existingClues;
         }
 
+        /**
+         * Returns the HTML for the crossword grid of the appropriate size
+         * @param bool $include_answers whether to include the answer letters in the grid
+         */
         public function getGridHtml($include_answers) : string {
             // Consider sending blank grid, to be populated by AJAX call
             $html = "<table id='crossword-edit' class='crossword-grid'>\n";
@@ -461,6 +465,27 @@ END_SQL;
          */
         public function exportAsJSON() : string {
             return json_encode($this->exposeForExport());
+        }
+
+        /**
+         * Returns whether or not the crossword has letters in every square and questions for each clue
+         */
+        public function isComplete() : bool {
+            $allPC = $this->getPlacedClues();
+            $hasAllAnswers = true;
+            $hasAllQuestions = true;
+            foreach ($allPC as $pc) {
+                $c = $pc->getClue();
+                if ($c->question == null || empty(trim($c->question))) {
+                    $hasAllQuestions = false;
+                    break;
+                }
+                if ($c->answer == null || empty(trim($c->answer)) || strpos($c->answer, '?' !== false)) {
+                    $hasAllAnswers = false;
+                    break;
+                }
+            }
+            return $hasAllAnswers & $hasAllQuestions;
         }
 
         /**
