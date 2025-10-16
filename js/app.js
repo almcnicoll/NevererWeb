@@ -1,4 +1,5 @@
-$(document).ready(function () {
+//#region jQuery DOM ready
+$(function () {
   // Transfer data from PHP scripts
   transferData();
   // Initialise all .toast elements on the page
@@ -21,7 +22,40 @@ $(document).ready(function () {
     autocorrect: "off",
     spellcheck: "false",
   });
+
+  // Handle copy buttons
+  $(".copy-button").on("click", function () {
+    let target = $(this).data("copy-source");
+    // Select text inside element
+    let copyText = $("#" + target).val();
+    // Copy text to clipboard
+    copyToClipboard(copyText);
+  });
 });
+//#endregion
+
+function copyToClipboard(text) {
+  // Modern browsers
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    return navigator.clipboard
+      .writeText(text)
+      .then(() => makeToast("Copied to clipboard!", "success"))
+      .catch(() => fallbackCopy(text));
+  } else {
+    fallbackCopy(text);
+  }
+}
+function fallbackCopy(text) {
+  // Older browsers
+  const temp = $("<input>").val(text).appendTo("body").select();
+  try {
+    document.execCommand("copy");
+    makeToast("Copied to clipboard!", "success");
+  } catch (e) {
+    makeToast("Copy failed!", "error");
+  }
+  temp.remove();
+}
 
 let toastClasses = {
   warning: "bg-warning",
