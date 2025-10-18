@@ -211,10 +211,10 @@ tr.clue-orientation-header {
   font-weight: bold;
   text-align: center;
 }
-#new-clue__Trigger {
+/*#new-clue__Trigger {
   position: absolute;
   margin-top: -8px;
-}
+}*/
 span.letter-holder {
   cursor: default;
 }
