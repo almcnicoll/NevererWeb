@@ -67,7 +67,7 @@ END_HTML;
     $modal_new_clue->setTitle('Add clue')
     ->setBody($form_new_clue->getHtml())
     ->setButtons("Save")
-    ->setTrigger("+")
+    ->setTrigger("<i class='bi bi-plus-square'></i>")
     ->setSidebar($new_clue_sidebar);
     echo $modal_new_clue->getMainHtml();
     
@@ -146,7 +146,7 @@ END_HTML;
     <div id="ajaxCount"></div>
 </div>
 <!-- Title etc -->
-<div style="float:right;">
+<div class="btn-group" style="float:right;">
     <button type="button" id="print__Trigger" class="btn btn-success"><span class="bi bi-printer-fill"
             aria-hidden="true"></span></button>
     <?= $modal_edit_settings->getTriggerHtml(); ?>
@@ -202,8 +202,12 @@ if ($fatal_error) {
                 <td class='clue-question'>&nbsp;</td>
             </tr>
         </table>
-        <div>
-            <?= $modal_new_clue->getTriggerHtml(); ?>
+        <div class="d-flex flex-row-reverse" style="padding-bottom: 0px; margin-bottom: -1.5rem;">
+            <div class="btn-group">
+                <?= $modal_new_clue->getTriggerHtml(); ?>
+                <a href="#" class="zoom-link btn btn-md btn-secondary" data-zoom="1"><i class="bi bi-zoom-in"></i></a>
+                <a href="#" class="zoom-link btn btn-md btn-secondary" data-zoom="-1"><i class="bi bi-zoom-out"></i></a>
+            </div>
         </div>
         <div class='clue-container'>
             <?= $crossword->getCluesHtml(true); ?>

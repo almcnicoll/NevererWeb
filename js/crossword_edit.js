@@ -5,6 +5,7 @@ var selectedClue = 0;
 var ajaxCallId = 0;
 var ajaxCalls = new Object();
 var ajaxErrorsCount = 0;
+var clueZoomLevel = 100;
 
 // Constants
 const FLAG_CONFLICT = 1;
@@ -245,6 +246,7 @@ $(document).ready(
     $("#print__Trigger").on("click", function () {
       window.print();
     });
+    $(".zoom-link").on("click", clueListZoom);
 
     // Word-list updaters
     $("input#new-clue-answer").on("change", checkForSuggestWordListRefresh);
@@ -1105,5 +1107,28 @@ function gridSquareMenuClickHandler(eventObject) {
   }
   // Hide menu
   $("#context-menu-menu-grid-square").hide();
+}
+
+/**
+ * Zooms the clue list in or out
+ * @param {e} e the event object describing the event
+ */
+function clueListZoom(e) {
+  e.preventDefault();
+  // Select the correct element
+  let targ = $(e.currentTarget);
+  if (!targ.hasClass("zoom-link")) {
+    targ = targ.closest(".zoom-link");
+  }
+  // Get the zoom direction
+  const modifier = targ.data("zoom");
+  clueZoomLevel += 5 * modifier;
+  if (clueZoomLevel < 25) {
+    clueZoomLevel = 25;
+  }
+  if (clueZoomLevel > 300) {
+    clueZoomLevel = 300;
+  }
+  $(".clue-row td").css("font-size", clueZoomLevel + "%");
 }
 //#endregion

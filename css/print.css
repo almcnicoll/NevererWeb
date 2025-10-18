@@ -20,7 +20,8 @@ td {
   visibility: hidden;
 }
 button,
-button.btn {
+button.btn,
+a.btn {
   display: none;
 }
 table#clue-list {
