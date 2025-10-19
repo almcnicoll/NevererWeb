@@ -19,11 +19,12 @@
         $fatal_error = true;
     } else {
         $crossword = Crossword::getById($params[0]);
-        if ($crossword->user_id != $_SESSION['USER_ID']) {
+        /*if ($crossword->user_id != $_SESSION['USER_ID']) {
             $error_messages[] = "You can only solve crosswords that you created or that have been shared publicly.";
             //DisplayMessage::add("You can only edit crosswords that you created.", DisplayMessage::LVL_ERROR, 1);
             $fatal_error = true;
-        } elseif (!$crossword->isComplete()) {
+        }*/
+        if (!$crossword->isComplete()) {
             $error_messages[] = "That crossword is not complete, so cannot be solved.";
             //DisplayMessage::add("This crossword is not complete, so cannot be solved.", DisplayMessage::LVL_ERROR, 1);
             $fatal_error = true;
