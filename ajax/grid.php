@@ -43,6 +43,20 @@ use Crosswords\PlacedClue;
             populate_from_request(['xMin','xMax','yMin','yMax']);
             $grid = $crossword->getGrid($xMin,$yMin,$xMax,$yMax);
             die(json_encode($grid->toArray()));
+        case 'solveget':
+            // Called as /ajax/grid/solveget/[id]?xMin=&yMin=&xMax=&yMax=
+            Grid::ensureLoaded();
+            // Retrieve crossword
+            $crossword_id = array_shift($params);
+            /** @var Crossword $crossword */
+            $crossword = Crossword::findFirst(['id','=',$crossword_id]);
+            if ($crossword === null) { throw_error("Cannot find crossword with id {$crossword_id}"); }
+            if (!$crossword->isComplete()) { throw_error("Crossword #{$crossword_id} is not complete"); }
+            // Retrieve grid from crossword
+            $xMin = 0; $xMax = $crossword->cols-1; $yMin = 0; $yMax = $crossword->rows-1;
+            populate_from_request(['xMin','xMax','yMin','yMax']);
+            $grid = $crossword->getGrid($xMin,$yMin,$xMax,$yMax);
+            die(json_encode($grid->toArray()));
         case 'clear':
             // Called as /ajax/grid/clear/[id]/?xMin=&yMin=&xMax=&yMax=
             Grid::ensureLoaded(); PlacedClue::ensureLoaded(); Crossword::ensureLoaded();
