@@ -409,7 +409,7 @@ function refreshPartialGrid(xMin, xMax, yMin, yMax) {
   // Make the request
   var url =
     root_path +
-    "/grid/*/get/" +
+    "/grid/*/solveget/" +
     crossword_id +
     "?domain=ajax&xMin=" +
     xMin +
@@ -435,7 +435,8 @@ function refreshGrid() {
  */
 function refreshClueList() {
   // Make the request
-  var url = root_path + "/placed_clue/*/list/" + crossword_id + "?domain=ajax";
+  var url =
+    root_path + "/placed_clue/*/solvelist/" + crossword_id + "?domain=ajax";
   makeAjaxCall("get", url, null, updateClueList);
 }
 

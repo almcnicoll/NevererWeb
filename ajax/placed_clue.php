@@ -44,6 +44,15 @@ switch ($action) {
         if (!$crossword->isOwnedBy($user->id)) { throw_error("Crossword with id {$crossword_id} does not belong to user #{$user->id}"); }
         $pcList = $crossword->getPlacedClues(PlacedClue::ORDER_AD);
         die(json_encode($pcList->toArray()));
+    case 'solvelist':
+        // Called as /ajax/placed_clue/*/solvelist/[crossword_id]
+        $crossword_id = array_shift($params);
+        /** @var Crossword $crossword */
+        $crossword = Crossword::findFirst(['id','=',$crossword_id]);
+        if ($crossword === null) { throw_error("Cannot find crossword with id {$crossword_id}"); }
+        if (!$crossword->isComplete()) { throw_error("Crossword #{$crossword_id} is not complete"); }
+        $pcList = $crossword->getPlacedClues(PlacedClue::ORDER_AD);
+        die(json_encode($pcList->toArray()));
     case 'get':
         // Called as /ajax/placed_clue/*/get/[id]
         $pc_id = array_shift($params);

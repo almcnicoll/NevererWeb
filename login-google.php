@@ -3,6 +3,7 @@
     require_once('vendor/autoload.php');
     use Security\User;
     use Security\AuthMethod;
+    use Misc\Path;
     use Google\Client;
     use Google\Service\Oauth2;
 
@@ -63,7 +64,18 @@
             $_SESSION['USER_REFRESHNEEDED'] = strtotime('2100-01-01 00:00:00'); // Never expire
         }
             session_write_close();
-            header('Location: ./');
+            if (isset($_SESSION['redirect_url_once'])) {
+                if (Path::isAbsoluteUrl($_SESSION['redirect_url_once'])) {
+                    // Absolute URLs go straight through unchanged
+                    header('Location: '.$_SESSION['redirect_url_once']);
+                } else {
+                    // Relative URLs get appended to the root
+                    header('Location: '.Path::combine($config['root_path'],$_SESSION['redirect_url_once']));
+                }
+                unset($_SESSION['redirect_url_once']);
+            } else {
+                header('Location: '.Path::combine($config['root_path'],'/'));
+            }
             die();
     } else {
         // Initial page load

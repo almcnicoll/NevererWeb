@@ -49,6 +49,8 @@ namespace Security {
             self::$__config['pageinfo']['privacy_policy'] = new PageInfo(PageInfo::AUTH_NEVER, false);
             self::$__config['pageinfo']['crossword_export'] = new PageInfo(PageInfo::AUTH_NEVER, false, 'none');
             self::$__config['pageinfo']['crossword_solve'] = new PageInfo(PageInfo::AUTH_NEVER, false);
+            self::$__config['pageinfo']['placed_clue'] = new PageInfo(PageInfo::AUTH_NEVER, false);
+            self::$__config['pageinfo']['grid'] = new PageInfo(PageInfo::AUTH_NEVER, false);
 
             self::$__loaded = true; // Don't need to reinitialise
         }

@@ -86,7 +86,15 @@ $pageinfo = PageInfo::get($stub);
 // Check if we need to authenticate now
 if ($pageinfo->authSetting === PageInfo::AUTH_EARLY) {
     $pageinfo->processRequestData();
-    User::loginCheck($pageinfo->redirectOnFail);
+    // Don't redirect css / js files to login.php and set redirect_url
+    if (
+        strtolower(substr($_SERVER['REQUEST_URI'],-4,4)) == '.css' ||
+        strtolower(substr($_SERVER['REQUEST_URI'],-4,4)) == '.js'
+    ) {
+        if (!User::loginCheck(false)) { die(""); }
+    } else {
+        User::loginCheck($pageinfo->redirectOnFail);
+    }
 }
 
 $allowed_domains = ['pages','ajax'];
