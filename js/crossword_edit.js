@@ -202,6 +202,19 @@ function displayAjaxError(json) {
   makeToast(text);
 }
 
+/**
+ * Triggers selecting a clue 
+ * @param {Event} event 
+ */
+function clueRowClickHandler(e) {
+  e.preventDefault();
+  let tr = $(e.currentTarget).closest("tr.clue-row");
+  /*let orientation = tr.data("clue-orientation");
+  let number = tr.data("clue-number");*/
+  let clueId = tr.data("placed-clue-id");
+  selectClue(clueId);
+}
+
 //#endregion
 
 //#region startup
@@ -242,6 +255,7 @@ $(document).ready(
       "click",
       gridSquareMenuClickHandler
     );
+    $(document).on("click", "tr.clue-row, tr.clue-row td, tr.clue-row span", clueRowRightClickHandler);
     $(".alters-trim").on("change", updateTrims);
     $("#print__Trigger").on("click", function () {
       window.print();
