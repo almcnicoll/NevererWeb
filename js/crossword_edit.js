@@ -203,8 +203,8 @@ function displayAjaxError(json) {
 }
 
 /**
- * Triggers selecting a clue 
- * @param {Event} event 
+ * Triggers selecting a clue
+ * @param {Event} event
  */
 function clueRowClickHandler(e) {
   e.preventDefault();
@@ -255,7 +255,11 @@ $(document).ready(
       "click",
       gridSquareMenuClickHandler
     );
-    $(document).on("click", "tr.clue-row, tr.clue-row td, tr.clue-row span", clueRowRightClickHandler);
+    $(document).on(
+      "click",
+      "tr.clue-row, tr.clue-row td, tr.clue-row span",
+      clueRowClickHandler
+    );
     $(".alters-trim").on("change", updateTrims);
     $("#print__Trigger").on("click", function () {
       window.print();
