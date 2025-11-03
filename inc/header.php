@@ -45,6 +45,11 @@ use UI\DisplayMessage;
                     <a class="nav-link" aria-current="page" href="<?= $config['root_path'] ?>/crossword/create">+
                         New</a>
                 </li>
+                <li>
+                    <a class="nav-link" aria-current="page" target="_blank"
+                        href="<?= $config['root_path'] ?>/dictionary/index">+
+                        Dictionaries</a>
+                </li>
             </ul>
             <!-- User menu (logged in) -->
             <div class="justify-content-end" id="navbarUserMenu2">
@@ -56,8 +61,7 @@ use UI\DisplayMessage;
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
                             aria-expanded="false">
                             <span class='d-none d-md-inline'><?= $user->display_name ?></span>
-                            <span
-                                class='d-md-none initial-display'><?= substr($user->display_name,0,1) ?></span>
+                            <span class='d-md-none initial-display'><?= substr($user->display_name,0,1) ?></span>
                         </a>
                         <ul class="dropdown-menu">
                             <?php if ($user->identifier == 'almcnicoll'): ?><li><a class="dropdown-item"

@@ -20,6 +20,7 @@ namespace Dictionaries {
         public int $writeable = 0;
         public int $user_id;
         public ?string $last_updated = null;
+        private ?int $__entryCount = null;
 
         static string $tableName = "tomes";
         static $fields = ['id','name','source','source_type','source_format','readable','writeable','user_id','last_modified','created','modified'];
@@ -78,6 +79,20 @@ namespace Dictionaries {
             }
         }
 
+        public function getEntryCount():int {
+            if ($this->__entryCount != null) { return $this->__entryCount; }
+            $sql = <<<END_SQL
+                SELECT COUNT(*)
+                FROM tome_entries
+                WHERE tome_id = ?
+            END_SQL;
+            $pdo = db::getPDO();
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$this->id]);
+            $this->__entryCount = (int) $stmt->fetchColumn();
+            return $this->__entryCount;
+        }
+
         /**
          * Updates the last_modified field to be the maximum of created/modified from all its TomeEntries, or its own created field if there are no entries
          * NB - we don't want to run this on TomeEntry save as it would run multiple times on bulk inserts, which is unnecessary.
@@ -91,7 +106,7 @@ namespace Dictionaries {
                 GROUP BY tome_id
                 ) e ON t.id = e.tome_id
                 SET t.last_updated = e.max_date;
-END_HTML;
+            END_HTML;
             $pdo = db::getPDO();
             $stmt = $pdo->prepare($sql);
             $stmt->execute();
@@ -112,11 +127,11 @@ END_HTML;
             $owner_readable = self::PERMISSION_OWNER;
             $public_readable = self::PERMISSION_PUBLIC;
             $sql = <<<END_SQL
-SELECT COUNT(id)>0 AS readable
-FROM tomes t
-WHERE t.id=?
-AND ((t.user_id = ? AND readable = {$owner_readable}) OR readable = {$public_readable})
-END_SQL;
+                SELECT COUNT(id)>0 AS readable
+                FROM tomes t
+                WHERE t.id=?
+                AND ((t.user_id = ? AND readable = {$owner_readable}) OR readable = {$public_readable})
+            END_SQL;
             $pdo = db::getPDO();
             $stmt = $pdo->prepare($sql);
             $criteria_values = [$tome_id,$user_id];
@@ -140,11 +155,11 @@ END_SQL;
             $owner_writeable = self::PERMISSION_OWNER;
             $public_writeable = self::PERMISSION_PUBLIC;
             $sql = <<<END_SQL
-SELECT COUNT(id)>0 AS writeable
-FROM tomes t
-WHERE t.id=?
-AND ((t.user_id = ? AND writeable = {$owner_writeable}) OR writeable = {$public_writeable})
-END_SQL;
+                SELECT COUNT(id)>0 AS writeable
+                FROM tomes t
+                WHERE t.id=?
+                AND ((t.user_id = ? AND writeable = {$owner_writeable}) OR writeable = {$public_writeable})
+            END_SQL;
             $pdo = db::getPDO();
             $stmt = $pdo->prepare($sql);
             $criteria_values = [$tome_id,$user_id];
