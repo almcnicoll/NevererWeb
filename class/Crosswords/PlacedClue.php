@@ -35,10 +35,10 @@ namespace Crosswords {
        * - saves any "captive clue" (not yet in db)
        * @return ?int the id of the saved record or null if the save failed
        */
-      public function save() : ?int {
+      public function save($onDuplicateKeyUpdate = false) : ?int {
         if (!isset($this->place_number)) { $this->place_number = 0; } // Don't let's have this throw an error
         
-        $returnVal = parent::save(); // Call parent save logic
+        $returnVal = parent::save($onDuplicateKeyUpdate); // Call parent save logic
         $crossword = $this->getCrossword(); // Retrieve the crossword
         // Save any "captive" clue that hasn't yet been saved
         if ($this->__captiveClue != null) {

@@ -377,3 +377,24 @@ VALUES ('google','login-google.php','img/logins/google.png',NOW(),NOW());
 /* VERSION 31 */
 INSERT INTO `faqs` (`question`,`answer`,`rank`,`created`,`modified`)
 VALUES ("Can I save my crossword as a PDF?","A PDF is a great way to distribute a crossword. However, making PDFs look 'just right' can be time-consuming and requires use of third-party code that has limitations.<br /><br />Most modern browsers have the option to print to PDF, so effort has been put into making the crossword print well. To produce a PDF, click the print icon (top-right when editing) and choose 'Save to PDF' (or similar).<br /><br />See <a href='https://xodo.com/blog/how-to-save-webpage-as-pdf' target='_blank'>this link</a> for more details. <em>(try <a href='https://web.archive.org/web/20250627063533/https://xodo.com/blog/how-to-save-webpage-as-pdf' target='_blank'>here</a> if that link is dead)</em>",20,NOW(),NOW());
+/* UPDATE */
+/* VERSION 32 */
+ALTER TABLE `tomes` ADD COLUMN `subscribed_by_default` TINYINT(1) DEFAULT 0 AFTER user_id;
+UPDATE `tomes` SET subscribed_by_default = 1 WHERE `name` IN ('SOWPODS','English idioms','Famous names') AND readable = 2;
+CREATE TABLE `subscriptions` (
+  `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` INT(10) UNSIGNED NOT NULL,
+  `tome_id` INT(10) UNSIGNED NOT NULL,
+  `subscribed` TINYINT(1) UNSIGNED DEFAULT 1,
+  `created` DATETIME DEFAULT NULL,
+  `modified` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UserToTome` (`user_id`,`tome_id`)
+) ENGINE=INNODB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/* UPDATE */
+/* VERSION 33 */
+/*include 33_missing_subscription_sp.sql*/
+/* UPDATE */
+/* VERSION 34 */
+CREATE INDEX user_sub_tome
+ON `subscriptions` (user_id,subscribed,tome_id);

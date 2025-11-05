@@ -42,8 +42,8 @@ namespace Dictionaries {
         /**
          * Saves the entry the usual way, then updates the table's letter counts if needed
          */
-        public function save() : ?int {
-            $returnVal = parent::save();
+        public function save($onDuplicateKeyUpdate = false) : ?int {
+            $returnVal = parent::save($onDuplicateKeyUpdate);
             if ($this->z == null) {
                 // We need to update letter count
                 Tome::updateLetterCounts();

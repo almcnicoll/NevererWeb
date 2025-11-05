@@ -37,7 +37,7 @@ $action = array_shift($params);
 switch ($action) {
     case 'list':
         // Called as /ajax/tome/*/list
-        $tomes = Tome::getAllForUser($user->id);
+        $tomes = Tome::getSubscribedForUser($user->id);
         die(json_encode($tomes));
     case 'create':
         /** @var string $name */
