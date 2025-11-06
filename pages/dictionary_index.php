@@ -74,7 +74,7 @@
                     foreach ($mine as $tome) {
                         $owner = User::getById($tome->user_id);
                         $entry_count = $tome->getEntryCount();
-                        $subscribed = array_key_exists($tome->id, $subs);
+                        $subscribed = array_key_exists($tome->id, $subs) && $subs[$tome->id]->subscribed==1;
                 ?>
                 <tr style='vertical-align: middle;' class='tome-row <?= ($subscribed?"subscribed":"not-subscribed") ?>'>
                     <th scope='row'>
@@ -96,16 +96,27 @@
                             <div class='col-md-6'>
                                 <?php if ($subscribed) {
                                     ?>
-                                <a href='dictionary/unsubscribe/<?=$tome->id?>' title='Unsubscribe from dictionary'
-                                    class='btn btn-md btn-success'><span class='bi bi-cloud-plus-fill fs-5'
-                                        role='unsubscribe'></span>
+                                <a href='<?= $config['root_path'] ?>/dictionary/*/subscribe/<?=$tome->id?>'
+                                    title='Subscribe to dictionary' class='btn btn-md btn-outline-success subscribe'
+                                    style="display:none;">
+                                    <span class='bi bi-cloud-plus fs-5 text-dark' role='subscribe'></span>
+                                </a>
+                                <a href='<?= $config['root_path'] ?>/dictionary/*/unsubscribe/<?=$tome->id?>'
+                                    title='Unsubscribe from dictionary'
+                                    class='btn btn-md btn-outline-secondary unsubscribe'>
+                                    <span class='bi bi-cloud-plus-fill fs-5 text-success' role='unsubscribe'></span>
                                 </a>
                                 <?php
                                 } else {
                                     ?>
-                                <a href='dictionary/subscribe/<?=$tome->id?>' title='Subscribe to dictionary'
-                                    class='btn btn-md btn-success'><span class='bi bi-cloud-plus fs-5'
-                                        role='subscribe'></span>
+                                <a href='<?= $config['root_path'] ?>/dictionary/*/subscribe/<?=$tome->id?>'
+                                    title='Subscribe to dictionary' class='btn btn-md btn-outline-success subscribe'>
+                                    <span class='bi bi-cloud-plus fs-5 text-dark' role='subscribe'></span>
+                                </a>
+                                <a href='<?= $config['root_path'] ?>/dictionary/*/unsubscribe/<?=$tome->id?>'
+                                    title='Unsubscribe from dictionary'
+                                    class='btn btn-md btn-outline-secondary unsubscribe' style="display:none;">
+                                    <span class='bi bi-cloud-plus-fill fs-5 text-success' role='unsubscribe'></span>
                                 </a>
                                 <?php
                                 }
@@ -145,7 +156,7 @@
                     foreach ($public as $tome) {
                         $owner = User::getById($tome->user_id);
                         $entry_count = $tome->getEntryCount();
-                        $subscribed = array_key_exists($tome->id, $subs);
+                        $subscribed = array_key_exists($tome->id, $subs) && $subs[$tome->id]->subscribed==1;
                 ?>
                 <tr style='vertical-align: middle;' class='tome-row <?= ($subscribed?"subscribed":"not-subscribed") ?>'>
                     <th scope='row'>
@@ -167,16 +178,27 @@
                             <div class='col-md-6'>
                                 <?php if ($subscribed) {
                                     ?>
-                                <a href='dictionary/unsubscribe/<?=$tome->id?>' title='Unsubscribe from dictionary'
-                                    class='btn btn-md btn-success'><span class='bi bi-cloud-plus-fill fs-5'
-                                        role='unsubscribe'></span>
+                                <a href='<?= $config['root_path'] ?>/dictionary/*/subscribe/<?=$tome->id?>'
+                                    title='Subscribe to dictionary' class='btn btn-md btn-outline-success subscribe'
+                                    style="display:none;">
+                                    <span class='bi bi-cloud-plus fs-5 text-dark' role='subscribe'></span>
+                                </a>
+                                <a href='<?= $config['root_path'] ?>/dictionary/*/unsubscribe/<?=$tome->id?>'
+                                    title='Unsubscribe from dictionary'
+                                    class='btn btn-md btn-outline-secondary unsubscribe'>
+                                    <span class='bi bi-cloud-plus-fill fs-5 text-success' role='unsubscribe'></span>
                                 </a>
                                 <?php
                                 } else {
                                     ?>
-                                <a href='dictionary/subscribe/<?=$tome->id?>' title='Subscribe to dictionary'
-                                    class='btn btn-md btn-success'><span class='bi bi-cloud-plus fs-5'
-                                        role='subscribe'></span>
+                                <a href='<?= $config['root_path'] ?>/dictionary/*/subscribe/<?=$tome->id?>'
+                                    title='Subscribe to dictionary' class='btn btn-md btn-outline-success subscribe'>
+                                    <span class='bi bi-cloud-plus fs-5 text-dark' role='subscribe'></span>
+                                </a>
+                                <a href='<?= $config['root_path'] ?>/dictionary/*/unsubscribe/<?=$tome->id?>'
+                                    title='Unsubscribe from dictionary'
+                                    class='btn btn-md btn-outline-secondary unsubscribe' style="display:none;">
+                                    <span class='bi bi-cloud-plus-fill fs-5 text-success' role='unsubscribe'></span>
                                 </a>
                                 <?php
                                 }
