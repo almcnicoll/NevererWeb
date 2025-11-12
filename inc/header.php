@@ -41,14 +41,18 @@ use UI\DisplayMessage;
         <div class="collapse navbar-collapse" id="navbarUserMenu">
             <!-- Create button -->
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <div class='vr bg-light'></div>
                 <li>
-                    <a class="nav-link" aria-current="page" href="<?= $config['root_path'] ?>/crossword/create">+
-                        New</a>
+                    <a class="nav-link" aria-current="page" href="<?= $config['root_path'] ?>/crossword/create">
+                        New Crossword
+                    </a>
                 </li>
+                <div class='vr bg-light'></div>
                 <li>
                     <a class="nav-link" aria-current="page" target="_blank"
-                        href="<?= $config['root_path'] ?>/dictionary/index">+
-                        Dictionaries</a>
+                        href="<?= $config['root_path'] ?>/dictionary/index">
+                        Dictionaries
+                    </a>
                 </li>
             </ul>
             <!-- User menu (logged in) -->
