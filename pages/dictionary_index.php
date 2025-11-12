@@ -38,7 +38,7 @@
 ?>
 <h2>Dictionary Management</h2>
 
-
+<!-- MY DICTIONARIES -->
 <div class='card text-bg-dark'>
     <div class='card-body'>
         <div class="d-grid gap-2 d-md-block">
@@ -121,6 +121,10 @@
                                 <?php
                                 }
                                 ?>
+                                <a href="<?= $config['root_path'] ?>/dictionary/edit/<?=$tome->id?>"
+                                    title="Edit dictionary" class="btn btn-md btn-outline-warning edit">
+                                    <span class="bi bi-pencil fs-5 text-dark"></span>
+                                </a>
                             </div>
                         </div>
                     </td>
@@ -136,6 +140,7 @@
     </div> <!-- CARD-BODY -->
 </div> <!-- CARD -->
 <br />
+<!-- PUBLIC DICTIONARIES -->
 <div class='card text-bg-dark'>
     <div class='card-body'>
         <div class="d-grid gap-2 d-md-block">
