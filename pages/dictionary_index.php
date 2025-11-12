@@ -93,7 +93,7 @@
                     </td>
                     <td>
                         <div class='row'>
-                            <div class='col-md-6'>
+                            <div class='col-md-4'>
                                 <?php if ($subscribed) {
                                     ?>
                                 <a href='<?= $config['root_path'] ?>/dictionary/*/subscribe/<?=$tome->id?>'
@@ -121,9 +121,19 @@
                                 <?php
                                 }
                                 ?>
+                            </div>
+                            <div class='col-md-4'>
                                 <a href="<?= $config['root_path'] ?>/dictionary/edit/<?=$tome->id?>"
                                     title="Edit dictionary" class="btn btn-md btn-outline-warning edit">
                                     <span class="bi bi-pencil fs-5 text-dark"></span>
+                                </a>
+                            </div>
+                            <div class='col-md-4'>
+                                <a href="<?= $config['root_path'] ?>/dictionary/delete/<?=$tome->id?>"
+                                    title="Delete dictionary" class="btn btn-md btn-outline-danger delete"
+                                    data-id="<?= $tome->id ?>" data-bs-toggle='modal' data-bs-target='#tomeDeleteModal'
+                                    role='delete'>
+                                    <span class=" bi bi-trash fs-5 text-dark"></span>
                                 </a>
                             </div>
                         </div>
@@ -219,3 +229,31 @@
         </table>
     </div> <!-- CARD-BODY -->
 </div> <!-- CARD -->
+
+<div class="modal fade" id="tomeDeleteModal" tabindex="-1">
+    <div class="modal-dialog .modal-fullscreen-lg-down">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Dictionary</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                    id="deleteModalCloseX"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-12">
+                        Are you sure you want to delete the dictionary?
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 p-2">
+                        <a class='btn btn-md btn-danger' id='deleteConfirm' style='width: 100%;'>Yes</a>
+                    </div>
+                    <div class="col-md-6 p-2">
+                        <button class='btn btn-md btn-success' id='deleteCancel' data-bs-dismiss="modal"
+                            style='width: 100%;'>Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

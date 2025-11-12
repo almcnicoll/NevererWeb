@@ -23,8 +23,49 @@ function ToggleSubscribe(e) {
     },
   });
 }
+
+function FlagTome(e) {
+  let tome_id = $(e.currentTarget).data("id");
+  $("#deleteConfirm").data("id", tome_id);
+}
+
+function DeleteTome(e) {
+  // Stop link firing
+  e.preventDefault();
+  // Get tome_id
+  let tome_id = $(e.currentTarget).data("id");
+  if (tome_id == null) {
+    alert("Could not delete dictionary. Please try again later.");
+    return;
+  }
+  // Send request
+  let url = "~ROOT~/dictionary/*/delete/" + tome_id + "?domain=ajax";
+  let ajaxOptions = {
+    async: true,
+    cache: false,
+    dataType: "json",
+    method: "POST",
+    timeout: 10000,
+    complete: ReportOnTomeDelete,
+    data: {
+      tome_id: tome_id,
+    },
+  };
+  $("html, html *").css("cursor", "wait"); // Wait cursor
+  $.ajax(url, ajaxOptions);
+}
+
+function ReportOnTomeDelete(jqXHR, textStatus) {
+  // Handle callback
+  $("html,html *").css("cursor", "auto"); // Put cursor back
+  $("#deleteModalCloseX").trigger("click"); // Close modal
+  top.location.reload(); // Reload page
+}
+
 // #region DOM ready
 $(function () {
   $(".subscribe,.unsubscribe").on("click", ToggleSubscribe);
+  $(".delete").on("click", FlagTome);
+  $("#deleteConfirm").on("click", DeleteTome);
 });
 // #endregion

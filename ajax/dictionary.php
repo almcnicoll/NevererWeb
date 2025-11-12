@@ -51,6 +51,10 @@ switch ($action) {
         $sub->subscribed = false;
         $sub->save();
         break;
+    case 'delete':
+        $tome = Tome::getById($params[0]);
+        $tome->delete();
+        break;
     default:
         $file = str_replace(__DIR__,'',__FILE__);
         throw_error(["Invalid action {$action} passed to {$file}"]);
