@@ -89,7 +89,7 @@
                         <div class='cell-container'><?=$entry_count?></div>
                     </td>
                     <td>
-                        <div class='cell-container'><?= ($tome->is_writeable ? "Read / Write" : "Read-only") ?></div>
+                        <div class='cell-container'><?= ($tome->writeable ? "Read / Write" : "Read-only") ?></div>
                     </td>
                     <td>
                         <div class='row'>
@@ -176,7 +176,7 @@
                         <div class='cell-container'><?=$entry_count?></div>
                     </td>
                     <td>
-                        <div class='cell-container'><?= ($tome->is_writeable ? "Read / Write" : "Read-only") ?></div>
+                        <div class='cell-container'><?= ($tome->writeable ? "Read / Write" : "Read-only") ?></div>
                     </td>
                     <td>
                         <div class='row'>
