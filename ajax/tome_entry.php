@@ -118,7 +118,7 @@ END_SQL;
         $pdo = db::getPDO();        
         $stmt = $pdo->prepare($sql);
         $stmt->execute($criteria_values);
-        $stmt->setFetchMode(PDO::FETCH_CLASS, TomeEntry::class);
+        $stmt->setFetchMode(PDO::FETCH_CLASS|PDO::FETCH_PROPS_LATE, TomeEntry::class);
         $results = $stmt->fetchAll();
         $output = ['results' => $results];
         die(json_encode($output));

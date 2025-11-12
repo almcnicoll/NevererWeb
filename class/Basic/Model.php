@@ -157,7 +157,7 @@ namespace Basic {
                     .static::getDefaultOrderBy();
             $query = $pdo->query($sql);
 
-            $query->setFetchMode(PDO::FETCH_CLASS, static::class);
+            $query->setFetchMode(PDO::FETCH_CLASS|PDO::FETCH_PROPS_LATE, static::class);
             $results = $query->fetchAll();
             return $results;
         }
@@ -197,7 +197,7 @@ namespace Basic {
             $stmt = $pdo->prepare($sql);
             $stmt->execute($params);
 
-            $stmt->setFetchMode(PDO::FETCH_CLASS,static::class);
+            $stmt->setFetchMode(PDO::FETCH_CLASS|PDO::FETCH_PROPS_LATE,static::class);
             $result = $stmt->fetch();
             if ($result === false) { return null; }
             return $result;
