@@ -41,9 +41,18 @@ use UI\DisplayMessage;
         <div class="collapse navbar-collapse" id="navbarUserMenu">
             <!-- Create button -->
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <div class='vr bg-light'></div>
                 <li>
-                    <a class="nav-link" aria-current="page" href="<?= $config['root_path'] ?>/crossword/create">+
-                        New</a>
+                    <a class="nav-link" aria-current="page" href="<?= $config['root_path'] ?>/crossword/create">
+                        New Crossword
+                    </a>
+                </li>
+                <div class='vr bg-light'></div>
+                <li>
+                    <a class="nav-link" aria-current="page" target="_blank"
+                        href="<?= $config['root_path'] ?>/dictionary/index">
+                        Dictionaries
+                    </a>
                 </li>
             </ul>
             <!-- User menu (logged in) -->
@@ -56,8 +65,7 @@ use UI\DisplayMessage;
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
                             aria-expanded="false">
                             <span class='d-none d-md-inline'><?= $user->display_name ?></span>
-                            <span
-                                class='d-md-none initial-display'><?= substr($user->display_name,0,1) ?></span>
+                            <span class='d-md-none initial-display'><?= substr($user->display_name,0,1) ?></span>
                         </a>
                         <ul class="dropdown-menu">
                             <?php if ($user->identifier == 'almcnicoll'): ?><li><a class="dropdown-item"

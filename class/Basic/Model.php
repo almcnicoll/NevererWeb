@@ -157,7 +157,7 @@ namespace Basic {
                     .static::getDefaultOrderBy();
             $query = $pdo->query($sql);
 
-            $query->setFetchMode(PDO::FETCH_CLASS, static::class);
+            $query->setFetchMode(PDO::FETCH_CLASS|PDO::FETCH_PROPS_LATE, static::class);
             $results = $query->fetchAll();
             return $results;
         }
@@ -197,7 +197,7 @@ namespace Basic {
             $stmt = $pdo->prepare($sql);
             $stmt->execute($params);
 
-            $stmt->setFetchMode(PDO::FETCH_CLASS,static::class);
+            $stmt->setFetchMode(PDO::FETCH_CLASS|PDO::FETCH_PROPS_LATE,static::class);
             $result = $stmt->fetch();
             if ($result === false) { return null; }
             return $result;
@@ -330,9 +330,8 @@ namespace Basic {
             //error_log($sql);
             //error_log(print_r($criteria_values,true));
             $stmt = $pdo->prepare($sql);
+            $stmt->setFetchMode(PDO::FETCH_CLASS|PDO::FETCH_PROPS_LATE, static::class);
             $stmt->execute($criteria_values);
-
-            $stmt->setFetchMode(PDO::FETCH_CLASS, static::class);
             $results = $stmt->fetchAll();
             return $results;
         }
@@ -341,7 +340,7 @@ namespace Basic {
          * Saves the entity
          * @return ?int the id of the created entity
          */
-        public function save() : ?int {
+        public function save($onDuplicateKeyUpdate = false) : ?int {
             $pdo = db::getPDO();
 
             // If id is set and record exists then update; otherwise, create new
@@ -367,7 +366,10 @@ namespace Basic {
 
             if ($is_insert) {
                 // Create record
-                $sql = "INSERT INTO `".static::$tableName."` (`".implode('`,`',static::$fields)."`) VALUES (".implode(',',$insert_placeholders).")";
+                $sql = "INSERT INTO `".static::$tableName."` (`".implode('`,`',static::$fields)."`) VALUES (".implode(',',$insert_placeholders).") ";
+                if ($onDuplicateKeyUpdate) {
+                    $sql .= "ON DUPLICATE KEY UPDATE " . implode(', ', array_map(fn($f) => "`$f` = VALUES(`$f`)", static::$fields));
+                }
             } else {
                 // Update record
                 $sql = "UPDATE `".static::$tableName."` SET ".implode(',',$criteria_strings)." WHERE id=?";

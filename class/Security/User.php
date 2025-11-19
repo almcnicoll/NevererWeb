@@ -10,9 +10,10 @@ namespace Security {
         public ?string $email;
         public ?string $display_name;
         public ?string $image_url = null;
+        public ?int $default_dictionary = null;
 
         static string $tableName = "users";
-        static $fields = ['id','authmethod_id','identifier','email','display_name','image_url','created','modified'];
+        static $fields = ['id','authmethod_id','identifier','email','display_name','image_url','default_dictionary','created','modified'];
 
         public static $defaultOrderBy = [
             ['created','DESC'],

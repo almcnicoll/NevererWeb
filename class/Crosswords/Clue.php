@@ -38,11 +38,11 @@ namespace Crosswords {
          * - updates the pattern of the clue
          * @return ?int the id of the saved record or null if the save failed
          */
-        public function save() : ?int {
+        public function save($onDuplicateKeyUpdate = false) : ?int {
             $this->ensureFieldSet('question')->ensureFieldSet('answer');
             $this->answer = strtolower($this->answer);
             $this->pattern = Clue::getPattern($this->answer);
-            $returnVal = parent::save(); // Call parent save logic
+            $returnVal = parent::save($onDuplicateKeyUpdate); // Call parent save logic
             return $returnVal;
         }
 

@@ -74,8 +74,8 @@ if (count($my_crosswords)==0) {
             <div class="col-12">
                 <h3>You don't have any crosswords. How sad!</h3>
                 <h4>Click below to create one.</h4>
-                <a class="btn btn-primary" href="crossword/create">Create</a><br />
-                <a class="btn btn-secondary" href="crossword/import">Import</a>
+                <a class="btn btn-primary" href="<?= $config['root_path'] ?>/crossword/create">Create</a><br />
+                <a class="btn btn-secondary" href="<?= $config['root_path'] ?>/crossword/import">Import</a>
             </div>
         </div>
         <?php

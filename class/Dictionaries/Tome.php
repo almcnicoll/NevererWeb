@@ -19,10 +19,12 @@ namespace Dictionaries {
         public int $readable = 0;
         public int $writeable = 0;
         public int $user_id;
+        public int $subscribed_by_default;
         public ?string $last_updated = null;
+        private ?int $__entryCount = null;
 
         static string $tableName = "tomes";
-        static $fields = ['id','name','source','source_type','source_format','readable','writeable','user_id','last_modified','created','modified'];
+        static $fields = ['id','name','source','source_type','source_format','readable','writeable','user_id','subscribed_by_default','last_updated','created','modified'];
 
         public static $defaultOrderBy = ['id'];
 
@@ -35,6 +37,7 @@ namespace Dictionaries {
         
         public const FORMAT_UNKNOWN = 'unknown';
         public const FORMAT_JSON = 'json';
+        public const FORMAT_SQL = 'sql';
         public const FORMAT_TEXT = 'text';
 
         public const PERMISSION_NOBODY = 0;
@@ -66,6 +69,32 @@ namespace Dictionaries {
         }
 
         /**
+         * Retrieves all Tomes that are visible to the specified user AND currently subscribed
+         * @param int $user_id the id of the user by which to filter
+         * @return mixed an array of Tome objects
+         */
+        public static function getSubscribedForUser(int $user_id) : array {
+            $sql = <<<END_SQL
+            SELECT tome_id
+                FROM subscriptions s
+                INNER JOIN tomes t ON t.id=s.tome_id
+                WHERE s.user_id = ? AND s.subscribed=1
+                AND ((t.user_id = ? AND t.readable<>0) OR (t.readable=2))
+            ;
+            END_SQL;
+            $pdo = db::getPDO();
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$user_id,$user_id]);
+            $allSubscribedTomeIds = $stmt->fetchAll(PDO::FETCH_COLUMN, 0);
+            
+            // Avoid error from WHERE ... IN () with empty brackets
+            if (count($allSubscribedTomeIds)==0) { return []; }
+
+            $tomes_all = Tome::find(['id','IN',$allSubscribedTomeIds]);
+            return $tomes_all;
+        }
+
+        /**
          * Retrieves the last_modified field as a nullable DateTime
          * @return ?DateTime the last_modified date
          */
@@ -76,6 +105,20 @@ namespace Dictionaries {
             } catch (Exception $ex) {
                 return null;
             }
+        }
+
+        public function getEntryCount():int {
+            if ($this->__entryCount != null) { return $this->__entryCount; }
+            $sql = <<<END_SQL
+                SELECT COUNT(*)
+                FROM tome_entries
+                WHERE tome_id = ?
+            END_SQL;
+            $pdo = db::getPDO();
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$this->id]);
+            $this->__entryCount = (int) $stmt->fetchColumn();
+            return $this->__entryCount;
         }
 
         /**
@@ -91,7 +134,7 @@ namespace Dictionaries {
                 GROUP BY tome_id
                 ) e ON t.id = e.tome_id
                 SET t.last_updated = e.max_date;
-END_HTML;
+            END_HTML;
             $pdo = db::getPDO();
             $stmt = $pdo->prepare($sql);
             $stmt->execute();
@@ -112,11 +155,11 @@ END_HTML;
             $owner_readable = self::PERMISSION_OWNER;
             $public_readable = self::PERMISSION_PUBLIC;
             $sql = <<<END_SQL
-SELECT COUNT(id)>0 AS readable
-FROM tomes t
-WHERE t.id=?
-AND ((t.user_id = ? AND readable = {$owner_readable}) OR readable = {$public_readable})
-END_SQL;
+                SELECT COUNT(id)>0 AS readable
+                FROM tomes t
+                WHERE t.id=?
+                AND ((t.user_id = ? AND readable = {$owner_readable}) OR readable = {$public_readable})
+            END_SQL;
             $pdo = db::getPDO();
             $stmt = $pdo->prepare($sql);
             $criteria_values = [$tome_id,$user_id];
@@ -140,11 +183,11 @@ END_SQL;
             $owner_writeable = self::PERMISSION_OWNER;
             $public_writeable = self::PERMISSION_PUBLIC;
             $sql = <<<END_SQL
-SELECT COUNT(id)>0 AS writeable
-FROM tomes t
-WHERE t.id=?
-AND ((t.user_id = ? AND writeable = {$owner_writeable}) OR writeable = {$public_writeable})
-END_SQL;
+                SELECT COUNT(id)>0 AS writeable
+                FROM tomes t
+                WHERE t.id=?
+                AND ((t.user_id = ? AND writeable = {$owner_writeable}) OR writeable = {$public_writeable})
+            END_SQL;
             $pdo = db::getPDO();
             $stmt = $pdo->prepare($sql);
             $criteria_values = [$tome_id,$user_id];
@@ -180,7 +223,7 @@ END_SQL;
             $pdo = db::getPDO();
             $stmt = $pdo->prepare($sql);
             $stmt->execute();
-            // Close the cursor - prevents error #2014 "Cannot execute queries while there are pending result sets"
+            // Close the cursor - prevents error 2014 "Cannot execute queries while there are pending result sets"
             $stmt->closeCursor();
         }
 
@@ -188,9 +231,9 @@ END_SQL;
          * Saves the tome, after updating its last_updated field
          * @return ?int the id of the tome
          */
-        public function save() : ?int {
+        public function save($onDuplicateKeyUpdate = false) : ?int {
             static::updateLastUpdated();
-            return parent::save();
+            return parent::save($onDuplicateKeyUpdate);
         }
     }
 }

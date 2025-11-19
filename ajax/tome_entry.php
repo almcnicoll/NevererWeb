@@ -53,7 +53,7 @@ switch ($action) {
         if (!isset($since)) { $since = new DateTime('1970-01-01 00:00:00'); }
         if (!isset($tome_ids)) {
             // Not supplied - retrieve all accessible dictionaries
-            $tomes = Tome::getAllForUser($user->id);
+            $tomes = Tome::getSubscribedForUser($user->id);
             $tome_ids = array_column($tomes, 'id');
             $permissions_checked = true;
         } elseif (!is_array($tome_ids)) {
@@ -102,7 +102,7 @@ switch ($action) {
         $pattern = ''; $limit = null; $offset = null;
         populate_from_request(['pattern','limit','offset']);
         // Retrieve for all user-accessible dictionaries
-        $tomes = Tome::getAllForUser($user->id);
+        $tomes = Tome::getSubscribedForUser($user->id);
         $tome_ids = array_column($tomes, 'id');
         // Generate query
         $criteria_values = $tome_ids;
@@ -118,7 +118,7 @@ END_SQL;
         $pdo = db::getPDO();        
         $stmt = $pdo->prepare($sql);
         $stmt->execute($criteria_values);
-        $stmt->setFetchMode(PDO::FETCH_CLASS, TomeEntry::class);
+        $stmt->setFetchMode(PDO::FETCH_CLASS|PDO::FETCH_PROPS_LATE, TomeEntry::class);
         $results = $stmt->fetchAll();
         $output = ['results' => $results];
         die(json_encode($output));

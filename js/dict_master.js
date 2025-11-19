@@ -5,7 +5,7 @@
  * - Listens for 'fetch' messages from the worker and performs AJAX using `makeAjaxCall()`.
  * - Sends the result back to the worker using postMessage.
  */
-
+// TODO - HIGH consider subscription status when synchronising / serving dictionaries
 // Super-variable!
 let dictionary = {};
 
