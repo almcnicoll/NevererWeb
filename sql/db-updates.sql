@@ -398,3 +398,6 @@ CREATE TABLE `subscriptions` (
 /* VERSION 34 */
 CREATE INDEX user_sub_tome
 ON `subscriptions` (user_id,subscribed,tome_id);
+/* UPDATE */
+/* VERSION 35 */
+ALTER TABLE `users` ADD COLUMN `default_dictionary` INT(10) NULL DEFAULT NULL AFTER `image_url`;

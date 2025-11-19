@@ -55,6 +55,12 @@ switch ($action) {
         $tome = Tome::getById($params[0]);
         $tome->delete();
         break;
+    case 'setdefault':
+        //$tome = Tome::getById($params[0]);
+        $user->default_dictionary = $params[0];
+        $user->save();
+        $_SESSION['USER'] = serialize($user);
+        break;
     default:
         $file = str_replace(__DIR__,'',__FILE__);
         throw_error(["Invalid action {$action} passed to {$file}"]);

@@ -35,6 +35,9 @@
     $public = array_filter($readable_tomes, fn($t) => $t->user_id != $_SESSION['USER_ID']);
     $subs = Subscription::getAllForUser($_SESSION['USER_ID']);
     $subs = array_column($subs, null, 'tome_id'); // Convert it to an associative array with tome_id as the key
+
+    // Get user's default dictionary
+    $default_dictionary = $user->default_dictionary;
 ?>
 <h2>Dictionary Management</h2>
 
@@ -66,6 +69,7 @@
                     <th>Author</th>
                     <th>Entries</th>
                     <th>Permissions</th>
+                    <th>Default?</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -90,6 +94,16 @@
                     </td>
                     <td>
                         <div class='cell-container'><?= ($tome->writeable ? "Read / Write" : "Read-only") ?></div>
+                    </td>
+                    <td>
+                        <div class='cell-container'>
+                            <?php
+                                if ($tome->writeable) {
+                                    $radio_checked = ($tome->id == $default_dictionary) ? " checked ":"";
+                                    echo "<input type='radio' name='default_dictionary' value='{$tome->id}' class='default-dictionary-radio' {$radio_checked}>";
+                                }
+                            ?>
+                        </div>
                     </td>
                     <td>
                         <div class='row'>
