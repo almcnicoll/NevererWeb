@@ -1,0 +1,101 @@
+<?php
+use Logging\LoggedError;
+use Dictionaries\Tome;
+use Dictionaries\TomeClue;
+use PDO,Exception,DateTime;
+use Basic\db;
+
+function throw_error($errors) {
+    $retval = ['errors' => $errors];
+    if (is_array($errors)) {
+        $output = print_r($errors,true);
+        error_log($output);
+        @LoggedError::log('ajaxError',0,__FILE__,__LINE__,$output);
+    } else {
+        error_log($errors);
+        @LoggedError::log('ajaxError',0,__FILE__,__LINE__,$errors);
+    }
+    die(json_encode($retval));
+}
+function populate_from_request($varnames) {
+    if (!is_array($varnames)) {
+        LoggedError::log(LoggedError::TYPE_DEBUG, 0, __FILE__, __LINE__, 
+        "populate_from_request normally receives an array of variable names, but a scalar was provided "
+        ."- this may indicate erroneous usage");
+    }
+    foreach ($varnames as $varname) {
+        if (isset($_REQUEST[$varname])) { 
+            $safe_varname = str_replace('-','_',$varname);
+            global $$safe_varname;
+            $$safe_varname = $_REQUEST[$varname]; 
+        }
+    }
+}
+
+//error_log(print_r($params,true));
+
+if ((!is_array($params))||(count($params) == 0)) {
+    $file = str_replace(__DIR__,'',__FILE__);
+    throw_error("No valid action passed to {$file}");
+}
+$action = array_shift($params);
+
+//error_log($action);
+
+switch ($action) {
+    case 'list':
+        $errors = [];
+        $permissions_checked = false;
+        // Called as /ajax/tome_clue/*/list?tome_ids=[m,n]&limit=p&offset=q
+        // If tome_id is not supplied, retrieve for all user-accessible dictionaries
+        populate_from_request(['tome_ids','since','limit','offset']);
+        if (!isset($since)) { $since = new DateTime('1970-01-01 00:00:00'); }
+        if (!isset($tome_ids)) {
+            // Not supplied - retrieve all accessible dictionaries
+            $tomes = Tome::getSubscribedForUser($user->id);
+            $tome_ids = array_column($tomes, 'id');
+            $permissions_checked = true;
+        } elseif (!is_array($tome_ids)) {
+            if (is_integer($tome_ids)) {
+                // Single int value supplied instead of array
+                $tome_ids = [$tome_ids];
+            } else {
+                // We're really stuck - give up
+                throw_error("Cannot parse tome ids: value supplied was {$tome_ids}");
+            }
+        }
+        // Check they're all integers and all user-readable
+        foreach ($tome_ids as $tome_id) {
+            if (!is_numeric($tome_id)) { $errors[] = "Cannot parse tome id with value of {$tome_id}"; }
+            if (!$permissions_checked) { // We don't need to check if we've just pulled the list of user-readable tomes
+                if (!Tome::readableBy($tome_id, $user->id)) { $errors[] = "User does not have permission to read tome with id of {$tome_id}"; }
+            }
+        }
+        if (count($errors) > 0) { throw_error($errors); }
+        
+        $criteria = [];
+        $criteria[] = ['tome_id','IN',$tome_ids];
+        $criteria[] = ['modified','>=',$since];
+        if (!isset($limit)) { $limit = null; }
+        if (!isset($offset)) { $offset = null; }
+        // Return entries
+        $extras = ['forceIndex' => 'filter2'];
+        $tome_clues = TomeClue::find($criteria, ['modified','tome_id','word'], $limit+1, $offset, $extras);
+        $more_clues = false;
+        if (count($tome_clues) == $limit+1) {
+            $more_clues = true;
+            array_pop($tome_clues); // Because we don't actually want the last one (we just want to know it exists)
+        }
+        $return_value = [
+            'clues' => $tome_clues,
+            'nextOffset' => (
+                $more_clues ?
+                $offset+$limit: // Next offset to try
+                null // No more rows
+            )
+        ];
+        die(json_encode($return_value));
+    default:
+        $file = str_replace(__DIR__,'',__FILE__);
+        throw_error("Invalid action {$action} passed to {$file}");
+}

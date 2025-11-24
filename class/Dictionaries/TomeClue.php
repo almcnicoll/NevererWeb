@@ -9,18 +9,19 @@ namespace Dictionaries {
     use Security\User;
 
     class TomeClue extends Model {
-        public int $tomeentry_id;
+        public int $tome_id;
         public int $user_id;
-        public ?string $question = null;
+        public string $word = '';
+        public string $question = '';
         public bool $cryptic = true;
 
         static string $tableName = "tome_clues";
-        static $fields = ['id','tomeentry_id','user_id','question','cryptic','created','modified'];
+        static $fields = ['id','tome_id','user_id','question','cryptic','created','modified'];
 
         public static $defaultOrderBy = ['id'];
 
         // Relationships
-        public static $belongsTo = TomeEntry::class;
+        public static $belongsTo = Tome::class;
         public static $hasOne = [User::class];
 
         /**

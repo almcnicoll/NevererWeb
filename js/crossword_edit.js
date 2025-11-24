@@ -820,7 +820,7 @@ function refreshSuggestedWordList(context) {
       $("#new-clue-suggested-words-pattern").text(pattern);
       $("table.word-list tbody td").remove();
       // Handle possibility of dictionary sync not yet being complete
-      if (!dictionary.sync_complete) {
+      if (!dictionary.entries_sync_complete) {
         // Offload to server method until dict sync complete
         $("#new-clue-suggested-words-tbody").html(
           "<h5>Retrieving words will be slower while dictionary sync underway</h5>"
@@ -857,7 +857,7 @@ function refreshSuggestedWordList(context) {
       $("#edit-clue-suggested-words-pattern").text(pattern);
       $("table.word-list tbody td").remove();
       // Handle possibility of dictionary sync not yet being complete
-      if (!dictionary.sync_complete) {
+      if (!dictionary.entries_sync_complete) {
         // Offload to server method until dict sync complete
         $("#edit-clue-suggested-words-tbody").html(
           "<h5>Retrieving words will be slower while dictionary sync underway</h5>"
