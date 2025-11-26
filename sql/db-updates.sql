@@ -406,3 +406,6 @@ ALTER TABLE `users` ADD COLUMN `default_dictionary` INT(10) NULL DEFAULT NULL AF
 ALTER TABLE `tome_clues` RENAME COLUMN `tomeentry_id` TO `tome_id`;
 ALTER TABLE `tome_clues` ADD COLUMN `word` VARCHAR(100) NOT NULL AFTER `user_id`;
 ALTER TABLE `tome_clues` ADD KEY `filter2` (`modified`,`tome_id`,`word`);
+/* UPDATE */
+/* VERSION 37 */
+ALTER TABLE `tome_clues` ADD COLUMN `explanation` VARCHAR(500) DEFAULT NULL AFTER `question`;

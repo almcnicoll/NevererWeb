@@ -41,6 +41,13 @@
 
 <!-- MODALS -->
 <?php
+    $save_tome_clue = $_SESSION['save-tome-clue'] ?? false;
+    $cryptic_clue = $_SESSION['cryptic-clue'] ?? true;
+    $save_tome_clue_checked = $save_tome_clue ? "checked" : "unchecked";
+    $cryptic_clue_checked = $cryptic_clue ? "checked" : "unchecked";
+    $tome_clue_saveable = ($user->default_dictionary != null);
+    $save_tome_clue_disabled = $tome_clue_saveable ? "enabled" : "disabled";
+
     $form_new_clue = new UI\BootstrapForm('new-clue');
     $form_new_clue->addField('row')->setLabel('Starting row')->setType("number")->setDivClass('mb-3')->setClass('focussed-input border-secondary')->setStyle('max-width: 10em;')->setAdditionalAttributes(['min'=>0,'max'=>$crossword->rows-1])->setHelp("(starting at row 0)");
     $form_new_clue->addField('col')->setLabel('Starting column')->setType("number")->setDivClass('mb-3')->setClass('border-secondary')->setStyle('max-width: 10em;')->setAdditionalAttributes(['min'=>0,'max'=>$crossword->cols-1])->setHelp("(starting at column 0)");
@@ -49,20 +56,24 @@
     $form_new_clue->addField('pattern')->setLabel('')->setType('hidden');
     $form_new_clue->addField('clue')->setLabel('Clue')->setDivClass('mb-3')->setClass('border-secondary'); /*->setHelp("The clue text")*/
     $form_new_clue->addField('explanation')->setLabel('Explanation')->setClass('border-secondary'); /*->setHelp("An explanation of the working of the clue (optional, will not show on crossword output)")*/
+    $form_new_clue->addField('save-tome-clue')->setLabel('Save Clue text to dictionary?')->setClass('border-secondary')->setType('checkbox')->setValue("on")
+                    ->setAdditionalAttributes([$save_tome_clue_checked=>$save_tome_clue_checked,$save_tome_clue_disabled=>$save_tome_clue_disabled]); /*->setHelp("Whether to save the clue text in your default dictionary for future use")*/
+    $form_new_clue->addField('cryptic-clue')->setLabel('Cryptic clue?')->setClass('border-secondary')->setType('checkbox')->setValue("on")
+                    ->setAdditionalAttributes([$cryptic_clue_checked=>$cryptic_clue_checked]); /*->setHelp("Whether the clue is cryptic in nature")*/
     $new_clue_sidebar = <<<END_HTML
-<div class="container">
-<div class="row word-list-row">
-<table class="table table-hover word-list">
-    <thead>
-        <tr class='table-dark'>
-            <th scope='col' id='new-clue-suggested-words-pattern'></th>
-        </tr>
-    </thead>
-    <tbody id='new-clue-suggested-words-tbody'></tbody>
-</table>
-</div>
-</div>
-END_HTML;
+    <div class="container">
+    <div class="row word-list-row">
+    <table class="table table-hover word-list">
+        <thead>
+            <tr class='table-dark'>
+                <th scope='col' id='new-clue-suggested-words-pattern'></th>
+            </tr>
+        </thead>
+        <tbody id='new-clue-suggested-words-tbody'></tbody>
+    </table>
+    </div>
+    </div>
+    END_HTML;
     $modal_new_clue = new UI\BootstrapModal('new-clue');
     $modal_new_clue->setTitle('Add clue')
     ->setBody($form_new_clue->getHtml())
@@ -81,20 +92,24 @@ END_HTML;
     $form_edit_clue->addField('pattern')->setLabel('')->setType('hidden');
     $form_edit_clue->addField('clue')->setLabel('Clue')->setDivClass('mb-3')->setClass('border-secondary'); /*->setHelp("The clue text")*/
     $form_edit_clue->addField('explanation')->setLabel('Explanation')->setClass('border-secondary'); /*->setHelp("An explanation of the working of the clue (optional, will not show on crossword output)")*/
+    $form_edit_clue->addField('save-tome-clue')->setLabel('Save Clue text to dictionary?')->setClass('border-secondary')->setType('checkbox')->setValue("on")
+                    ->setAdditionalAttributes([$save_tome_clue_checked=>$save_tome_clue_checked,$save_tome_clue_disabled=>$save_tome_clue_disabled]); /*->setHelp("Whether to save the clue text in your default dictionary for future use")*/
+    $form_edit_clue->addField('cryptic-clue')->setLabel('Cryptic clue?')->setClass('border-secondary')->setType('checkbox')->setValue("on")
+                    ->setAdditionalAttributes([$cryptic_clue_checked=>$cryptic_clue_checked]); /*->setHelp("Whether the clue is cryptic in nature")*/
     $edit_clue_sidebar = <<<END_HTML
-<div class="container">
-<div class="row word-list-row">
-<table class="table table-hover word-list">
-    <thead>
-        <tr class='table-dark'>
-            <th scope='col' id='edit-clue-suggested-words-pattern'></th>
-        </tr>
-    </thead>
-    <tbody id='edit-clue-suggested-words-tbody'></tbody>
-</table>
-</div>
-</div>
-END_HTML;
+    <div class="container">
+    <div class="row word-list-row">
+    <table class="table table-hover word-list">
+        <thead>
+            <tr class='table-dark'>
+                <th scope='col' id='edit-clue-suggested-words-pattern'></th>
+            </tr>
+        </thead>
+        <tbody id='edit-clue-suggested-words-tbody'></tbody>
+    </table>
+    </div>
+    </div>
+    END_HTML;
     $modal_edit_clue = new UI\BootstrapModal('edit-clue');
     $modal_edit_clue->setTitle('Edit clue')
     ->setBody($form_edit_clue->getHtml())

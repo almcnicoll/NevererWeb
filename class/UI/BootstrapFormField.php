@@ -160,8 +160,8 @@ namespace UI {
             switch (strtolower($this->type)) {
                 case 'select':
                     $input_tag = <<<END_TAG
-    <select class="form-control {$this->class}" id="{$this->id}" name="{$this->id}" aria-describedby="{$this->id}-help" style="{$this->style}" {$attributes}>\n
-    END_TAG;
+                    <select class="form-select {$this->class}" id="{$this->id}" name="{$this->id}" aria-describedby="{$this->id}-help" style="{$this->style}" {$attributes}>\n
+                    END_TAG;
                     foreach ($this->options as $k=>$v) {
                         if ($v == $this->value) { $selected='selected'; } else { $selected = ''; }
                         $input_tag .= "<option value=\"{$k}\" {$selected}>{$v}</option>\n";
@@ -170,15 +170,21 @@ namespace UI {
                     break;
                 case 'textarea':
                     $input_tag = <<<END_TAG
-    <textarea class="form-control {$this->class}" id="{$this->id}" name="{$this->id}" aria-describedby="{$this->id}-help" placeholder="{$this->placeholder}" style="{$this->style}" {$attributes}>
-    {$this->value}
-    </textarea>
-    END_TAG;
+                    <textarea class="form-control {$this->class}" id="{$this->id}" name="{$this->id}" aria-describedby="{$this->id}-help" placeholder="{$this->placeholder}" style="{$this->style}" {$attributes}>
+                    {$this->value}
+                    </textarea>
+                    END_TAG;
+                    break;
+                case 'checkbox':
+                    // NB - add form-check class manually for next-line behaviour
+                    $input_tag = <<<END_TAG
+                    <input type="{$this->type}" class="{$this->class}" id="{$this->id}" name="{$this->id}" aria-describedby="{$this->id}-help" placeholder="{$this->placeholder}" style="{$this->style}" {$attributes} value="{$this->value}">
+                    END_TAG;
                     break;
                 default:
                     $input_tag = <<<END_TAG
-    <input type="{$this->type}" class="form-control {$this->class}" id="{$this->id}" name="{$this->id}" aria-describedby="{$this->id}-help" placeholder="{$this->placeholder}" style="{$this->style}" {$attributes} value="{$this->value}">
-    END_TAG;
+                    <input type="{$this->type}" class="form-control {$this->class}" id="{$this->id}" name="{$this->id}" aria-describedby="{$this->id}-help" placeholder="{$this->placeholder}" style="{$this->style}" {$attributes} value="{$this->value}">
+                    END_TAG;
                     break;
             }
             $help_text = "<small id=\"{$this->id}-help\" class=\"form-text text-muted\">{$this->help}</small>";
@@ -195,7 +201,7 @@ namespace UI {
             $labelled_input_tag
             $help_text
             $div_end
-    END_HTML;
+            END_HTML;
             return $html;
         }
     }

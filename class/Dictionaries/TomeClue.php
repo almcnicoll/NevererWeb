@@ -13,10 +13,11 @@ namespace Dictionaries {
         public int $user_id;
         public string $word = '';
         public string $question = '';
+        public string $explanation = '';
         public bool $cryptic = true;
 
         static string $tableName = "tome_clues";
-        static $fields = ['id','tome_id','user_id','question','cryptic','created','modified'];
+        static $fields = ['id','tome_id','user_id','word','question','explanation','cryptic','created','modified'];
 
         public static $defaultOrderBy = ['id'];
 
@@ -30,7 +31,5 @@ namespace Dictionaries {
         public function __construct()
         {
         }
-
-
     }
 }
