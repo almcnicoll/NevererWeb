@@ -16,8 +16,10 @@ dictionary.worker_path = "~ROOT~/js/dict_worker.js";
 /** @type {Worker} WebWorker instance for background sync and IndexedDB operations. */
 dictionary.worker = new Worker(dictionary.worker_path);
 
-/** @type {boolean} Tracks whether the dictionary sync has completed */
-dictionary.sync_complete = false;
+/** @type {boolean} Tracks whether the dictionary-entry sync has completed */
+dictionary.entries_sync_complete = false;
+/** @type {boolean} Tracks whether the dictionary-clue sync has completed */
+dictionary.clues_sync_complete = false;
 // #endregion
 
 // #region INIT
@@ -53,7 +55,7 @@ dictionary.multiPartInit = function (parts, callback) {
 /**
  * Handles the worker thread saying that it's finished initialising
  * part of what's needed. When all parts are complete, we
- * fire off the "continueSync" action
+ * fire off the "continueSyncEntries" action
  * @param {string} partName the init part that is returning
  * @param {object} msg the message object returned from the worker, in case we need debug info
  */
@@ -69,7 +71,7 @@ dictionary.initReturn = function (partName, msg) {
   if (incomplete === 0) {
     // We're ready to start the actual sync
     dictionary.worker.postMessage({
-      type: "continueSync",
+      type: "continueSyncEntries",
     });
   }
 };
@@ -233,7 +235,7 @@ dictionary.worker.onmessage = function (e) {
         msg.format
       );
       break;
-    case "syncIncomplete":
+    case "syncIncompleteEntries":
       // Update the UI
       $("#status-bar").html(
         "Synchronised " +
@@ -242,14 +244,37 @@ dictionary.worker.onmessage = function (e) {
       );
       // Now trigger the next partial sync
       dictionary.worker.postMessage({
-        type: "continueSync",
+        type: "continueSyncEntries",
         root_path: root_path,
       });
       break;
-    case "syncComplete":
+    case "syncCompleteEntries":
       // Update the UI
-      $("#status-bar").html("Dictionary sync complete");
-      dictionary.sync_complete = true;
+      $("#status-bar").html("Dictionary-entry sync complete");
+      dictionary.entries_sync_complete = true;
+      // Now trigger the clue sync process
+      dictionary.worker.postMessage({
+        type: "continueSyncClues",
+        root_path: root_path,
+      });
+      break;
+    case "syncIncompleteClues":
+      // Update the UI
+      $("#status-bar").html(
+        "Synchronised " +
+          msg.count +
+          " clues <i class='bi bi-info-square-fill' title='Synchronising the full clue list happens once per browser but should be fairly speedy.'></i>"
+      );
+      // Now trigger the next partial sync
+      dictionary.worker.postMessage({
+        type: "continueSyncClues",
+        root_path: root_path,
+      });
+      break;
+    case "syncCompleteClues":
+      // Update the UI
+      $("#status-bar").html("Full dictionary sync complete");
+      dictionary.clues_sync_complete = true;
       break;
     default:
       console.log("Unexpected message " + msg.type + " sent to dict_master.js");

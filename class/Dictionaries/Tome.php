@@ -90,7 +90,7 @@ namespace Dictionaries {
             // Avoid error from WHERE ... IN () with empty brackets
             if (count($allSubscribedTomeIds)==0) { return []; }
 
-            $tomes_all = Tome::find(['id','IN',$allSubscribedTomeIds]);
+            $tomes_all = Tome::find([['id','IN',$allSubscribedTomeIds]]);
             return $tomes_all;
         }
 
