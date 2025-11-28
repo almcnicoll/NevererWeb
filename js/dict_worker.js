@@ -135,6 +135,12 @@ self.onmessage = function (e) {
                     destination: destination,
                     format: format,
                 });
+                getAllMatchingTomeClues(matches).then((tomeClues) => {
+                    self.postMessage({
+                        type: "tomeClueResults",
+                        results: tomeClues,
+                    });
+                });
             });
             break;
         default:
@@ -485,5 +491,35 @@ async function getAllMatchingEntriesByPattern(pattern, length, offset = 0, limit
         results: paged,
         total: filteredByRegex.length, // total *matched* count, not total in DB
     };
+}
+
+/**
+ * Retrieves matching clues from the local TomeClues data store
+ * @param {{ results: Array<{ word: string }> }} matches an object containing a property results with an array of pattern-matching results in it
+ * @returns {Promise<Array<{ id:number, word:string, tome_id:number, user_id:number, date_added:string, question:string, explanation?:string }>>} a flat array of matching clues from the local store
+ */
+async function getAllMatchingTomeClues(matches) {
+    if (!matches || !Array.isArray(matches.results)) return [];
+
+    // Normalise to lower-case because IndexedDB matching is case-sensitive
+    const wanted = matches.results.map((r) => r.word?.toLowerCase()).filter(Boolean);
+
+    if (wanted.length === 0) return [];
+
+    // Deduplicate words
+    const unique = [...new Set(wanted)];
+
+    // Query all words in parallel
+    const results = await Promise.all(
+        unique.map((w) =>
+            db.clues
+                .where("word")
+                .equalsIgnoreCase(w) // Dexie helper: case-insensitive match
+                .toArray()
+        )
+    );
+
+    // Flatten output
+    return results.flat();
 }
 // #endregion
