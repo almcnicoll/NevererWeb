@@ -145,10 +145,13 @@ dictionary.populateSuggestedWords = function (matches, totalMatches, destination
 dictionary.populateSuggestedClues = function (matches) {
     for (var i in matches) {
         let result = matches[i];
-        // TODO - make this better, add support for multiple clues against a single word
+        // TODO - make this better: add support for clicking question-square-fill icon and do styling (e.g. colour)
+        let safeClue = result.question.replaceAll('"', "'");
         $(`td.suggested-word-list-item[data-word=${result.word}]`)
             .addClass("has-tome-clue")
-            .attr("title", result.question);
+            .addClass("d-flex")
+            .addClass("justify-content-between")
+            .append(`<i class='bi bi-question-square-fill tome-clue' role='button' title="${safeClue}"></i>`);
     }
 };
 
