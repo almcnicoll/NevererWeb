@@ -145,7 +145,7 @@ dictionary.populateSuggestedWords = function (matches, totalMatches, destination
 dictionary.populateSuggestedClues = function (matches) {
     for (var i in matches) {
         let result = matches[i];
-        // TODO - make this better: add support for clicking question-square-fill icon and do styling (e.g. colour)
+        // TODO - LOW make this better: add support for explanations as well as clues?
         let safeClue = result.question.replaceAll('"', "'");
         $(`td.suggested-word-list-item[data-word=${result.word}]`)
             .addClass("has-tome-clue")
