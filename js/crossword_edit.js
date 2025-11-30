@@ -264,6 +264,12 @@ $(document).ready(
         $("#edit-clue").on("click", "td.suggested-word-list-item", function () {
             $("#edit-clue-answer").val($(this).text());
         });
+        $("#new-clue").on("click", "i.tome-clue", function () {
+            $("#new-clue-clue").val($(this).attr("title"));
+        });
+        $("#edit-clue").on("click", "i.tome-clue", function () {
+            $("#edit-clue-clue").val($(this).attr("title"));
+        });
 
         // Refresh data
         refreshGrid();
