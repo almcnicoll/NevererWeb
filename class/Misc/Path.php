@@ -20,6 +20,7 @@ namespace Misc {
         private static function trimPath(string $path): string
         {
             $path = trim($path);
+            if ($path === '') { return $path; }
             $start = $path[0] === DIRECTORY_SEPARATOR ? 1 : 0;
             $end = $path[strlen($path) - 1] === DIRECTORY_SEPARATOR ? -1 : strlen($path);
             return substr($path, $start, $end);
