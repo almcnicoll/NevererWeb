@@ -1,6 +1,7 @@
 <?php
 use Logging\LoggedError;
 use Crosswords\Clue, Crosswords\Crossword, Crosswords\PlacedClue;
+use Dictionaries\TomeClue;
 
 function throw_error($errors) {
     $retval = ['errors' => $errors];
@@ -198,6 +199,19 @@ switch ($action) {
         $c->question = $_POST['clue'];
         $c->explanation = $_POST['explanation'];
         $pc->save();
+        // including TomeClue if appropriate
+        if ($_POST['save-tome-clue']) {
+            $tc = new TomeClue();
+            $tc->tome_id = $user->default_dictionary;
+            $tc->user_id = $user->id;
+            $tc->word = $c->answer;
+            $tc->question = $c->question;
+            $tc->explanation = $c->explanation;
+            $tc->cryptic = (bool)$_POST['cryptic-clue'];
+            $tc->save();
+        }
+        $_SESSION['save-tome-clue'] = (bool)$_POST['save-tome-clue'];
+        $_SESSION['cryptic-clue'] = (bool)$_POST['cryptic-clue'];
         
         // Work out if we need to create other new clues for symmetry
         $additionalClues = $crossword->getNewSymmetryClues($pc);
@@ -238,6 +252,19 @@ switch ($action) {
         $clue->question = $_POST['clue'];
         $clue->explanation = $_POST['explanation'];
         $placedClue->save();
+        // including TomeClue if appropriate
+        if ($_POST['save-tome-clue']) {
+            $tc = new TomeClue();
+            $tc->tome_id = $user->default_dictionary;
+            $tc->user_id = $user->id;
+            $tc->word = $clue->answer;
+            $tc->question = $clue->question;
+            $tc->explanation = $clue->explanation;
+            $tc->cryptic = (bool)$_POST['cryptic-clue'];
+            $tc->save();
+        }
+        $_SESSION['save-tome-clue'] = (bool)$_POST['save-tome-clue'];
+        $_SESSION['cryptic-clue'] = (bool)$_POST['cryptic-clue'];
 
         // Alter and save symmetry clues
         foreach ($additionalClues as $apc) {

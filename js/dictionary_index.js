@@ -62,10 +62,41 @@ function ReportOnTomeDelete(jqXHR, textStatus) {
   top.location.reload(); // Reload page
 }
 
+function SetDefaultDictionary(e) {
+  let tome_id = $(e.currentTarget).attr("value");
+  if (tome_id == null) {
+    alert("Could not set default dictionary. Please try again later.");
+    return;
+  }
+  $("html, html *").css("cursor", "wait"); // Wait cursor
+  // Send request
+  let url = "~ROOT~/dictionary/*/setdefault/" + tome_id + "?domain=ajax";
+  let ajaxOptions = {
+    async: true,
+    cache: false,
+    dataType: "json",
+    method: "POST",
+    timeout: 10000,
+    complete: ReportOnDefaultDictionarySet,
+    data: {
+      tome_id: tome_id,
+    },
+  };
+  $("html, html *").css("cursor", "wait"); // Wait cursor
+  $.ajax(url, ajaxOptions);
+}
+
+function ReportOnDefaultDictionarySet(jqXHR, textStatus) {
+  // Handle callback
+  $("html,html *").css("cursor", "auto"); // Put cursor back
+  top.location.reload(); // Reload page
+}
+
 // #region DOM ready
 $(function () {
   $(".subscribe,.unsubscribe").on("click", ToggleSubscribe);
   $(".delete").on("click", FlagTome);
   $("#deleteConfirm").on("click", DeleteTome);
+  $("input.default-dictionary-radio").on("change", SetDefaultDictionary);
 });
 // #endregion

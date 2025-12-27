@@ -16,18 +16,23 @@ const db = new Dexie(DB_NAME_V02);
 
 // Define database schema
 db.version(1).stores({
-  tomes:
-    "id, name, source_type, source_format, writeable, user_id, last_updated",
-  entries: "id, tome_id, word, bare_letters, user_id, date_added, length",
-  sync_meta: "key, last_sync, last_offset", // keep last_offset if used
+    tomes: "id, name, source_type, source_format, writeable, user_id, last_updated",
+    entries: "id, tome_id, word, bare_letters, user_id, date_added, length",
+    sync_meta: "key, last_sync, last_offset", // keep last_offset if used
 });
 // Version 2 schema with compound indexes
 db.version(2).stores({
-  tomes:
-    "id, name, source_type, source_format, writeable, user_id, last_updated",
-  entries: "id,word,bare_letters,length,[length+bare_letters]",
-  sync_meta: "key, last_sync, last_offset", // keep last_offset if used
+    tomes: "id, name, source_type, source_format, writeable, user_id, last_updated",
+    entries: "id, word, bare_letters, length, [length+bare_letters]",
+    sync_meta: "key, last_sync, last_offset", // keep last_offset if used
 });
+db.version(3).stores({
+    tomes: "id, name, source_type, source_format, writeable, user_id, last_updated",
+    entries: "id, word, bare_letters, length, [length+bare_letters]",
+    clues: "id, word, tome_id, user_id, date_added, question, cryptic, [word+tome_id]",
+    sync_meta: "key, last_sync, last_offset",
+});
+
 // #endregion
 
 // #region VARIABLES
@@ -42,7 +47,8 @@ let serverTomeIds = new Set();
 let localTomes;
 let localTomeIds = new Set();
 let obsoleteTomeIds;
-let meta;
+let eMeta;
+let cMeta;
 const SyncLimit = 100;
 let thisSyncStamp;
 // #endregion
@@ -53,7 +59,7 @@ let thisSyncStamp;
  * @returns {string} A unique message ID (e.g., "msg_ab12cd34")
  */
 function generateId() {
-  return "msg_" + Math.random().toString(36).slice(2);
+    return "msg_" + Math.random().toString(36).slice(2);
 }
 
 /**
@@ -66,9 +72,9 @@ function generateId() {
  */
 let fetchReturnCallbacks = {};
 function fetchFromServer(method, data, callback) {
-  const id = generateId();
-  fetchReturnCallbacks[id] = callback;
-  self.postMessage({ type: "fetch", method, data, id });
+    const id = generateId();
+    fetchReturnCallbacks[id] = callback;
+    self.postMessage({ type: "fetch", method, data, id });
 }
 // #endregion
 
@@ -80,77 +86,67 @@ function fetchFromServer(method, data, callback) {
  */
 
 self.onmessage = function (e) {
-  const msg = e.data;
-  switch (msg.type) {
-    case "init.tomeList":
-      fetchTomeList();
-      break;
-    case "init.syncMetadata":
-      fetchMetadata();
-      break;
-    case "continueSync":
-      doSync();
-      break;
-    case "fetched": // return from fetchFromServer
-      let thisFetchCallback = fetchReturnCallbacks[msg.id];
-      if (thisFetchCallback !== null) {
-        thisFetchCallback(msg.success, msg.payload);
-      }
-      fetchReturnCallbacks[msg.id] = null;
-      break;
-    case "lookupByRegex":
-      ({
-        regex,
-        flags,
-        destination,
-        format,
-        length,
-        offset = 0,
-        limit = Infinity,
-      } = msg);
+    const msg = e.data;
+    switch (msg.type) {
+        case "init.tomeList":
+            fetchTomeList();
+            break;
+        case "init.syncMetadata":
+            fetchMetadata();
+            break;
+        case "continueSyncEntries":
+            doSyncEntries();
+            break;
+        case "continueSyncClues":
+            doSyncClues();
+            break;
+        case "fetched": // return from fetchFromServer
+            let thisFetchCallback = fetchReturnCallbacks[msg.id];
+            if (thisFetchCallback !== null) {
+                thisFetchCallback(msg.success, msg.payload);
+            }
+            fetchReturnCallbacks[msg.id] = null;
+            break;
+        case "lookupByRegex":
+            ({ regex, flags, destination, format, length, offset = 0, limit = Infinity } = msg);
 
-      pattern = new RegExp(regex, flags);
+            pattern = new RegExp(regex, flags);
 
-      getAllMatchingEntriesByRegex(pattern, length, offset, limit).then(
-        (matches) => {
-          self.postMessage({
-            type: "regexResults",
-            results: matches,
-            offset: offset,
-            limit: limit,
-            destination: destination,
-            format: format,
-          });
-        }
-      );
-      break;
-    case "lookupByPattern":
-      ({
-        pattern = "",
-        destination,
-        format,
-        length,
-        offset = 0,
-        limit = Infinity,
-      } = msg);
+            getAllMatchingEntriesByRegex(pattern, length, offset, limit).then((matches) => {
+                self.postMessage({
+                    type: "regexResults",
+                    results: matches,
+                    offset: offset,
+                    limit: limit,
+                    destination: destination,
+                    format: format,
+                });
+            });
+            break;
+        case "lookupByPattern":
+            ({ pattern = "", destination, format, length, offset = 0, limit = Infinity } = msg);
 
-      getAllMatchingEntriesByPattern(pattern, length, offset, limit).then(
-        (matches) => {
-          self.postMessage({
-            type: "regexResults",
-            results: matches,
-            offset: offset,
-            limit: limit,
-            destination: destination,
-            format: format,
-          });
-        }
-      );
-      break;
-    default:
-      console.log("Unexpected message " + msg.type + " sent to dict_worker.js");
-      break;
-  }
+            getAllMatchingEntriesByPattern(pattern, length, offset, limit).then((matches) => {
+                self.postMessage({
+                    type: "regexResults",
+                    results: matches,
+                    offset: offset,
+                    limit: limit,
+                    destination: destination,
+                    format: format,
+                });
+                getAllMatchingTomeClues(matches).then((tomeClues) => {
+                    self.postMessage({
+                        type: "tomeClueResults",
+                        results: tomeClues,
+                    });
+                });
+            });
+            break;
+        default:
+            console.log("Unexpected message " + msg.type + " sent to dict_worker.js");
+            break;
+    }
 };
 // #endregion
 
@@ -160,161 +156,249 @@ self.onmessage = function (e) {
  * and updates the local IndexedDB cache
  */
 function fetchTomeList() {
-  // Get list of tomes from server
-  /** @type {{ url: string }} */
-  let data = {
-    url: "tome/*/list",
-  };
-  fetchFromServer("get", data, parseTomeList); // end server-fetch function
+    // Get list of tomes from server
+    /** @type {{ url: string }} */
+    let data = {
+        url: "tome/*/list",
+    };
+    fetchFromServer("get", data, parseTomeList); // end server-fetch function
 }
 async function parseTomeList(success, payload) {
-  if (!success) return;
+    if (!success) return;
 
-  try {
-    serverTomes = JSON.parse(payload);
-  } catch (e) {
-    console.error("Failed to parse Tomes payload:", e); // TODO - throw this error properly (will require posting a message)
-    return;
-  }
-
-  if (!Array.isArray(serverTomes)) return;
-
-  serverTomeIds = new Set(serverTomes.map((t) => t.id));
-  localTomes = await db.tomes.toArray();
-  localTomeIds = new Set(localTomes.map((t) => t.id));
-
-  // Identify obsolete tome IDs
-  obsoleteTomeIds = [...localTomeIds].filter((id) => !serverTomeIds.has(id));
-
-  // Update tomes and remove obsolete ones
-  db.transaction("rw", db.tomes, db.entries, async function () {
-    // Bulk insert/update tomes
-    await db.tomes.bulkPut(serverTomes);
-
-    // Bulk delete tomes and their entries that are no longer on the server
-    if (obsoleteTomeIds.length > 0) {
-      await db.tomes.bulkDelete(obsoleteTomeIds);
-
-      // Delete associated entries
-      for (const id of obsoleteTomeIds) {
-        await db.entries.where("tome_id").equals(id).delete(); // can't bulkDelete on compound index
-      }
+    try {
+        serverTomes = JSON.parse(payload);
+    } catch (e) {
+        console.error("Failed to parse Tomes payload:", e); // TODO - throw this error properly (will require posting a message)
+        return;
     }
-  }).then(function () {
-    // Now tell the main process that we're done with this part
-    var msgId = generateId();
-    var msgData = {
-      type: "initialised",
-      subType: "tomeList",
-      msgId,
-    };
-    self.postMessage(msgData);
-  });
+
+    if (!Array.isArray(serverTomes)) return;
+
+    serverTomeIds = new Set(serverTomes.map((t) => t.id));
+    localTomes = await db.tomes.toArray();
+    localTomeIds = new Set(localTomes.map((t) => t.id));
+
+    // Identify obsolete tome IDs
+    obsoleteTomeIds = [...localTomeIds].filter((id) => !serverTomeIds.has(id));
+
+    // Update tomes and remove obsolete ones
+    db.transaction("rw", db.tomes, db.entries, async function () {
+        // Bulk insert/update tomes
+        await db.tomes.bulkPut(serverTomes);
+
+        // Bulk delete tomes and their entries that are no longer on the server
+        if (obsoleteTomeIds.length > 0) {
+            await db.tomes.bulkDelete(obsoleteTomeIds);
+
+            // Delete associated entries
+            for (const id of obsoleteTomeIds) {
+                await db.entries.where("tome_id").equals(id).delete(); // can't bulkDelete on compound index
+            }
+        }
+    }).then(function () {
+        // Now tell the main process that we're done with this part
+        var msgId = generateId();
+        var msgData = {
+            type: "initialised",
+            subType: "tomeList",
+            msgId,
+        };
+        self.postMessage(msgData);
+    });
 }
 
 async function fetchMetadata(payload) {
-  meta = (await db.sync_meta.get("entries")) || {};
-  meta.last_sync = meta.last_sync || "1970-01-01T00:00:00Z";
-  meta.last_offset = meta.last_offset || 0; // Could be null if it's our first sync or if our last sync completed all rows
-  // Tell the main thread that we're done here
-  var msgId = generateId();
-  var msgData = {
-    type: "initialised",
-    subType: "syncMetadata",
-    msgId,
-  };
-  self.postMessage(msgData);
+    eMeta = (await db.sync_meta.get("entries")) || {};
+    eMeta.last_sync = eMeta.last_sync || "1970-01-01T00:00:00Z";
+    eMeta.last_offset = eMeta.last_offset || 0; // Could be null if it's our first sync or if our last sync completed all rows
+    cMeta = (await db.sync_meta.get("clues")) || {};
+    cMeta.last_sync = cMeta.last_sync || "1970-01-01T00:00:00Z";
+    cMeta.last_offset = cMeta.last_offset || 0; // Could be null if it's our first sync or if our last sync completed all rows
+    // Tell the main thread that we're done here
+    var msgId = generateId();
+    var msgData = {
+        type: "initialised",
+        subType: "syncMetadata",
+        msgId,
+    };
+    self.postMessage(msgData);
 }
 
-function doSync() {
-  {
-    // Set up fetch
-    data = {
-      url: "tome_entry/*/list",
-      tome_ids: [...serverTomeIds],
-      since: meta.last_sync,
-      offset: meta.last_offset,
-      limit: SyncLimit,
-    };
+function doSyncEntries() {
+    {
+        // Set up fetch
+        data = {
+            url: "tome_entry/*/list",
+            tome_ids: [...serverTomeIds],
+            since: eMeta.last_sync,
+            offset: eMeta.last_offset,
+            limit: SyncLimit,
+        };
 
-    // Fetch next batch of entries from the server
-    thisSyncStamp = new Date().toISOString(); // Store timestamp of last request, for writing to metadata on completion
-    fetchFromServer("get", data, async (success, payload) => {
-      if (!success) return;
+        // Fetch next batch of entries from the server
+        thisSyncStamp = new Date().toISOString(); // Store timestamp of last request, for writing to metadata on completion
+        fetchFromServer("get", data, async (success, payload) => {
+            if (!success) return;
 
-      let ajaxData;
-      let newEntries;
-      let nextOffset;
-      try {
-        ajaxData = JSON.parse(payload);
-        newEntries = ajaxData.entries;
-        nextOffset = ajaxData.nextOffset;
-      } catch (e) {
-        console.error("Failed to parse entries payload:", e);
-        return;
-      }
+            let ajaxData;
+            let newEntries;
+            let nextOffset;
+            try {
+                ajaxData = JSON.parse(payload);
+                newEntries = ajaxData.entries;
+                nextOffset = ajaxData.nextOffset;
+            } catch (e) {
+                console.error("Failed to parse entries payload:", e);
+                return;
+            }
 
-      if (!Array.isArray(newEntries)) return;
+            if (!Array.isArray(newEntries)) return;
 
-      // Separate deletions and additions
-      const entriesToDelete = [];
-      const entriesToPut = [];
+            // Separate deletions and additions
+            const entriesToDelete = [];
+            const entriesToPut = [];
 
-      for (const entry of newEntries) {
-        if (entry.date_deleted) {
-          entriesToDelete.push([entry.tome_id, entry.word]);
-        } else {
-          entriesToPut.push(entry);
-        }
-      }
+            for (const entry of newEntries) {
+                if (entry.date_deleted) {
+                    entriesToDelete.push([entry.tome_id, entry.word]);
+                } else {
+                    entriesToPut.push(entry);
+                }
+            }
 
-      await db.transaction("rw", db.entries, db.sync_meta, async () => {
-        // Delete matching entries by [tome_id + word] — can't bulk delete compound index directly
-        for (const [tome_id, word] of entriesToDelete) {
-          await db.entries
-            .where("[tome_id+word]")
-            .equals([tome_id, word])
-            .delete();
-        }
+            await db.transaction("rw", db.entries, db.sync_meta, async () => {
+                // Delete matching entries by [tome_id + word] — can't bulk delete compound index directly
+                for (const [tome_id, word] of entriesToDelete) {
+                    await db.entries.where("[tome_id+word]").equals([tome_id, word]).delete();
+                }
 
-        // Bulk insert/update new or changed entries
-        if (entriesToPut.length > 0) {
-          await db.entries.bulkPut(entriesToPut);
-        }
+                // Bulk insert/update new or changed entries
+                if (entriesToPut.length > 0) {
+                    await db.entries.bulkPut(entriesToPut);
+                }
 
-        // Update sync metadata
-        if (nextOffset == null) {
-          // We're done
-          // Update the date
-          meta.last_offset = null;
-          meta.last_sync = thisSyncStamp;
-          await db.sync_meta.put({
-            key: "entries",
-            last_sync: thisSyncStamp,
-            last_offset: nextOffset,
-          });
-          // Tell the main thread that our sync is complete
-          var msgId = generateId();
-          self.postMessage({ type: "syncComplete", msgId });
-        } else {
-          // There's more to retrieve
-          // Don't update the date
-          meta.last_offset = nextOffset;
-          await db.sync_meta.put({
-            key: "entries",
-            last_offset: nextOffset,
-          });
-          // Tell the main thread that our sync is partially complete
-          var msgId = generateId();
-          self.postMessage({
-            type: "syncIncomplete",
-            count: nextOffset,
-            msgId,
-          });
-        }
-      });
-    });
-  }
+                // Update sync metadata
+                if (nextOffset == null) {
+                    // We're done
+                    // Update the date
+                    eMeta.last_offset = null;
+                    eMeta.last_sync = thisSyncStamp;
+                    await db.sync_meta.put({
+                        key: "entries",
+                        last_sync: thisSyncStamp,
+                        last_offset: nextOffset,
+                    });
+                    // Tell the main thread that our sync is complete
+                    var msgId = generateId();
+                    self.postMessage({ type: "syncCompleteEntries", msgId });
+                } else {
+                    // There's more to retrieve
+                    // Don't update the date
+                    eMeta.last_offset = nextOffset;
+                    await db.sync_meta.put({
+                        key: "entries",
+                        last_offset: nextOffset,
+                    });
+                    // Tell the main thread that our sync is partially complete
+                    var msgId = generateId();
+                    self.postMessage({
+                        type: "syncIncompleteEntries",
+                        count: nextOffset,
+                        msgId,
+                    });
+                }
+            });
+        });
+    }
+}
+
+function doSyncClues() {
+    {
+        // Set up fetch
+        data = {
+            url: "tome_clue/*/list",
+            tome_ids: [...serverTomeIds],
+            since: cMeta.last_sync,
+            offset: cMeta.last_offset,
+            limit: SyncLimit,
+        };
+
+        // Fetch next batch of entries from the server
+        thisSyncStamp = new Date().toISOString(); // Store timestamp of last request, for writing to metadata on completion
+        fetchFromServer("get", data, async (success, payload) => {
+            if (!success) return;
+
+            let ajaxData;
+            let newClues;
+            let nextOffset;
+            try {
+                ajaxData = JSON.parse(payload);
+                newClues = ajaxData.clues;
+                nextOffset = ajaxData.nextOffset;
+            } catch (e) {
+                console.error("Failed to parse clues payload:", e);
+                return;
+            }
+
+            if (!Array.isArray(newClues)) return;
+
+            // Separate deletions and additions
+            const cluesToDelete = [];
+            const cluesToPut = [];
+
+            for (const entry of newClues) {
+                if (entry.date_deleted) {
+                    cluesToDelete.push([entry.tome_id, entry.word]);
+                } else {
+                    cluesToPut.push(entry);
+                }
+            }
+
+            await db.transaction("rw", db.clues, db.sync_meta, async () => {
+                // Delete matching entries by [tome_id + word] — can't bulk delete compound index directly
+                for (const [tome_id, word] of cluesToDelete) {
+                    await db.clues.where("[word+tome_id]").equals([word, tome_id]).delete();
+                }
+
+                // Bulk insert/update new or changed entries
+                if (cluesToPut.length > 0) {
+                    await db.clues.bulkPut(cluesToPut);
+                }
+
+                // Update sync metadata
+                if (nextOffset == null) {
+                    // We're done
+                    // Update the date
+                    cMeta.last_offset = null;
+                    cMeta.last_sync = thisSyncStamp;
+                    await db.sync_meta.put({
+                        key: "clues",
+                        last_sync: thisSyncStamp,
+                        last_offset: nextOffset,
+                    });
+                    // Tell the main thread that our sync is complete
+                    var msgId = generateId();
+                    self.postMessage({ type: "syncCompleteClues", msgId });
+                } else {
+                    // There's more to retrieve
+                    // Don't update the date
+                    cMeta.last_offset = nextOffset;
+                    await db.sync_meta.put({
+                        key: "clues",
+                        last_offset: nextOffset,
+                    });
+                    // Tell the main thread that our sync is partially complete
+                    var msgId = generateId();
+                    self.postMessage({
+                        type: "syncIncompleteClues",
+                        count: nextOffset,
+                        msgId,
+                    });
+                }
+            });
+        });
+    }
 }
 // #endregion
 
@@ -326,17 +410,17 @@ function doSync() {
  * @returns RegExp the regular expression used to search
  */
 function getRegexFromPattern(pattern, bareLettersVersion = true) {
-  if (bareLettersVersion) {
-    // This is the simple one
-    var rePattern = pattern.replaceAll("?", ".").toUpperCase();
-    return (re = new RegExp(rePattern, "i"));
-  } else {
-    // This is the complex one
-    var rePattern = pattern.replaceAll("?", ".").toUpperCase();
-    var arr = rePattern.split("");
-    rePattern = arr.join("[\\s'-]*");
-    return (re = new RegExp(rePattern, "i"));
-  }
+    if (bareLettersVersion) {
+        // This is the simple one
+        var rePattern = pattern.replaceAll("?", ".").toUpperCase();
+        return (re = new RegExp(rePattern, "i"));
+    } else {
+        // This is the complex one
+        var rePattern = pattern.replaceAll("?", ".").toUpperCase();
+        var arr = rePattern.split("");
+        rePattern = arr.join("[\\s'-]*");
+        return (re = new RegExp(rePattern, "i"));
+    }
 }
 
 /**
@@ -348,25 +432,20 @@ function getRegexFromPattern(pattern, bareLettersVersion = true) {
  * @param {number} [limit=50] - Max number of matching entries to return.
  * @returns {Promise<{ results: Array<Object>, total: number }>}
  */
-async function getAllMatchingEntriesByRegex(
-  pattern,
-  length,
-  offset = 0,
-  limit = 50
-) {
-  // Step 1: Narrow the query using indexed `length`
-  const entries = await db.entries.where("length").equals(length).toArray();
+async function getAllMatchingEntriesByRegex(pattern, length, offset = 0, limit = 50) {
+    // Step 1: Narrow the query using indexed `length`
+    const entries = await db.entries.where("length").equals(length).toArray();
 
-  // Step 2: Filter using RegExp in memory
-  const filtered = entries.filter((entry) => pattern.test(entry.bare_letters));
+    // Step 2: Filter using RegExp in memory
+    const filtered = entries.filter((entry) => pattern.test(entry.bare_letters));
 
-  // Step 3: Paginate
-  const paged = filtered.slice(offset, offset + limit);
+    // Step 3: Paginate
+    const paged = filtered.slice(offset, offset + limit);
 
-  return {
-    results: paged,
-    total: filtered.length, // total *matched* count, not total in DB
-  };
+    return {
+        results: paged,
+        total: filtered.length, // total *matched* count, not total in DB
+    };
 }
 
 /**
@@ -378,47 +457,69 @@ async function getAllMatchingEntriesByRegex(
  * @param {int} limit the limit of how many records to retrieve (for record paging)
  * @returns
  */
-async function getAllMatchingEntriesByPattern(
-  pattern,
-  length,
-  offset = 0,
-  limit = 50
-) {
-  // Determine if there are any opening known letters to filter by
-  const firstQM = pattern.indexOf("?");
-  var searchString;
-  switch (firstQM) {
-    case -1:
-      // No question marks - we have a whole string - simples!
-      searchString = pattern;
-      break;
-    default:
-      // Otherwise, use whatever letters we have (if any) as a prefix
-      searchString = pattern.substr(0, firstQM);
-  }
-  // We can't do this in stages - we have to use the compound length+bare_letters index
-  const lowerBound = [length, searchString];
-  const upperBound = [length, searchString + "\uffff"];
-  const filteredByIndex = await db.entries
-    .where("[length+bare_letters]")
-    .between(lowerBound, upperBound)
-    .toArray();
+async function getAllMatchingEntriesByPattern(pattern, length, offset = 0, limit = 50) {
+    // Determine if there are any opening known letters to filter by
+    const firstQM = pattern.indexOf("?");
+    var searchString;
+    switch (firstQM) {
+        case -1:
+            // No question marks - we have a whole string - simples!
+            searchString = pattern;
+            break;
+        default:
+            // Otherwise, use whatever letters we have (if any) as a prefix
+            searchString = pattern.substr(0, firstQM);
+    }
+    // We can't do this in stages - we have to use the compound length+bare_letters index
+    const lowerBound = [length, searchString];
+    const upperBound = [length, searchString + "\uffff"];
+    const filteredByIndex = await db.entries.where("[length+bare_letters]").between(lowerBound, upperBound).toArray();
 
-  // Check for "no fixed letters" option
-  const noLettersSpecified = pattern == new String("").repeat(length);
+    // Check for "no fixed letters" option
+    const noLettersSpecified = pattern == new String("").repeat(length);
 
-  // Now generate a regular expression and filter using RegExp in memory
-  const rePattern = getRegexFromPattern(pattern, true);
-  const filteredByRegex = noLettersSpecified
-    ? filteredByIndex
-    : filteredByIndex.filter((entry) => rePattern.test(entry.bare_letters));
+    // Now generate a regular expression and filter using RegExp in memory
+    const rePattern = getRegexFromPattern(pattern, true);
+    const filteredByRegex = noLettersSpecified
+        ? filteredByIndex
+        : filteredByIndex.filter((entry) => rePattern.test(entry.bare_letters));
 
-  // Step 3: Paginate
-  const paged = filteredByRegex.slice(offset, offset + limit);
+    // Step 3: Paginate
+    const paged = filteredByRegex.slice(offset, offset + limit);
 
-  return {
-    results: paged,
-    total: filteredByRegex.length, // total *matched* count, not total in DB
-  };
+    return {
+        results: paged,
+        total: filteredByRegex.length, // total *matched* count, not total in DB
+    };
+}
+
+/**
+ * Retrieves matching clues from the local TomeClues data store
+ * @param {{ results: Array<{ word: string }> }} matches an object containing a property results with an array of pattern-matching results in it
+ * @returns {Promise<Array<{ id:number, word:string, tome_id:number, user_id:number, date_added:string, question:string, explanation?:string }>>} a flat array of matching clues from the local store
+ */
+async function getAllMatchingTomeClues(matches) {
+    if (!matches || !Array.isArray(matches.results)) return [];
+
+    // Normalise to lower-case because IndexedDB matching is case-sensitive
+    const wanted = matches.results.map((r) => r.word?.toLowerCase()).filter(Boolean);
+
+    if (wanted.length === 0) return [];
+
+    // Deduplicate words
+    const unique = [...new Set(wanted)];
+
+    // Query all words in parallel
+    const results = await Promise.all(
+        unique.map((w) =>
+            db.clues
+                .where("word")
+                .equalsIgnoreCase(w) // Dexie helper: case-insensitive match
+                .toArray()
+        )
+    );
+
+    // Flatten output
+    return results.flat();
 }
 // #endregion
