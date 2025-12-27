@@ -1,4 +1,4 @@
-// debugger; // Uncomment to open this file in Dev Tools
+//debugger; // Uncomment to open this file in Dev Tools
 
 // #region SETUP
 // Load Dexie.js for IndexedDB management
@@ -142,6 +142,10 @@ self.onmessage = function (e) {
                     });
                 });
             });
+            break;
+        case "getAnagrams":
+            ({ sourceWord } = msg);
+            getAnagrams(sourceWord);
             break;
         default:
             console.log("Unexpected message " + msg.type + " sent to dict_worker.js");
@@ -521,5 +525,146 @@ async function getAllMatchingTomeClues(matches) {
 
     // Flatten output
     return results.flat();
+}
+
+/**
+ * Converts a string to a 26-dimensional vector
+ * @param {string} word the word to vectorise
+ * @returns {Uint8Array} the vector equivalent of the word
+ */
+function wordToVector(word) {
+    word = word.toUpperCase();
+    const v = new Uint8Array(26);
+    for (let i = 0; i < word.length; i++) {
+        const code = word.charCodeAt(i) - 65;
+        if (code >= 0 && code < 26) v[code]++;
+    }
+    return v;
+}
+
+/**
+ * Attempts to subtract vector w from vector R, failing if subtraction is negative in any dimension
+ * @param {Uint8Array} R Currently-remaining vector
+ * @param {Uint8Array} w Candidate word vector
+ * @returns {Uint8Array|null} the resulting remaining-letters vector or null if subtraction fails
+ */
+function vSubtractIfPossible(R, w) {
+    const out = new Uint8Array(26);
+    for (let i = 0; i < 26; i++) {
+        const d = R[i] - w[i];
+        if (d < 0) return null;
+        out[i] = d;
+    }
+    return out;
+}
+
+/**
+ * Converts a word's a-z letter counts into a vector
+ * @param {object} row - DB row with a-z counts
+ * @returns {Uint8Array} 26-length vector
+ */
+function rowToVector(row) {
+    const v = new Uint8Array(26);
+    for (let i = 0; i < 26; i++) {
+        const letter = String.fromCharCode(97 + i); // 'a'..'z'
+        v[i] = row[letter] || 0;
+    }
+    return v;
+}
+
+/**
+ * Converts a vector to a string key for memoisation
+ * @param {Uint8Array} v
+ * @returns {string}
+ */
+function vectorKey(v) {
+    let s = "";
+    for (let i = 0; i < 26; i++) {
+        s += String.fromCharCode(65 + i).repeat(v[i]);
+    }
+    return s;
+}
+
+/**
+ * Recursive DFS search
+ * @param {Uint8Array} remaining - letters left
+ * @param {Array} candidates - array of { vector, words }
+ * @param {number} startIndex - index in candidates array to start at
+ * @param {Array} currentSolution - array of candidate indices
+ * @param {Set} deadStates - memoisation set
+ * @param {Array} solutions - collected solutions
+ */
+function search(remaining, candidates, startIndex, currentSolution, deadStates, solutions) {
+    const key = vectorKey(remaining);
+    if (deadStates.has(key)) return;
+
+    if (key.length === 0) {
+        // Base case: no letters left
+        solutions.push([...currentSolution]);
+        return;
+    }
+
+    let found = false;
+
+    for (let i = startIndex; i < candidates.length; i++) {
+        const next = vSubtractIfPossible(remaining, candidates[i].vector);
+        if (!next) continue;
+
+        currentSolution.push(i);
+        search(next, candidates, i, currentSolution, deadStates, solutions); // i, not i+1
+        currentSolution.pop();
+
+        found = true;
+    }
+
+    if (!found) {
+        deadStates.add(key);
+    }
+}
+
+/**
+ * Main entry point
+ * @param {string} sourceWord - already uppercase, no spaces/punctuation
+ * @returns {Promise<Array>} - array of solutions, each solution is array of words
+ */
+async function getAnagrams(sourceWord) {
+    // Convert source word to vector
+    const sourceVec = wordToVector(sourceWord);
+
+    // Load candidate words from Dexie
+    // Pre-filter: only words whose letters are subset of sourceVec
+    const allRows = await db.entries.toArray();
+    const candidates = [];
+    for (const row of allRows) {
+        const vec = rowToVector(row);
+        let fits = true;
+        for (let i = 0; i < 26; i++) {
+            if (vec[i] > sourceVec[i]) {
+                fits = false;
+                break;
+            }
+        }
+        if (fits) {
+            candidates.push({ vector: vec, words: [row.word] });
+        }
+    }
+
+    // Sort candidates lexicographically to enforce combination order
+    candidates.sort((a, b) => a.words[0].localeCompare(b.words[0]));
+
+    const deadStates = new Set();
+    const solutions = [];
+
+    search(sourceVec, candidates, 0, [], deadStates, solutions);
+
+    // Expand candidate indices to actual words
+    const expanded = solutions.map((sol) => sol.map((i) => candidates[i].words[0]));
+
+    self.postMessage({
+        type: "anagramResults",
+        results: expanded,
+    });
+
+    return expanded;
 }
 // #endregion

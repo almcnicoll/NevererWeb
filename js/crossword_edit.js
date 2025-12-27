@@ -274,6 +274,12 @@ $(document).ready(
         // Refresh data
         refreshGrid();
         refreshClueList();
+
+        /*
+        $("#sourceword").on("keyup", function () {
+            dictionary.getAnagrams($(this).val().toUpperCase());
+        });
+        */
     }
 );
 //#endregion

@@ -276,10 +276,26 @@ dictionary.worker.onmessage = function (e) {
             $("#status-bar").html("Full dictionary sync complete");
             dictionary.clues_sync_complete = true;
             break;
+        case "anagramResults":
+            dictionary.showAnagrams(msg.results);
+            break;
         default:
             console.log("Unexpected message " + msg.type + " sent to dict_master.js");
             break;
     }
+};
+// #endregion
+
+// #region ANAGRAM FUNCTIONS
+dictionary.getAnagrams = function (sourceWord) {
+    dictionary.worker.postMessage({
+        type: "getAnagrams",
+        sourceWord: sourceWord,
+    });
+};
+
+dictionary.showAnagrams = function (results) {
+    //
 };
 // #endregion
 
