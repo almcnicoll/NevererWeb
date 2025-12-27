@@ -72,7 +72,7 @@
     ->setBody($form_new_clue->getHtml())
     ->setButtons("Save")
     ->setTrigger("<i class='bi bi-plus-square'></i>")
-    ->setSidebar($new_clue_sidebar->getHTML());
+    ->setSidebar($new_clue_sidebar->getHTML(1));
     echo $modal_new_clue->getMainHtml();
     
     $form_edit_clue = new UI\BootstrapForm('edit-clue');
@@ -98,7 +98,7 @@
     $modal_edit_clue->setTitle('Edit clue')
     ->setBody($form_edit_clue->getHtml())
     ->setButtons("Save")
-    ->setSidebar($edit_clue_sidebar->getHTML());
+    ->setSidebar($edit_clue_sidebar->getHTML(1));
     echo $modal_edit_clue->getMainHtml();
     
     $form_edit_settings = new UI\BootstrapForm('edit-settings');

@@ -54,7 +54,7 @@ namespace UI {
             $this->elements[] = $element;
             return $this;
         }
-        function getHTML() : string {
+        function getHTML($defaultElement = 0) : string {
             $startHTML = <<<END_HTML
             <div class="accordion" id="accordion{$this->name}">
             END_HTML;
@@ -63,7 +63,7 @@ namespace UI {
             END_HTML;
             $middleHTML = '';
             foreach ($this->elements as $k=>$element) {
-                $middleHTML .= $element->getHTML( ($k==0) );
+                $middleHTML .= $element->getHTML( ($k==$defaultElement) );
             }
             return $startHTML . $middleHTML . $endHTML;
         }

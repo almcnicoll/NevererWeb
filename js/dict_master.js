@@ -295,7 +295,8 @@ dictionary.getAnagrams = function (sourceWord) {
 };
 
 dictionary.showAnagrams = function (results) {
-    const rows = results.map((s) => `<tr><td>${s.replaceAll(",", " ")}</td></tr>`).join("");
+    // TODO - MED replace , with space in s
+    const rows = results.map((s) => `<tr><td>${s}</td></tr>`).join("");
     $(".anagram-results-tbody").html(rows);
 };
 // #endregion
