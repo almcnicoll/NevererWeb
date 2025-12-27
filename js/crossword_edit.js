@@ -275,11 +275,9 @@ $(document).ready(
         refreshGrid();
         refreshClueList();
 
-        /*
-        $("#sourceword").on("keyup", function () {
+        $(".anagram-search").on("change", function () {
             dictionary.getAnagrams($(this).val().toUpperCase());
         });
-        */
     }
 );
 //#endregion
@@ -593,6 +591,8 @@ function populateEditForm(data) {
     $("#edit-clue input#edit-clue-col").val(pc.x);
     $("#edit-clue select#edit-clue-orientation").val(pc.orientation);
     $("#edit-clue input#edit-clue-answer").val(c.answer);
+    $("#edit-clue .anagram-search").val(c.answer);
+    $("#edit-clue .anagram-search").trigger("change");
     $("#edit-clue input#edit-clue-answer").data("old-answer", c.answer);
     $("table.word-list tbody td").remove();
     $("#edit-clue-suggested-words-pattern").text(c.answer);

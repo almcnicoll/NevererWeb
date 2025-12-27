@@ -1,6 +1,7 @@
 <?php
     use Crosswords\Crossword, Crosswords\PlacedClue, UI\DisplayMessage;
     use UI\BootstrapAccordion, UI\BootstrapAccordionElement;
+    use UI\SuggestedWordsViewComponent, UI\AnagramFinderViewComponent;
     
     $fatal_error = false;
 
@@ -61,23 +62,11 @@
                     ->setAdditionalAttributes([$save_tome_clue_checked=>$save_tome_clue_checked,$save_tome_clue_disabled=>$save_tome_clue_disabled]); /*->setHelp("Whether to save the clue text in your default dictionary for future use")*/
     $form_new_clue->addField('cryptic-clue')->setLabel('Cryptic clue?')->setClass('border-secondary')->setType('checkbox')->setValue("on")
                     ->setAdditionalAttributes([$cryptic_clue_checked=>$cryptic_clue_checked]); /*->setHelp("Whether the clue is cryptic in nature")*/
-                    $new_clue_sidebar_dictionary = <<<END_HTML
-    <div class="container">
-    <div class="row word-list-row">
-    <table class="table table-hover word-list">
-        <thead>
-            <tr class='table-dark'>
-                <th scope='col' id='new-clue-suggested-words-pattern'></th>
-            </tr>
-        </thead>
-        <tbody id='new-clue-suggested-words-tbody'></tbody>
-    </table>
-    </div>
-    </div>
-    END_HTML;
-    $new_clue_sidebar = new UI\BootstrapAccordion("new_clue")
-		->AddElementByParts("Anagram Finder", "TEST", "anagram")
-		->AddElementByParts("Dictionary", $new_clue_sidebar_dictionary,"dictionary"); // TODO - HIGH here and in edit form, make anagram form functional
+    $new_clue_sidebar_dictionary = UI\SuggestedWordsViewComponent::HTML("new");
+    $new_clue_sidebar_anagram = UI\AnagramFinderViewComponent::HTML("new");
+    $new_clue_sidebar = (new UI\BootstrapAccordion("new_clue"))
+        ->AddElementByParts("Anagram Finder", $new_clue_sidebar_anagram, "anagram")
+        ->AddElementByParts("Dictionary", $new_clue_sidebar_dictionary,"dictionary"); // TODO - HIGH here and in edit form, make anagram form functional
     $modal_new_clue = new UI\BootstrapModal('new-clue');
     $modal_new_clue->setTitle('Add clue')
     ->setBody($form_new_clue->getHtml())
@@ -100,22 +89,10 @@
                     ->setAdditionalAttributes([$save_tome_clue_checked=>$save_tome_clue_checked,$save_tome_clue_disabled=>$save_tome_clue_disabled]); /*->setHelp("Whether to save the clue text in your default dictionary for future use")*/
     $form_edit_clue->addField('cryptic-clue')->setLabel('Cryptic clue?')->setClass('border-secondary')->setType('checkbox')->setValue("on")
                     ->setAdditionalAttributes([$cryptic_clue_checked=>$cryptic_clue_checked]); /*->setHelp("Whether the clue is cryptic in nature")*/
-    $edit_clue_sidebar_dictionary = <<<END_HTML
-    <div class="container">
-    <div class="row word-list-row">
-    <table class="table table-hover word-list">
-        <thead>
-            <tr class='table-dark'>
-                <th scope='col' id='edit-clue-suggested-words-pattern'></th>
-            </tr>
-        </thead>
-        <tbody id='edit-clue-suggested-words-tbody'></tbody>
-    </table>
-    </div>
-    </div>
-    END_HTML;
-    $edit_clue_sidebar = new UI\BootstrapAccordion("edit_clue")
-		->AddElementByParts("Anagram Finder", "TEST", "anagram")
+    $edit_clue_sidebar_dictionary = UI\SuggestedWordsViewComponent::HTML("edit");
+    $edit_clue_sidebar_anagram = UI\AnagramFinderViewComponent::HTML("edit");
+    $edit_clue_sidebar = (new UI\BootstrapAccordion("edit_clue"))
+		->AddElementByParts("Anagram Finder", $edit_clue_sidebar_anagram, "anagram")
 		->AddElementByParts("Dictionary", $edit_clue_sidebar_dictionary,"dictionary");
     $modal_edit_clue = new UI\BootstrapModal('edit-clue');
     $modal_edit_clue->setTitle('Edit clue')
