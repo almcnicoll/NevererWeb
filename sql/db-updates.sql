@@ -362,7 +362,7 @@ CALL PopulateLetterCounts();
 /* UPDATE */
 /* VERSION 27 */
 INSERT INTO `faqs` (`question`,`answer`,`rank`,`created`,`modified`)
-VALUES ("What does 'synchronising words' mean, and why is it taking so long?","There's a bunch of word-based operations which Neverer needs to do to support crossword-making - in particular, looking for words or phrases which match a particular gap in your crossword.<br /><br />Sending these all to the server to query would be (a) slow and (b) costly in terms of server resources. Instead, Neverer downloads a list of words from the server to your local machine.<br /><br />Once those words are stored locally on your machine, Neverer will only need to download any changes, which will most likely be small in number. However, the initial synchronisation could take anything from a few minutes to an hour. The system is useable in the meantime, but a few features will be unavailable.",10,NOW(),NOW());
+VALUES ("What does 'synchronising words' mean, and why is it taking so long?","There's a bunch of word-based operations which Neverer needs to do to support crossword-making - in particular, looking for words or phrases which match a particular gap in your crossword.<br /><br />Sending these all to the server to query would be (a) slow and (b) costly in terms of server resources. Instead, Neverer downloads a list of words from the server to your local machine.<br /><br />Once those words are stored locally on your machine, Neverer will only need to download any changes, which will most likely be small in number. However, the initial synchronisation could take anything from a few minutes to an hour. The system is usable in the meantime, but a few features will be unavailable.",10,NOW(),NOW());
 /* UPDATE */
 /* VERSION 28 */
 /*include 28_idiom_tome.sql*/
@@ -409,3 +409,14 @@ ALTER TABLE `tome_clues` ADD KEY `filter2` (`modified`,`tome_id`,`word`);
 /* UPDATE */
 /* VERSION 37 */
 ALTER TABLE `tome_clues` ADD COLUMN `explanation` VARCHAR(500) DEFAULT NULL AFTER `question`;
+/* UPDATE */
+/* VERSION 38 */
+INSERT INTO `faqs` (`question`,`answer`,`rank`,`created`,`modified`) VALUES
+  ("The site sucks on mobile devices. Are you planning a mobile version?","I'm a developer first and a web designer fifth or sixth: I'm sure there is a way to make it all much slicker on mobile, but I haven't really designed with that in mind. I find it's just about usable, but far from ideal, and there's an item on the 'long list' to work on a mobile-friendly layout.<br /><br />Whether I do this will probably depend in part on whether anyone other than me thinks it would be useful: I don't do much crossword-setting on my phone.",40,NOW(),NOW()),
+  ("Why is the site called the Neverer?","Because I'm a sucker for a truly bad pun.<br /><br />For some reason 'never a cross word' was the title of the first crossword I ever set, and the name stuck.",50,NOW(),NOW()),
+  ("What if I've found a bug?","There's a decent chance that others will find bugs that I haven't.<br /><br />I use github to track all the bugs I find, as well as feature requests: feel free to create an issue here: <a href='https://github.com/almcnicoll/NevererWeb/issues' target='_blank'>https://github.com/almcnicoll/NevererWeb/issues</a>.",3,NOW(),NOW()),
+  ("How can I give feedback?","I'd love to hear from you, but I don't want loads of spam bots picking up my email address, so please send any feedback to *name*@neverer.uk where *name* is the answer to the cryptic clue 'Sign up, submariner!' (4).<br /><br />If your feedback is about a feature request, please raise an issue at <a href='https://github.com/almcnicoll/NevererWeb/issues' target='_blank'>https://github.com/almcnicoll/NevererWeb/issues</a> so I can put it into the workflow.",4,NOW(),NOW());
+/* UPDATE */
+/* VERSION 39 */
+INSERT INTO `faqs` (`question`,`answer`,`rank`,`created`,`modified`) VALUES
+  ("Can people solve puzzles I've set online?","Yes, that's the purpose of the 'Share' link by each crossword in your list. The link you share gives people access to a blank-grid version which they can type into dynamically.<br /><br />It doesn't tell them if they've got answers correct, or provide hints - although a sufficiently determined technical user can find the answers by inspecting the HTML. It's discreet, but not highly secure from that perspective.",5,NOW(),NOW());

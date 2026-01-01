@@ -90,7 +90,7 @@ if (file_exists('sql/db-updates.sql')) {
     // Check if we're already up to date
     $current_version = DbUpdate::highestVersion();
     if ($max_version === $current_version) {
-        pre_die("Your database is up-to-date.");
+        pre_die("Your database is up-to-date (version {$current_version}).");
     }
     // Check if database is "more up-to-date" than file
     if ($current_version > $max_version) {
