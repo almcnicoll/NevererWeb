@@ -296,7 +296,13 @@ dictionary.getAnagrams = function (sourceWord) {
 
 dictionary.showAnagrams = function (results) {
     // TODO - MED replace , with space in s
-    const rows = results.map((s) => `<tr><td>${s}</td></tr>`).join("");
+    const rows = results
+        .map(
+            (s) =>
+                `<tr><td class="suggested-clue-text-item" data-word="${s.join(" ").toLowerCase()}">` +
+                `${s.join(" ").toUpperCase()}</td></tr>`
+        )
+        .join("");
     $(".anagram-results-tbody").html(rows);
 };
 // #endregion

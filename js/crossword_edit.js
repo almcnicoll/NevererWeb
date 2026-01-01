@@ -264,11 +264,20 @@ $(document).ready(
         $("#edit-clue").on("click", "td.suggested-word-list-item", function () {
             $("#edit-clue-answer").val($(this).text());
         });
+        $("#new-clue").on("click", "td.suggested-clue-text-item", function () {
+            $("#new-clue-clue").val((i, v) => v + $(this).text());
+        });
+        $("#edit-clue").on("click", "td.suggested-clue-text-item", function () {
+            $("#edit-clue-clue").val((i, v) => v + $(this).text());
+        });
         $("#new-clue").on("click", "i.tome-clue", function () {
             $("#new-clue-clue").val($(this).attr("title"));
         });
         $("#edit-clue").on("click", "i.tome-clue", function () {
             $("#edit-clue-clue").val($(this).attr("title"));
+        });
+        $(".accordion-item_0").on("shown.bs.collapse", function () {
+            $(this).find(".anagram-search")[0].focus();
         });
 
         // Refresh data
@@ -276,6 +285,10 @@ $(document).ready(
         refreshClueList();
 
         $(".anagram-search").on("change", function () {
+            $(this)
+                .closest("div.container")
+                .find("tbody")
+                .prepend("<tr><td style='font-style:italic;'>searching...</td></tr>");
             dictionary.getAnagrams($(this).val().toUpperCase());
         });
     }

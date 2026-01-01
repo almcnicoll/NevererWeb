@@ -625,7 +625,6 @@ function search(remaining, candidates, startIndex, currentSolution, deadStates, 
 /**
  * Main entry point
  * @param {string} sourceWord - already uppercase, no spaces/punctuation
- * @returns {Promise<Array>} - array of solutions, each solution is array of words
  */
 async function getAnagrams(sourceWord) {
     // Convert source word to vector
@@ -660,11 +659,27 @@ async function getAnagrams(sourceWord) {
     // Expand candidate indices to actual words
     const expanded = solutions.map((sol) => sol.map((i) => candidates[i].words[0]));
 
+    // Sort to fewer, longer words first
+    const ordered = expanded
+        .map((sol) => ({
+            sol,
+            count: sol.length,
+            chars: sol.reduce((s, w) => s + w.length, 0),
+            alpha: sol.join(" "), // stable, readable tie-breaker
+        }))
+        .sort(
+            (a, b) =>
+                a.count - b.count || // 1. fewer words first
+                b.chars - a.chars || // 2. longer total length first
+                a.alpha.localeCompare(b.alpha) // 3. alphabetical
+        )
+        .map((x) => x.sol);
+
     self.postMessage({
         type: "anagramResults",
-        results: expanded,
+        results: ordered,
     });
 
-    return expanded;
+    return;
 }
 // #endregion

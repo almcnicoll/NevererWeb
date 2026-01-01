@@ -18,17 +18,13 @@ namespace UI {
                             <label for="anagramsearchword_{$this->prefix}">Anagrams for:</label>
                         </div>
                         <div class="col-6">
-                            <input class="form-control border-secondary no-mobile-auto anagram-search" id="anagramsearchword_{$this->prefix}" name="anagramsearchword_{$this->prefix}">
+                            <input class="form-control border-secondary no-mobile-auto anagram-search" id="anagramsearchword_{$this->prefix}" name="anagramsearchword_{$this->prefix}" style="text-transform:uppercase;">
                         </div>
                     </div>
                 </div>
-                <div class="row anagram-results-container" style="max-height: 12em; overflow: scroll-y;" id="anagramresults_{$this->prefix}">
+                <div class="row anagram-results-container" id="anagramresults_{$this->prefix}">
                     <table class="table table-hover anagram-list">
-                        <thead>
-                            <tr class='table-dark'>
-                                <th scope='col' id='{$this->prefix}-anagram-results'></th>
-                            </tr>
-                        </thead>
+                        <thead></thead>
                         <tbody id='{$this->prefix}-anagram-results-tbody' class='anagram-results-tbody'></tbody>
                     </table>
                 </div>

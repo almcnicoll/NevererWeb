@@ -15,12 +15,12 @@ namespace UI {
             $this->name = $name;
         }
 
-        function getHTML($shown) : string {
+        function getHTML($shown, $itemkey) : string {
             $show = ($shown) ? "show" : "";
             $expanded = ($shown) ? "true" : "false";
             $collapsed = ($shown) ? "" : "collapsed";
             $output = <<<END_HTML
-                <div class="accordion-item">
+                <div class="accordion-item accordion-item_{$itemkey}" id="accordion-item_{$this->parent->name}_{$itemkey}">
                     <h2 class="accordion-header">
                         <button class="accordion-button {$collapsed}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{$this->name}" aria-expanded="{$expanded}" aria-controls="collapse{$this->name}">
                             {$this->title}
@@ -63,7 +63,7 @@ namespace UI {
             END_HTML;
             $middleHTML = '';
             foreach ($this->elements as $k=>$element) {
-                $middleHTML .= $element->getHTML( ($k==$defaultElement) );
+                $middleHTML .= $element->getHTML( ($k==$defaultElement), $k );
             }
             return $startHTML . $middleHTML . $endHTML;
         }
