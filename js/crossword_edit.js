@@ -260,21 +260,27 @@ $(document).ready(
         $("input#edit-clue-answer").on("change", checkForSuggestWordListRefresh);
         $("#new-clue").on("click", "td.suggested-word-list-item", function () {
             $("#new-clue-answer").val($(this).text());
+            $("#new-clue-answer")[0].focus();
         });
         $("#edit-clue").on("click", "td.suggested-word-list-item", function () {
             $("#edit-clue-answer").val($(this).text());
+            $("#edit-clue-answer")[0].focus();
         });
         $("#new-clue").on("click", "td.suggested-clue-text-item", function () {
             $("#new-clue-clue").val((i, v) => v + $(this).text());
+            $("#new-clue-clue")[0].focus();
         });
         $("#edit-clue").on("click", "td.suggested-clue-text-item", function () {
             $("#edit-clue-clue").val((i, v) => v + $(this).text());
+            $("#edit-clue-clue")[0].focus();
         });
         $("#new-clue").on("click", "i.tome-clue", function () {
             $("#new-clue-clue").val($(this).attr("title"));
+            $("#new-clue-clue")[0].focus();
         });
         $("#edit-clue").on("click", "i.tome-clue", function () {
             $("#edit-clue-clue").val($(this).attr("title"));
+            $("#edit-clue-clue")[0].focus();
         });
         $(".accordion-item_0").on("shown.bs.collapse", function () {
             $(this).find(".anagram-search")[0].focus();
@@ -800,6 +806,16 @@ function checkForSuggestWordListRefresh(e) {
             var parts = id.split("-");
             var context = parts[0];
             refreshSuggestedWordList(context);
+            // Also update anagram field as long as it's visible and equal to old answer
+            var anagramField = $(this).closest("div.modal").find(".anagram-search");
+            if (
+                anagramField.length > 0 &&
+                anagramField.is(":visible") &&
+                (anagramField.val() == oldVal || anagramField.val() == "" || anagramField.val() == null)
+            ) {
+                anagramField.val(newVal);
+                anagramField.trigger("change");
+            }
         }
     }
 }
