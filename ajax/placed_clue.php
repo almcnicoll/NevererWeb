@@ -199,8 +199,10 @@ switch ($action) {
         $c->question = $_POST['clue'];
         $c->explanation = $_POST['explanation'];
         $pc->save();
+        // Only save clues if answer is complete AND clue text is populated
+        $valid_saveable_tomeclue = (strpos($_POST['answer'],'?')===false) && (strlen(trim($_POST['clue']))>0);
         // including TomeClue if appropriate
-        if ($_POST['save-tome-clue']) {
+        if ($_POST['save-tome-clue'] && $valid_saveable_tomeclue) {
             $tc = new TomeClue();
             $tc->tome_id = $user->default_dictionary;
             $tc->user_id = $user->id;
@@ -252,8 +254,10 @@ switch ($action) {
         $clue->question = $_POST['clue'];
         $clue->explanation = $_POST['explanation'];
         $placedClue->save();
+        // Only save clues if answer is complete AND clue text is populated
+        $valid_saveable_tomeclue = (strpos($_POST['answer'],'?')===false) && (strlen(trim($_POST['clue']))>0);
         // including TomeClue if appropriate
-        if ($_POST['save-tome-clue']) {
+        if ($_POST['save-tome-clue'] && $valid_saveable_tomeclue) {
             $tc = new TomeClue();
             $tc->tome_id = $user->default_dictionary;
             $tc->user_id = $user->id;

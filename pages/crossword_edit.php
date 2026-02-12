@@ -66,7 +66,7 @@
     $new_clue_sidebar_anagram = UI\AnagramFinderViewComponent::HTML("new");
     $new_clue_sidebar = (new UI\BootstrapAccordion("new_clue"))
         ->AddElementByParts("Anagram Finder", $new_clue_sidebar_anagram, "anagram")
-        ->AddElementByParts("Dictionary", $new_clue_sidebar_dictionary,"dictionary"); // TODO - HIGH here and in edit form, make anagram form functional
+        ->AddElementByParts("Dictionary", $new_clue_sidebar_dictionary,"dictionary");
     $modal_new_clue = new UI\BootstrapModal('new-clue');
     $modal_new_clue->setTitle('Add clue')
     ->setBody($form_new_clue->getHtml())
