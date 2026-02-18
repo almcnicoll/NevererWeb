@@ -274,11 +274,13 @@ $(document).ready(
             $("#edit-clue-clue").val((i, v) => v + $(this).text());
             $("#edit-clue-clue")[0].focus();
         });
-        $("#new-clue").on("click", "i.tome-clue", function () {
+        $("#new-clue").on("click", "i.tome-clue", function (e) {
+            e.stopPropagation();
             $("#new-clue-clue").val($(this).attr("title"));
             $("#new-clue-clue")[0].focus();
         });
-        $("#edit-clue").on("click", "i.tome-clue", function () {
+        $("#edit-clue").on("click", "i.tome-clue", function (e) {
+            e.stopPropagation();
             $("#edit-clue-clue").val($(this).attr("title"));
             $("#edit-clue-clue")[0].focus();
         });
@@ -297,7 +299,7 @@ $(document).ready(
                 .prepend("<tr><td style='font-style:italic;'>searching...</td></tr>");
             dictionary.getAnagrams($(this).val().toUpperCase());
         });
-    }
+    },
 );
 //#endregion
 
@@ -348,15 +350,15 @@ function updateGridSquares(json) {
             // NB for the data() calls below, we want to set attr() too, so that we can use jQuery attribute selectors later
             sq.data("placed-clue-ids", square.placed_clue_ids.join(",")).attr(
                 "data-placed-clue-ids",
-                square.placed_clue_ids.join(",")
+                square.placed_clue_ids.join(","),
             );
             sq.data("has-across-clue", (square.intersects & 1) > 0).attr(
                 "data-has-across-clue",
-                (square.intersects & 1) > 0
+                (square.intersects & 1) > 0,
             );
             sq.data("has-down-clue", (square.intersects & 2) > 0).attr(
                 "data-has-down-clue",
-                (square.intersects & 2) > 0
+                (square.intersects & 2) > 0,
             );
             var letter = square.letter == "" ? "&nbsp;" : square.letter;
             sq.children(".letter-holder").html(letter);
@@ -410,7 +412,7 @@ function updateClueList(json, removeMissing = true) {
                 clueRow
                     .find(".clue-question")
                     .html(
-                        `<span class="clue-question">${pClue.clue.question}</span><span class="clue-pattern"> ${pClue.clue.pattern}</span>`
+                        `<span class="clue-question">${pClue.clue.question}</span><span class="clue-pattern"> ${pClue.clue.pattern}</span>`,
                     ); // Update question text
             }
             //unusedIds.removeByValue(id); // And remove it from unused list
@@ -444,7 +446,7 @@ function updateClueList(json, removeMissing = true) {
                 newRow
                     .find(".clue-question")
                     .html(
-                        `<span class="clue-question">${pClue.clue.question}</span><span class="clue-pattern"> ${pClue.clue.pattern}</span>`
+                        `<span class="clue-question">${pClue.clue.question}</span><span class="clue-pattern"> ${pClue.clue.pattern}</span>`,
                     ); // Update question text
             }
             if (insertBefore === false) {
@@ -575,7 +577,7 @@ function populateEditForm(data) {
 
     // Parse intersecting clues
     var intCluesList = arr["intersecting"];
-    if (!intCluesList instanceof Array) {
+    if ((!intCluesList) instanceof Array) {
         intCluesList = Array();
     }
     for (var ii = 0; ii < intCluesList.length; ii++) {
@@ -839,7 +841,7 @@ function refreshSuggestedWordList(context) {
             if (!dictionary.entries_sync_complete) {
                 // Offload to server method until dict sync complete
                 $("#new-clue-suggested-words-tbody").html(
-                    "<h5>Retrieving words will be slower while dictionary sync underway</h5>"
+                    "<h5>Retrieving words will be slower while dictionary sync underway</h5>",
                 );
                 const url =
                     root_path + "/tome_entry/*/lookup?domain=ajax" + "&pattern=" + pattern + "&limit=null&offset=null";
@@ -849,7 +851,7 @@ function refreshSuggestedWordList(context) {
                         parsedData,
                         parsedData.length,
                         "#new-clue-suggested-words-tbody",
-                        "table-row"
+                        "table-row",
                     );
                 });
                 return;
@@ -858,7 +860,7 @@ function refreshSuggestedWordList(context) {
                     pattern,
                     pattern.length,
                     "#new-clue-suggested-words-tbody",
-                    "table-row"
+                    "table-row",
                 );
                 break;
             }
@@ -870,7 +872,7 @@ function refreshSuggestedWordList(context) {
             if (!dictionary.entries_sync_complete) {
                 // Offload to server method until dict sync complete
                 $("#edit-clue-suggested-words-tbody").html(
-                    "<h5>Retrieving words will be slower while dictionary sync underway</h5>"
+                    "<h5>Retrieving words will be slower while dictionary sync underway</h5>",
                 );
                 const url =
                     root_path + "/tome_entry/*/lookup?domain=ajax" + "&pattern=" + pattern + "&limit=null&offset=null";
@@ -880,7 +882,7 @@ function refreshSuggestedWordList(context) {
                         parsedData,
                         parsedData.length,
                         "#edit-clue-suggested-words-tbody",
-                        "table-row"
+                        "table-row",
                     );
                 });
                 return;
@@ -889,7 +891,7 @@ function refreshSuggestedWordList(context) {
                     pattern,
                     pattern.length,
                     "#edit-clue-suggested-words-tbody",
-                    "table-row"
+                    "table-row",
                 );
                 break;
             }
