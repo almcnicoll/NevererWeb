@@ -15,7 +15,7 @@
     }
   ],
   "require": {
-    "firebase/php-jwt": "^6.10",
+    "firebase/php-jwt": "^7.0",
     "mpdf/mpdf": "^8.2",
     "google/apiclient": "^2.18"
   },
