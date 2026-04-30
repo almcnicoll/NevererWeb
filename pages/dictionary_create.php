@@ -32,6 +32,12 @@
             $subscription->tome_id = $tome->id;
             $subscription->subscribed = 1;
             $subscription->save();
+            // If this is the user's first dictionary, set it as default
+            if ($user->default_dictionary === null) {
+                $user->default_dictionary = $tome->id;
+                $user->save();
+                $_SESSION['USER'] = serialize($user);
+            }
 
             header("Location: {$config['root_path']}/dictionary/index");
         }
