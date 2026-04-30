@@ -210,11 +210,11 @@ switch ($action) {
             $tc->question = $c->question;
             $tc->explanation = $c->explanation;
             $tc->cryptic = (bool)$_POST['cryptic-clue'];
-            $tc->save();
+            $tc->save(true);
         }
         $_SESSION['save-tome-clue'] = (bool)$_POST['save-tome-clue'];
         $_SESSION['cryptic-clue'] = (bool)$_POST['cryptic-clue'];
-        
+
         // Work out if we need to create other new clues for symmetry
         $additionalClues = $crossword->getNewSymmetryClues($pc);
         foreach($additionalClues as $apc) { 
@@ -265,7 +265,7 @@ switch ($action) {
             $tc->question = $clue->question;
             $tc->explanation = $clue->explanation;
             $tc->cryptic = (bool)$_POST['cryptic-clue'];
-            $tc->save();
+            $tc->save(true);
         }
         $_SESSION['save-tome-clue'] = (bool)$_POST['save-tome-clue'];
         $_SESSION['cryptic-clue'] = (bool)$_POST['cryptic-clue'];
