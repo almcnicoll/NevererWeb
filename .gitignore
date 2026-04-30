@@ -5,3 +5,4 @@ php_errors.log
 *.log
 phpinfo.php
 .vscode/launch.json
+.vs
