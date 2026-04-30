@@ -140,7 +140,7 @@ URLs are parsed by `index.php` using `.htaccess` rewriting into `?params=...`:
 | # | Title | Milestone |
 |---|-------|-----------|
 | ~~#33~~ | ~~Set default dictionary on create~~ | **FIXED** — `pages/dictionary_create.php`: after saving a new Tome, if `$user->default_dictionary` is null, set it to the new tome's id and save the user |
-| #32 | Prompt when there's no default dictionary | Q1 2026 |
+| ~~#32~~ | ~~Prompt when there's no default dictionary~~ | **FIXED** — `pages/crossword_edit.php`: added inline prompt with a link to `/dictionary/create` below the disabled "Save clue to dictionary" checkbox in both new-clue and edit-clue forms |
 | #31 | Ability to filter words in anagram list | Q2 2026 |
 | #30 | New anagram request should abort previous ones | Q1 2026 |
 | #19 | Word definitions | Q1 2026 |

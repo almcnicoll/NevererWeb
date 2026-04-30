@@ -60,7 +60,10 @@
     $form_new_clue->addField('explanation')->setLabel('Explanation')->setClass('border-secondary'); /*->setHelp("An explanation of the working of the clue (optional, will not show on crossword output)")*/
     $form_new_clue->addField('save-tome-clue')->setLabel('Save Clue text to dictionary?')->setClass('border-secondary')->setType('checkbox')->setValue("on")
                     ->setAdditionalAttributes([$save_tome_clue_checked=>$save_tome_clue_checked,$save_tome_clue_disabled=>$save_tome_clue_disabled]); /*->setHelp("Whether to save the clue text in your default dictionary for future use")*/
-    $form_new_clue->addField('cryptic-clue')->setLabel('Cryptic clue?')->setClass('border-secondary')->setType('checkbox')->setValue("on")
+    if (!$tome_clue_saveable) {
+        $form_new_clue->addHtml("<p class='text-muted small'>You don't have a default dictionary set. <a href='{$config['root_path']}/dictionary/create'>Create a dictionary</a> to enable this option.</p>");
+    }
+    $form_new_clue->addField('cryptic-clue')
                     ->setAdditionalAttributes([$cryptic_clue_checked=>$cryptic_clue_checked]); /*->setHelp("Whether the clue is cryptic in nature")*/
     $new_clue_sidebar_dictionary = UI\SuggestedWordsViewComponent::HTML("new");
     $new_clue_sidebar_anagram = UI\AnagramFinderViewComponent::HTML("new");
@@ -87,7 +90,10 @@
     $form_edit_clue->addField('explanation')->setLabel('Explanation')->setClass('border-secondary'); /*->setHelp("An explanation of the working of the clue (optional, will not show on crossword output)")*/
     $form_edit_clue->addField('save-tome-clue')->setLabel('Save Clue text to dictionary?')->setClass('border-secondary')->setType('checkbox')->setValue("on")
                     ->setAdditionalAttributes([$save_tome_clue_checked=>$save_tome_clue_checked,$save_tome_clue_disabled=>$save_tome_clue_disabled]); /*->setHelp("Whether to save the clue text in your default dictionary for future use")*/
-    $form_edit_clue->addField('cryptic-clue')->setLabel('Cryptic clue?')->setClass('border-secondary')->setType('checkbox')->setValue("on")
+    if (!$tome_clue_saveable) {
+        $form_edit_clue->addHtml("<p class='text-muted small'>You don't have a default dictionary set. <a href='{$config['root_path']}/dictionary/create'>Create a dictionary</a> to enable this option.</p>");
+    }
+    $form_edit_clue->addField('cryptic-clue')
                     ->setAdditionalAttributes([$cryptic_clue_checked=>$cryptic_clue_checked]); /*->setHelp("Whether the clue is cryptic in nature")*/
     $edit_clue_sidebar_dictionary = UI\SuggestedWordsViewComponent::HTML("edit");
     $edit_clue_sidebar_anagram = UI\AnagramFinderViewComponent::HTML("edit");
