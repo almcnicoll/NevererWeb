@@ -51,6 +51,8 @@ let eMeta;
 let cMeta;
 const SyncLimit = 100;
 let thisSyncStamp;
+/** @type {boolean} Set to true to abort an in-progress anagram search */
+let abortAnagram = false;
 // #endregion
 
 // #region UTILITY FUNCTIONS
@@ -143,8 +145,12 @@ self.onmessage = function (e) {
                 });
             });
             break;
+        case "abortAnagrams":
+            abortAnagram = true;
+            break;
         case "getAnagrams":
             ({ sourceWord } = msg);
+            abortAnagram = false;
             getAnagrams(sourceWord);
             break;
         default:
@@ -595,6 +601,7 @@ function vectorKey(v) {
  * @param {Array} solutions - collected solutions
  */
 function search(remaining, candidates, startIndex, currentSolution, deadStates, solutions) {
+    if (abortAnagram) return;
     const key = vectorKey(remaining);
     if (deadStates.has(key)) return;
 

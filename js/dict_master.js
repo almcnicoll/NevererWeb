@@ -288,6 +288,10 @@ dictionary.worker.onmessage = function (e) {
 
 // #region ANAGRAM FUNCTIONS
 dictionary.getAnagrams = function (sourceWord) {
+    // Abort any in-progress anagram search before starting a new one
+    dictionary.worker.postMessage({
+        type: "abortAnagrams",
+    });
     dictionary.worker.postMessage({
         type: "getAnagrams",
         sourceWord: sourceWord,
