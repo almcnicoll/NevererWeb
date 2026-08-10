@@ -128,13 +128,21 @@ function loadWorkerScript() {
         importScripts: () => {},
         Dexie: FakeDexie,
         console,
+        setTimeout,
+        clearTimeout,
+        Date,
     };
     vm.createContext(sandbox);
-    // `const db = ...` and `let abortAnagram = ...` are top-level lexical bindings, not
-    // properties of the global object, so they wouldn't normally be reachable from outside
-    // the script. Append a line (same lexical scope, so it can still see them) that copies
-    // the ones tests need onto the sandbox object itself.
-    vm.runInContext(code + "\nthis.db = db;\n", sandbox, { filename: "dict_worker.js" });
+    // `const db = ...` and `let latestAnagramRequestId = ...` are top-level lexical
+    // bindings, not properties of the global object, so they wouldn't normally be
+    // reachable from outside the script. Append a line (same lexical scope, so it can
+    // still see them) that copies the ones tests need onto the sandbox object itself.
+    // `anagramSearchTuning` is copied by reference, so tests CAN mutate its properties
+    // (e.g. to force the yield path without needing a huge candidate set) even though
+    // the binding itself is a const.
+    vm.runInContext(code + "\nthis.db = db; this.anagramSearchTuning = anagramSearchTuning;\n", sandbox, {
+        filename: "dict_worker.js",
+    });
     return { sandbox, posted };
 }
 
@@ -261,6 +269,15 @@ function flush() {
     return new Promise((resolve) => setTimeout(resolve, 0));
 }
 
+/** Repeatedly flushes (real setTimeout(0) ticks) until predicate() is true or maxTicks is reached. */
+async function flushUntil(predicate, maxTicks = 50) {
+    for (let i = 0; i < maxTicks; i++) {
+        if (predicate()) return true;
+        await flush();
+    }
+    return predicate();
+}
+
 module.exports = {
     parseIndexSpec,
     FakeTable,
@@ -271,4 +288,5 @@ module.exports = {
     makeFakeBootstrap,
     toPlain,
     flush,
+    flushUntil,
 };

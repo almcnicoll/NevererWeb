@@ -58,8 +58,31 @@ let eMeta;
 let cMeta;
 const SyncLimit = 100;
 let thisSyncStamp;
-/** @type {boolean} Set to true to abort an in-progress anagram search */
-let abortAnagram = false;
+/**
+ * Identifies the most recently requested anagram search. Each call to getAnagrams()
+ * claims the next value; search() periodically compares the token it was called with
+ * against this to detect that a newer request has superseded it. Using an incrementing
+ * identity (instead of a shared "abort" boolean that every new request has to reset)
+ * means a new request can never accidentally un-abort an older, still in-flight one -
+ * see getAnagrams() and the "abortAnagrams"/"getAnagrams" cases below.
+ * @type {number}
+ */
+let latestAnagramRequestId = 0;
+/**
+ * Tuning for how often search() checks whether it's been superseded and, if so, hands
+ * control back to the event loop (via setTimeout) so a queued newer request actually
+ * gets a chance to run and bump latestAnagramRequestId. search() is a plain synchronous
+ * recursion, so without this, the worker can't process ANY new message - including an
+ * abort - until the current search finishes on its own.
+ * Exposed as a mutable object (rather than plain consts) so tests can dial the
+ * thresholds down without needing a huge candidate set to exercise the yield path.
+ */
+const anagramSearchTuning = {
+    /** Only bother checking the clock every N recursive calls (Date.now() isn't free either) */
+    yieldCheckStride: 500,
+    /** Yield once we've been running uninterrupted for about this long */
+    yieldAfterMs: 40,
+};
 // #endregion
 
 // #region UTILITY FUNCTIONS
@@ -153,11 +176,11 @@ self.onmessage = function (e) {
             });
             break;
         case "abortAnagrams":
-            abortAnagram = true;
+            // Supersede whatever's running (or about to run) without starting a new search.
+            latestAnagramRequestId++;
             break;
         case "getAnagrams":
             ({ sourceWord } = msg);
-            abortAnagram = false;
             getAnagrams(sourceWord);
             break;
         default:
@@ -599,16 +622,41 @@ function vectorKey(v) {
 }
 
 /**
- * Recursive DFS search
+ * Resolves once control has been handed back to the event loop, so any worker messages
+ * queued up while search() was running (in particular a newer getAnagrams/abortAnagrams
+ * request) get processed. A plain microtask (e.g. `await Promise.resolve()`) is NOT
+ * enough here: the microtask queue is always drained to completion before the next
+ * macrotask (like a queued postMessage event) is picked up, so it would never actually
+ * let a pending "abort" message through. setTimeout forces a real macrotask boundary.
+ * @returns {Promise<void>}
+ */
+function yieldToEventLoop() {
+    return new Promise((resolve) => setTimeout(resolve, 0));
+}
+
+/**
+ * Recursive DFS search. Periodically checks (and, if it's been running a while, yields
+ * so the worker can receive and act on) whether `requestId` has been superseded by a
+ * newer anagram request, per `latestAnagramRequestId`.
  * @param {Uint8Array} remaining - letters left
  * @param {Array} candidates - array of { vector, words }
  * @param {number} startIndex - index in candidates array to start at
  * @param {Array} currentSolution - array of candidate indices
  * @param {Set} deadStates - memoisation set
  * @param {Array} solutions - collected solutions
+ * @param {number} requestId - the id this call belongs to (see getAnagrams)
+ * @param {{count: number, lastYield: number}} pace - shared step/timing counters for yield pacing
  */
-function search(remaining, candidates, startIndex, currentSolution, deadStates, solutions) {
-    if (abortAnagram) return;
+async function search(remaining, candidates, startIndex, currentSolution, deadStates, solutions, requestId, pace) {
+    if (requestId !== latestAnagramRequestId) return; // superseded
+
+    pace.count++;
+    if (pace.count % anagramSearchTuning.yieldCheckStride === 0 && Date.now() - pace.lastYield >= anagramSearchTuning.yieldAfterMs) {
+        await yieldToEventLoop();
+        pace.lastYield = Date.now();
+        if (requestId !== latestAnagramRequestId) return; // may have been superseded while paused
+    }
+
     const key = vectorKey(remaining);
     if (deadStates.has(key)) return;
 
@@ -625,10 +673,12 @@ function search(remaining, candidates, startIndex, currentSolution, deadStates, 
         if (!next) continue;
 
         currentSolution.push(i);
-        search(next, candidates, i, currentSolution, deadStates, solutions); // i, not i+1
+        await search(next, candidates, i, currentSolution, deadStates, solutions, requestId, pace); // i, not i+1
         currentSolution.pop();
 
         found = true;
+
+        if (requestId !== latestAnagramRequestId) return; // stop scanning siblings too, once superseded
     }
 
     if (!found) {
@@ -637,16 +687,23 @@ function search(remaining, candidates, startIndex, currentSolution, deadStates, 
 }
 
 /**
- * Main entry point
+ * Main entry point. Each call claims the next latestAnagramRequestId and carries that
+ * id through the whole async pipeline (db fetch -> search -> postMessage), bailing out
+ * early at each stage if a newer request has since been made - see search() above and
+ * the "abortAnagrams"/"getAnagrams" message cases.
  * @param {string} sourceWord - already uppercase, no spaces/punctuation
  */
 async function getAnagrams(sourceWord) {
+    const requestId = ++latestAnagramRequestId;
+
     // Convert source word to vector
     const sourceVec = wordToVector(sourceWord);
 
     // Load candidate words from Dexie
     // Pre-filter: only words whose letters are subset of sourceVec
     const allRows = await db.entries.toArray();
+    if (requestId !== latestAnagramRequestId) return; // superseded while we were fetching
+
     const candidates = [];
     for (const row of allRows) {
         const vec = rowToVector(row);
@@ -667,8 +724,10 @@ async function getAnagrams(sourceWord) {
 
     const deadStates = new Set();
     const solutions = [];
+    const pace = { count: 0, lastYield: Date.now() };
 
-    search(sourceVec, candidates, 0, [], deadStates, solutions);
+    await search(sourceVec, candidates, 0, [], deadStates, solutions, requestId, pace);
+    if (requestId !== latestAnagramRequestId) return; // superseded during the search itself
 
     // Expand candidate indices to actual words
     const expanded = solutions.map((sol) => sol.map((i) => candidates[i].words[0]));
