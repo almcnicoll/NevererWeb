@@ -35,7 +35,7 @@ function DeleteTome(e) {
   // Get tome_id
   let tome_id = $(e.currentTarget).data("id");
   if (tome_id == null) {
-    alert("Could not delete dictionary. Please try again later.");
+    makeToast("Could not delete dictionary. Please try again later.", "error");
     return;
   }
   // Send request
@@ -65,7 +65,7 @@ function ReportOnTomeDelete(jqXHR, textStatus) {
 function SetDefaultDictionary(e) {
   let tome_id = $(e.currentTarget).attr("value");
   if (tome_id == null) {
-    alert("Could not set default dictionary. Please try again later.");
+    makeToast("Could not set default dictionary. Please try again later.", "error");
     return;
   }
   $("html, html *").css("cursor", "wait"); // Wait cursor

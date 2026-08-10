@@ -664,7 +664,7 @@ function createClue() {
     // Now fire off the request
     var url = root_path + "/placed_clue/*/create/" + crossword_id + "?domain=ajax";
     var formData = serializeForm("#new-clue form", "new-clue-");
-    makeAjaxCall("post", url, formData, refreshAll);
+    makeAjaxCall("post", url, formData, refreshAll, displayAjaxError);
 
     // If all else is fine, hide the modal
     bootstrap.Modal.getInstance(document.getElementById("new-clue")).hide();
@@ -704,7 +704,7 @@ function editClue() {
     // Now fire off the request
     var url = root_path + "/placed_clue/*/update/" + id + "?domain=ajax";
     var formData = serializeForm("#edit-clue form", "edit-clue-");
-    makeAjaxCall("post", url, formData, refreshAll);
+    makeAjaxCall("post", url, formData, refreshAll, displayAjaxError);
 
     // If all else is fine, hide the modal
     bootstrap.Modal.getInstance(document.getElementById("edit-clue")).hide();
@@ -756,7 +756,7 @@ function editSettings() {
     // Now fire off the request
     var url = root_path + "/crossword/*/update/" + id + "?domain=ajax";
     var formData = serializeForm("#edit-settings form", "edit-settings-");
-    makeAjaxCall("post", url, formData, refreshAll);
+    makeAjaxCall("post", url, formData, refreshAll, displayAjaxError);
 
     // If all else is fine, hide the modal
     bootstrap.Modal.getInstance(document.getElementById("edit-settings")).hide();
@@ -1107,7 +1107,7 @@ function gridSquareMenuClickHandler(eventObject) {
             makeAjaxCall("post", url, null, refreshAll, displayAjaxError);
             break;
         default:
-            alert("Not yet implemented!");
+            makeToast("Not yet implemented!", "warning");
             break;
     }
     // Hide menu

@@ -11,7 +11,7 @@ deleteHandler.reportOnDelete = function (jqXHR, textStatus) {
 deleteHandler.deleteCrossword = function () {
   // Check we've specified an id
   if (deleteHandler.idToDelete == null) {
-    alert("Could not delete crossword. Please try again later.");
+    makeToast("Could not delete crossword. Please try again later.", "error");
     return;
   }
   deleteHandler.url =
