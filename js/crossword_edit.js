@@ -292,12 +292,13 @@ $(document).ready(
         refreshGrid();
         refreshClueList();
 
-        $(".anagram-search").on("change", function () {
-            $(this)
-                .closest("div.container")
-                .find("tbody")
-                .prepend("<tr><td style='font-style:italic;'>searching...</td></tr>");
-            dictionary.getAnagrams($(this).val().toUpperCase());
+        $(".anagram-search, .anagram-exclude").on("change", function () {
+            var $container = $(this).closest("div.container");
+            var sourceWord = $container.find(".anagram-search").val().toUpperCase();
+            if (sourceWord.length === 0) return; // nothing to search for yet
+            var excludeWords = dictionary.parseExcludeWords($container.find(".anagram-exclude").val());
+            $container.find("tbody").prepend("<tr><td style='font-style:italic;'>searching...</td></tr>");
+            dictionary.getAnagrams(sourceWord, excludeWords);
         });
     },
 );

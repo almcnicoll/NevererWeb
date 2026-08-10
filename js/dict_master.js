@@ -287,7 +287,12 @@ dictionary.worker.onmessage = function (e) {
 // #endregion
 
 // #region ANAGRAM FUNCTIONS
-dictionary.getAnagrams = function (sourceWord) {
+/**
+ * Requests anagrams of sourceWord from the worker.
+ * @param {string} sourceWord - the word to find anagrams of
+ * @param {string[]} [excludeWords] - words to leave out of the results entirely
+ */
+dictionary.getAnagrams = function (sourceWord, excludeWords = []) {
     // Abort any in-progress anagram search before starting a new one
     dictionary.worker.postMessage({
         type: "abortAnagrams",
@@ -295,7 +300,21 @@ dictionary.getAnagrams = function (sourceWord) {
     dictionary.worker.postMessage({
         type: "getAnagrams",
         sourceWord: sourceWord,
+        excludeWords: excludeWords,
     });
+};
+
+/**
+ * Splits a free-text "exclude words" field into individual uppercase words.
+ * Accepts space- and/or comma-separated input.
+ * @param {string} text
+ * @returns {string[]}
+ */
+dictionary.parseExcludeWords = function (text) {
+    return (text || "")
+        .split(/[\s,]+/)
+        .map((w) => w.trim().toUpperCase())
+        .filter((w) => w.length > 0);
 };
 
 dictionary.showAnagrams = function (results) {

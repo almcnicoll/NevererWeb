@@ -180,8 +180,8 @@ self.onmessage = function (e) {
             latestAnagramRequestId++;
             break;
         case "getAnagrams":
-            ({ sourceWord } = msg);
-            getAnagrams(sourceWord);
+            ({ sourceWord, excludeWords } = msg);
+            getAnagrams(sourceWord, excludeWords);
             break;
         default:
             console.log("Unexpected message " + msg.type + " sent to dict_worker.js");
@@ -692,20 +692,24 @@ async function search(remaining, candidates, startIndex, currentSolution, deadSt
  * early at each stage if a newer request has since been made - see search() above and
  * the "abortAnagrams"/"getAnagrams" message cases.
  * @param {string} sourceWord - already uppercase, no spaces/punctuation
+ * @param {string[]} [excludeWords] - words to leave out of the candidate pool entirely,
+ *   so they (and any solution that would have used them) never appear in the results
  */
-async function getAnagrams(sourceWord) {
+async function getAnagrams(sourceWord, excludeWords = []) {
     const requestId = ++latestAnagramRequestId;
+    const excluded = new Set((excludeWords || []).map((w) => w.toUpperCase()));
 
     // Convert source word to vector
     const sourceVec = wordToVector(sourceWord);
 
     // Load candidate words from Dexie
-    // Pre-filter: only words whose letters are subset of sourceVec
+    // Pre-filter: only words whose letters are subset of sourceVec, and not excluded
     const allRows = await db.entries.toArray();
     if (requestId !== latestAnagramRequestId) return; // superseded while we were fetching
 
     const candidates = [];
     for (const row of allRows) {
+        if (excluded.has(row.word.toUpperCase())) continue;
         const vec = rowToVector(row);
         let fits = true;
         for (let i = 0; i < 26; i++) {

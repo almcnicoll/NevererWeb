@@ -76,6 +76,39 @@ test("getAnagrams: exact single-candidate match returns that one solution", asyn
     assert.deepEqual(toPlain(msg.results), [["DOG"]]);
 });
 
+test("getAnagrams: excludeWords (#31) removes matching candidates from the pool entirely", async () => {
+    const { sandbox, posted } = loadWorkerScript();
+    sandbox.db.entries.rows = [makeEntry("A"), makeEntry("AT"), makeEntry("T")];
+
+    await sandbox.getAnagrams("AT", ["AT"]);
+
+    const msg = posted.find((m) => m.type === "anagramResults");
+    // "AT" itself is gone, and any solution that would have needed it - here there
+    // isn't one, but the point is the excluded word can never appear in output
+    assert.deepEqual(toPlain(msg.results), [["A", "T"]]);
+});
+
+test("getAnagrams: excludeWords is case-insensitive and can knock out an entire solution", async () => {
+    const { sandbox, posted } = loadWorkerScript();
+    sandbox.db.entries.rows = [makeEntry("A"), makeEntry("AT"), makeEntry("T")];
+
+    await sandbox.getAnagrams("AT", ["a", "t"]); // lowercase input, e.g. straight from a text box
+
+    const msg = posted.find((m) => m.type === "anagramResults");
+    // both "A" and "T" excluded -> the two-word solution can't be built; only "AT" survives
+    assert.deepEqual(toPlain(msg.results), [["AT"]]);
+});
+
+test("getAnagrams: an empty/omitted excludeWords list behaves exactly as before", async () => {
+    const { sandbox, posted } = loadWorkerScript();
+    sandbox.db.entries.rows = [makeEntry("A"), makeEntry("AT"), makeEntry("T")];
+
+    await sandbox.getAnagrams("AT", []);
+
+    const msg = posted.find((m) => m.type === "anagramResults");
+    assert.deepEqual(toPlain(msg.results), [["AT"], ["A", "T"]]);
+});
+
 test("getAnagrams via the message interface (single request) completes and posts once", async () => {
     const { sandbox, posted } = loadWorkerScript();
     sandbox.db.entries.rows = [makeEntry("A"), makeEntry("AT"), makeEntry("T")];

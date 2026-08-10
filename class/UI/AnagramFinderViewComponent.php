@@ -22,6 +22,16 @@ namespace UI {
                         </div>
                     </div>
                 </div>
+                <div class="row">
+                    <div class="form-group mb-3">
+                        <div class="col-6">
+                            <label for="anagramexclude_{$this->prefix}">Exclude words:</label>
+                        </div>
+                        <div class="col-6">
+                            <input class="form-control border-secondary no-mobile-auto anagram-exclude" id="anagramexclude_{$this->prefix}" name="anagramexclude_{$this->prefix}" style="text-transform:uppercase;" placeholder="e.g. CAT DOG" title="Space or comma-separated words to leave out of the results">
+                        </div>
+                    </div>
+                </div>
                 <div class="row anagram-results-container" id="anagramresults_{$this->prefix}">
                     <table class="table table-hover anagram-list">
                         <thead></thead>
