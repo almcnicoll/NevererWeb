@@ -44,10 +44,11 @@
 <!-- MY DICTIONARIES -->
 <div class='card text-bg-dark'>
     <div class='card-body'>
-        <div class="d-grid gap-2 d-md-block">
-            <h2 class='card-title'>My Dictionaries
-                <a class="btn btn-primary mb-1 col-1" href="<?= $config['root_path'] ?>/dictionary/create">+ New</a>
-            </h2>
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <h2 class="card-title mb-0">My Dictionaries</h2>
+            <div class="d-grid gap-2 d-md-flex">
+                <a class="btn btn-primary" href="<?= $config['root_path'] ?>/dictionary/create">+ New</a>
+            </div>
         </div>
         <?php        
         if (count($mine) == 0) {

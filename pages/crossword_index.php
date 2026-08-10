@@ -81,11 +81,12 @@ if (count($my_crosswords)==0) {
     // At least one crossword of our own
 ?>
 
-        <div class="d-grid gap-2 d-md-block">
-            <h2 class='card-title'>Your crosswords
-                <a class="btn btn-primary mb-1 col-1" href="<?= $config['root_path'] ?>/crossword/create">+ New</a>
-                <a class="btn btn-success mb-1 col-1" href="<?= $config['root_path'] ?>/crossword/import">+ Import</a>
-            </h2>
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <h2 class="card-title mb-0">Your crosswords</h2>
+            <div class="d-grid gap-2 d-md-flex">
+                <a class="btn btn-primary" href="<?= $config['root_path'] ?>/crossword/create">+ New</a>
+                <a class="btn btn-success" href="<?= $config['root_path'] ?>/crossword/import">+ Import</a>
+            </div>
         </div>
 
 
