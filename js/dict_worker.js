@@ -32,6 +32,13 @@ db.version(3).stores({
     clues: "id, word, tome_id, user_id, date_added, question, cryptic, [word+tome_id]",
     sync_meta: "key, last_sync, last_offset",
 });
+// Version 4: restore tome_id index on entries (needed for deletion by tome)
+db.version(4).stores({
+    tomes: "id, name, source_type, source_format, writeable, user_id, last_updated",
+    entries: "id, word, bare_letters, length, [length+bare_letters], tome_id",
+    clues: "id, word, tome_id, user_id, date_added, question, cryptic, [word+tome_id]",
+    sync_meta: "key, last_sync, last_offset",
+});
 
 // #endregion
 

@@ -17,6 +17,7 @@ namespace UI {
         public mixed $tag_attributes = [];
         public string $style_preset = '';
         public int $column = 1;
+        public string $after_html = '';
 
         /**
          * Creates the field
@@ -126,6 +127,17 @@ namespace UI {
         }
 
         /**
+         * Sets HTML to be rendered immediately after this field (still inside its wrapping div),
+         * e.g. a contextual note - unlike BootstrapForm::addHtml(), which always renders above
+         * every field regardless of when it's called.
+         * @return BootstrapFormField the object itself, for method chaining
+         */
+        function setAfterHtml(string $html) : BootstrapFormField {
+            $this->after_html = $html;
+            return $this;
+        }
+
+        /**
          * Sets additional attributes for the <input> tag
          * @return BootstrapFormField the object itself, for method chaining
          */
@@ -200,6 +212,7 @@ namespace UI {
             $div_start
             $labelled_input_tag
             $help_text
+            {$this->after_html}
             $div_end
             END_HTML;
             return $html;

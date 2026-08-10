@@ -311,6 +311,90 @@ dictionary.showAnagrams = function (results) {
 };
 // #endregion
 
+// #region DEFINITIONS
+/** Cache of word definitions keyed by lowercase word */
+dictionary.definitionCache = {};
+
+/**
+ * Fetches a definition for the given word from the Free Dictionary API.
+ * Results are cached to avoid repeat network calls.
+ * @param {string} word - The word to define (case-insensitive)
+ * @param {function(string): void} callback - Called with an HTML string of the definition
+ */
+dictionary.getDefinition = function (word, callback) {
+    const key = word.toLowerCase();
+    if (dictionary.definitionCache[key] !== undefined) {
+        callback(dictionary.definitionCache[key]);
+        return;
+    }
+    $.getJSON("https://api.dictionaryapi.dev/api/v2/entries/en/" + encodeURIComponent(key))
+        .done(function (data) {
+            const lines = [];
+            if (data && data.length) {
+                const entry = data[0];
+                (entry.meanings || []).slice(0, 3).forEach(function (meaning) {
+                    const def = meaning.definitions && meaning.definitions[0];
+                    if (def) {
+                        lines.push("<em>" + meaning.partOfSpeech + "</em>: " + def.definition);
+                    }
+                });
+            }
+            const html = lines.length ? lines.join("<br>") : "No definition found.";
+            dictionary.definitionCache[key] = html;
+            callback(html);
+        })
+        .fail(function () {
+            const html = "No definition found.";
+            dictionary.definitionCache[key] = html;
+            callback(html);
+        });
+};
+
+/**
+ * Attaches definition popovers to suggested-word-list-item cells via event delegation.
+ * Call once after the document is ready.
+ */
+dictionary.initDefinitionPopovers = function () {
+    // NB - this app loads plain bootstrap.bundle.min.js alongside jQuery (see index.php),
+    // not a jQuery-Bootstrap plugin bridge, so popovers must go through the vanilla
+    // bootstrap.Popover API (same convention as the bootstrap.Modal usage elsewhere,
+    // e.g. crossword_edit.js) rather than $(...).popover(...).
+    $(document).on("mouseenter", "td.suggested-word-list-item", function () {
+        const el = this;
+        let pop = bootstrap.Popover.getInstance(el);
+        if (pop) {
+            pop.show();
+            return;
+        }
+        const word = $(el).text().trim().replace(/\s+/g, " ");
+        // Initialise with a loading message, then update once data arrives
+        pop = new bootstrap.Popover(el, {
+            content: "Loading…",
+            html: true,
+            trigger: "manual",
+            placement: "right",
+            container: "body",
+        });
+        pop.show();
+        dictionary.getDefinition(word, function (html) {
+            const instance = bootstrap.Popover.getInstance(el);
+            if (instance) {
+                instance._config.content = html;
+                // Update the visible popover body if it is still showing
+                const tip = instance.tip;
+                if (tip) {
+                    const body = tip.querySelector(".popover-body");
+                    if (body) body.innerHTML = html;
+                }
+            }
+        });
+    }).on("mouseleave", "td.suggested-word-list-item", function () {
+        const pop = bootstrap.Popover.getInstance(this);
+        if (pop) pop.hide();
+    });
+};
+// #endregion
+
 // #region DOCUMENT READY
 /**
  * Initiates the sync process when the DOM is ready.
@@ -320,5 +404,6 @@ dictionary.showAnagrams = function (results) {
  */
 $(document).ready(function () {
     dictionary.multiPartInit(["tomeList", "syncMetadata"], dictionary.initReturn);
+    dictionary.initDefinitionPopovers();
 });
 // #endregion

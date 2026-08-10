@@ -368,7 +368,13 @@ namespace Basic {
                 // Create record
                 $sql = "INSERT INTO `".static::$tableName."` (`".implode('`,`',static::$fields)."`) VALUES (".implode(',',$insert_placeholders).") ";
                 if ($onDuplicateKeyUpdate) {
-                    $sql .= "ON DUPLICATE KEY UPDATE " . implode(', ', array_map(fn($f) => "`$f` = VALUES(`$f`)", static::$fields));
+                    // Must exclude 'id': it's inserted as NULL for a fresh row, and MySQL resolves
+                    // VALUES(id) to the freshly-generated AUTO_INCREMENT value (not NULL) by the time
+                    // ON DUPLICATE KEY UPDATE runs - so including it silently reassigns the conflicting
+                    // row's primary key instead of updating it in place. Also exclude 'created' so a
+                    // conflict-triggered update doesn't reset the original creation timestamp.
+                    $updateFields = array_diff(static::$fields, ['id', 'created']);
+                    $sql .= "ON DUPLICATE KEY UPDATE " . implode(', ', array_map(fn($f) => "`$f` = VALUES(`$f`)", $updateFields));
                 }
             } else {
                 // Update record

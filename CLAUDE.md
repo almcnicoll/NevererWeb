@@ -143,7 +143,7 @@ URLs are parsed by `index.php` using `.htaccess` rewriting into `?params=...`:
 | ~~#32~~ | ~~Prompt when there's no default dictionary~~ | **FIXED** — `pages/crossword_edit.php`: added inline prompt with a link to `/dictionary/create` below the disabled "Save clue to dictionary" checkbox in both new-clue and edit-clue forms |
 | #31 | Ability to filter words in anagram list | Q2 2026 |
 | ~~#30~~ | ~~New anagram request should abort previous ones~~ | **FIXED** — `js/dict_worker.js`: added `abortAnagram` flag checked at top of recursive `search()`; new `abortAnagrams` message type sets it. `js/dict_master.js`: `dictionary.getAnagrams()` now sends `abortAnagrams` before each new `getAnagrams` message |
-| #19 | Word definitions | Q1 2026 |
+| ~~#19~~ | ~~Word definitions~~ | **FIXED** — `js/dict_master.js`: added `dictionary.getDefinition()` using the Free Dictionary API (`dictionaryapi.dev`) with a local cache, and `dictionary.initDefinitionPopovers()` which attaches Bootstrap popovers via event delegation on `td.suggested-word-list-item` cells — showing definitions on mouseover |
 | #14 | Mobile interface | Q1 2026 |
 | #8  | Inline JS replacement library | Q1 2026 |
 | #7  | Toasts for error/confirmation messages | Q2 2026 |
