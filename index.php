@@ -4,6 +4,7 @@ require_once('autoload.php');
 
 use Logging\LoggedError;
 use Security\User, Security\PageInfo;
+use UI\DataTransfer;
 
 // Do some resolving of requests relative to root before any other routing
 $root_marker = '~ROOT~';
@@ -157,12 +158,8 @@ if (!isset($_SESSION['PAGE_LOADCOUNTS'])) {
         integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
     <link href="<?= $config['root_path'] ?>/css/app.css" rel="stylesheet">
     <link href="<?= $config['root_path'] ?>/css/print.css" rel="stylesheet" media="print">
+    <?php DataTransfer::emit(['root_path' => $config['root_path']]); ?>
     <script type='text/javascript'>
-    // Variables from PHP script
-    <?php
-        // TODO #8 - MEDIUM this is going to start failing when CSP becomes common - write a short library for getting variables into application/json and parsing them in JS
-        echo "\t\tvar root_path = \"{$config['root_path']}\";\n";
-        ?>
     // Stub for debug (stub functions so that code can call these without throwing exceptions)
     let debugPane = {};
     debugPane.print = function() {};

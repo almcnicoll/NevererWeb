@@ -151,6 +151,7 @@ function loadWorkerScript() {
 function makeFakeJQuery() {
     const dataStore = new Map(); // el (any object identity) -> {key: val}
     const delegated = []; // {event, selector, handler}
+    const selectorElements = new Map(); // selector string -> array of fake elements
     function ensure(el) {
         if (!dataStore.has(el)) dataStore.set(el, {});
         return dataStore.get(el);
@@ -186,7 +187,21 @@ function makeFakeJQuery() {
         };
         return self;
     }
-    const $ = (el) => wrap(el);
+    function wrapCollection(elements) {
+        return {
+            length: elements.length,
+            each(fn) {
+                elements.forEach((el, i) => fn.call(el, i, el));
+                return this;
+            },
+        };
+    }
+    const $ = (selectorOrEl) => {
+        if (typeof selectorOrEl === "string" && selectorElements.has(selectorOrEl)) {
+            return wrapCollection(selectorElements.get(selectorOrEl));
+        }
+        return wrap(selectorOrEl);
+    };
     $.getJSON = () => {
         throw new Error("$.getJSON must be stubbed per-test");
     };
@@ -194,6 +209,10 @@ function makeFakeJQuery() {
     $.__readyCallbacks = [];
     $.__setText = (el, text) => {
         ensure(el).__text = text;
+    };
+    /** Registers fake elements to be returned by $("<selector>"), for code that does $(selector).each(...) */
+    $.__registerElements = (selector, elements) => {
+        selectorElements.set(selector, elements);
     };
     return $;
 }
@@ -278,12 +297,31 @@ async function flushUntil(predicate, maxTicks = 50) {
     return predicate();
 }
 
+/**
+ * Loads js/app.js into a fresh vm context. `window` is a self-reference (as it is in a
+ * real browser's global scope) so `window.foo = 1` inside the script is observable as
+ * sandbox.foo afterwards.
+ * @returns {{sandbox: object}}
+ */
+function loadAppScript() {
+    const code = fs.readFileSync(path.join(JS_DIR, "app.js"), "utf8");
+    const sandbox = {
+        $: makeFakeJQuery(),
+        console,
+    };
+    sandbox.window = sandbox;
+    vm.createContext(sandbox);
+    vm.runInContext(code, sandbox, { filename: "app.js" });
+    return { sandbox };
+}
+
 module.exports = {
     parseIndexSpec,
     FakeTable,
     FakeDexie,
     loadWorkerScript,
     loadMasterScript,
+    loadAppScript,
     makeFakeJQuery,
     makeFakeBootstrap,
     toPlain,

@@ -2,6 +2,7 @@
     use Crosswords\Crossword, Crosswords\PlacedClue, UI\DisplayMessage;
     use UI\BootstrapAccordion, UI\BootstrapAccordionElement;
     use UI\SuggestedWordsViewComponent, UI\AnagramFinderViewComponent;
+    use UI\DataTransfer;
     
     $fatal_error = false;
 
@@ -133,13 +134,13 @@
 
 
 <!-- Set vars -->
-<script type="text/javascript">
 <?php
-    echo "var root_path = \"{$config['root_path']}\";\n";
-    echo "var crossword_id = {$crossword->id};\n";
-    echo "var currentUser = {$user->id};\n";
+    DataTransfer::emit([
+        'root_path' => $config['root_path'],
+        'crossword_id' => $crossword->id,
+        'currentUser' => $user->id,
+    ]);
 ?>
-</script>
 <!-- Dictionary mgmt -->
 <script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/dexie/4.0.8/dexie.min.js'></script>
 <script type="text/javascript" src='~ROOT~/js/class/Tome.js'></script>

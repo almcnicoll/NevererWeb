@@ -1,5 +1,6 @@
 <?php
 use Crosswords\Crossword;
+use UI\DataTransfer;
 ?>
 <h2 class="text-center">Great! Now share the love...</h2>
 <?php
@@ -26,12 +27,7 @@ if (!isset($params[0])) {
     }
 }
 
-echo <<<END_SCRIPTS
-<!-- Set variable -->
-<script type='text/javascript'>
-if (typeof(root_path) === 'undefined') { var root_path = "{$config['root_path']}"; }
-</script>
-END_SCRIPTS;
+DataTransfer::emit(['root_path' => $config['root_path']]);
 
 // Display error messages
 if (count($error_messages)>0) {

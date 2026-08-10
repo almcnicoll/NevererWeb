@@ -1,5 +1,6 @@
 <?php
 use Crosswords\Crossword;
+use UI\DataTransfer;
 
 $error_messages = [];
 if (isset($_REQUEST['error_message'])) {
@@ -11,11 +12,8 @@ if (isset($_REQUEST['newname'])) {
     $user->save();
 }
 
+DataTransfer::emit(['root_path' => $config['root_path']]);
 echo <<<END_SCRIPTS
-<!-- Set variable -->
-<script type='text/javascript'>
-if (typeof(root_path) === 'undefined') { var root_path = "{$config['root_path']}"; }
-</script>
 <!-- Include crossword-delete script -->
 <script src='js/delete_handler.js'></script>
 END_SCRIPTS;

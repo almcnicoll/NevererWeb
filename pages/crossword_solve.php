@@ -1,5 +1,6 @@
 <?php
     use Crosswords\Crossword, Crosswords\PlacedClue, UI\DisplayMessage;
+    use UI\DataTransfer;
     
     $fatal_error = false;
 
@@ -51,16 +52,13 @@
 
 <!-- Set vars -->
 <?php
-echo '<script type="application/json" class="data-transfer" data-scope="window">';
-    $data = [
+    DataTransfer::emit([
         'root_path' => $config['root_path'],
         'crossword_id' => $crossword->id,
         'rows' => $crossword->rows,
         'cols' => $crossword->cols,
         'user_id' => $user->id,
-    ];
-    echo json_encode($data);
-    echo '</script>';
+    ]);
 ?>
 <!-- dexie for local progress storage -->
 <script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/dexie/4.0.8/dexie.min.js'></script>
