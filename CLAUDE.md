@@ -128,25 +128,31 @@ URLs are parsed by `index.php` using `.htaccess` rewriting into `?params=...`:
 
 ---
 
-## Open GitHub Issues (as of Feb 2026)
+## GitHub Issues (resolved as of Aug 2026)
 
-### Bugs (fix first)
+Every issue tracked below is now closed on GitHub (with a comment referencing the fixing commit). Kept here as a historical record since the descriptions explain *why* parts of the code look the way they do. Check https://github.com/almcnicoll/NevererWeb/issues for anything filed since.
+
+### Bugs
 | # | Title | Status |
 |---|-------|--------|
-| **#27** | Saving clue to database causes save failure when entry already exists | **FIXED** — `TomeClue::save()` now called with `true` (`ON DUPLICATE KEY UPDATE`) in both `create` and `update` cases in `ajax/placed_clue.php` |
-| **#20** | "This may also affect" incorrect | Open — the symmetry warning in `crossword_edit.js`/`crossword_edit.php` shows incorrect or misleading information |
+| ~~#27~~ | ~~Saving clue to database causes save failure when entry already exists~~ | **FIXED** — `TomeClue::save()` now called with `true` (`ON DUPLICATE KEY UPDATE`) in both `create` and `update` cases in `ajax/placed_clue.php`. This only actually worked once `Basic\Model::save(true)` itself was fixed to exclude `id`/`created` from the `ON DUPLICATE KEY UPDATE` clause — see Notes for Agents below |
+| ~~#20~~ | ~~"This may also affect" incorrect~~ | **CLOSED — not a bug.** Reporter misunderstood: the warning refers to the symmetry-rotated clue, not intersecting clues, so two across clues at opposite corners of the grid legitimately affecting each other is correct behaviour |
+
+*No currently-open bugs.*
 
 ### Enhancements
-| # | Title | Milestone |
+| # | Title | Resolution |
 |---|-------|-----------|
 | ~~#33~~ | ~~Set default dictionary on create~~ | **FIXED** — `pages/dictionary_create.php`: after saving a new Tome, if `$user->default_dictionary` is null, set it to the new tome's id and save the user |
-| ~~#32~~ | ~~Prompt when there's no default dictionary~~ | **FIXED** — `pages/crossword_edit.php`: added inline prompt with a link to `/dictionary/create` below the disabled "Save clue to dictionary" checkbox in both new-clue and edit-clue forms |
-| #31 | Ability to filter words in anagram list | Q2 2026 |
+| ~~#32~~ | ~~Prompt when there's no default dictionary~~ | **FIXED** — `pages/crossword_edit.php`: inline prompt with a link to `/dictionary/create`, attached directly after the disabled "Save clue to dictionary" checkbox via `BootstrapFormField::setAfterHtml()` (an earlier version used `BootstrapForm::addHtml()`, which always renders at the top of the form regardless of call site, so the message ended up disconnected from the checkbox it explains) |
+| ~~#31~~ | ~~Ability to filter words in anagram list~~ | **FIXED** — new "Exclude words" box in `UI\AnagramFinderViewComponent`; `js/dict_worker.js`'s `getAnagrams()` drops excluded words from the candidate pool *before* searching (not filtered from results afterward), so an excluded word can never appear in any solution |
 | ~~#30~~ | ~~New anagram request should abort previous ones~~ | **FIXED** — `js/dict_worker.js`: `search()`/`getAnagrams()` use a per-request id (`latestAnagramRequestId`) instead of a shared abort boolean, so a new request can't accidentally un-abort an older in-flight one, and `search()` now yields periodically (real `setTimeout`, tunable via `anagramSearchTuning`) so a request already mid-recursion can actually be interrupted, not just one that hasn't started yet |
-| ~~#19~~ | ~~Word definitions~~ | **FIXED** — `js/dict_master.js`: added `dictionary.getDefinition()` using the Free Dictionary API (`dictionaryapi.dev`) with a local cache, and `dictionary.initDefinitionPopovers()` which attaches Bootstrap popovers via event delegation on `td.suggested-word-list-item` cells — showing definitions on mouseover |
-| #14 | Mobile interface | Q1 2026 |
-| #8  | Inline JS replacement library | Q1 2026 |
-| #7  | Toasts for error/confirmation messages | Q2 2026 |
+| ~~#19~~ | ~~Word definitions~~ | **FIXED** — `js/dict_master.js`: `dictionary.getDefinition()` using the Free Dictionary API (`dictionaryapi.dev`) with a local cache, and `dictionary.initDefinitionPopovers()` which attaches Bootstrap popovers via event delegation on `td.suggested-word-list-item` cells — showing definitions on mouseover. Must use the vanilla `bootstrap.Popover` API (`new bootstrap.Popover(el, ...)`, `bootstrap.Popover.getInstance(el)`) — see Notes for Agents below |
+| ~~#14~~ | ~~Mobile interface~~ | **FIXED (scoped)** — fixed the specific bug from the issue's screenshot: Bootstrap's `col-1` grid class applied to the "+ New"/"+ Import" buttons in `crossword_index.php`/`dictionary_index.php`, outside of any `.row`, forced them to ~8% width regardless of viewport and squeezed the button text into unreadable vertical letter-stacks on phone screens. Replaced with a `d-grid gap-2 d-md-flex` button group (stacks full-width on mobile, inline from `md` up). This addressed the diagnosed bug only, not a full mobile redesign — the crossword grid itself was intentionally left untouched |
+| ~~#8~~ | ~~Inline JS replacement library~~ | **FIXED** — new `UI\DataTransfer` class emits `<script type="application/json" class="data-transfer">` blocks (read by the pre-existing `transferData()` in `js/app.js`) instead of inline `<script>` blocks with PHP values interpolated directly into executable JS. Replaced every such spot, including the one flagged by `index.php`'s own `TODO #8` comment |
+| ~~#7~~ | ~~Toasts for error/confirmation messages~~ | **FIXED** — replaced remaining `alert()` calls with the existing `makeToast()` toast system; `createClue()`/`editClue()`/`editSettings()` in `crossword_edit.js`/`crossword_solve.js` now have a fail handler (`displayAjaxError`) where a failed save previously gave no feedback at all and the modal closed as if it had succeeded |
+
+*No currently-open enhancements.*
 
 ---
 
