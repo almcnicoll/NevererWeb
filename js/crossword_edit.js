@@ -245,6 +245,7 @@ $(document).ready(
         $("#new-clue-default").on("click", createClue);
         $("#edit-clue-default").on("click", editClue);
         $("#edit-settings-default").on("click", editSettings);
+        $("#save-template-default").on("click", saveTemplate);
         $("td.crossword-grid-square").on("click", toggleSelect);
         $("td.crossword-grid-square").on("contextmenu", gridSquareRightClickHandler);
         $("#context-menu-menu-grid-square .dropdown-item").on("click", gridSquareMenuClickHandler);
@@ -761,6 +762,36 @@ function editSettings() {
 
     // If all else is fine, hide the modal
     bootstrap.Modal.getInstance(document.getElementById("edit-settings")).hide();
+}
+
+/** Triggers the AJAX to save the crossword's grid as a template */
+function saveTemplate() {
+    var name = $.trim($("#save-template-name").val());
+
+    $("#save-template").find("form").find(".is-invalid").removeClass("is-invalid");
+    $("#save-template").find("form").find(".error-explain").remove();
+    if (name.length == 0) {
+        fieldProblem("#save-template-name", "This field must not be blank.");
+        return;
+    }
+
+    var url = root_path + "/template/*/create/" + crossword_id + "?domain=ajax";
+    makeAjaxCall(
+        "post",
+        url,
+        { name: name },
+        function () {
+            makeToast("Template saved. You'll find it under Templates.", "success");
+        },
+        function (jqXHR) {
+            let message = "Could not save the template. Please try again later.";
+            try {
+                message = JSON.parse(jqXHR.responseText).errors || message;
+            } catch (e) {}
+            makeToast(message, "error");
+        }
+    );
+    bootstrap.Modal.getInstance(document.getElementById("save-template")).hide();
 }
 //#endregion
 

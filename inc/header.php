@@ -49,6 +49,12 @@ use UI\DisplayMessage;
                 </li>
                 <div class='vr bg-light'></div>
                 <li>
+                    <a class="nav-link" aria-current="page" href="<?= $config['root_path'] ?>/template/index">
+                        Templates
+                    </a>
+                </li>
+                <div class='vr bg-light'></div>
+                <li>
                     <a class="nav-link" aria-current="page" target="_blank"
                         href="<?= $config['root_path'] ?>/dictionary/index">
                         Dictionaries

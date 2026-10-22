@@ -479,12 +479,12 @@ namespace Basic {
         public function ensureFieldSet(string $fieldName, mixed $valueIfUnset = '', mixed $unsetValue = null) : static {
             // Check that the property exists
             if (!property_exists($this, $fieldName)) { throw new InvalidArgumentException("No field {$fieldName} in class ".static::class); }
-            if (!isset($this->$$fieldName)) {
+            if (!isset($this->$fieldName)) {
                 // If it's unset, set it to the specified value
-                $this->$$fieldName = $valueIfUnset;
-            } elseif ($this->$$fieldName == $unsetValue) {
+                $this->$fieldName = $valueIfUnset;
+            } elseif ($this->$fieldName == $unsetValue) {
                 // If it's equal to the unsetValue, set it to the specified value
-                $this->$$fieldName = $valueIfUnset;
+                $this->$fieldName = $valueIfUnset;
             }
             // Return the original object
             return $this;

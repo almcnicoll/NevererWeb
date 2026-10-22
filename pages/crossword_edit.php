@@ -128,6 +128,16 @@
     ->setButtons("Save")
     ->setTrigger("<span class='bi bi-gear-fill' aria-hidden='true'></span>");
     echo $modal_edit_settings->getMainHtml();
+
+    $form_save_template = new UI\BootstrapForm('save-template');
+    $form_save_template->addField('name')->setValue($crossword->title)->setLabel('Template name')->setDivClass('mb-3')->setClass('focussed-input border-secondary')
+        ->setHelp("Saves the grid layout and symmetry, without any letters or clues. Templates are private to you.");
+    $modal_save_template = new UI\BootstrapModal('save-template');
+    $modal_save_template->setTitle('Save as template')
+    ->setBody($form_save_template->getHtml())
+    ->setButtons("Save")
+    ->setTrigger("<span class='bi bi-bookmark-plus-fill' aria-hidden='true'></span><span class='visually-hidden'>Save as template</span>");
+    echo $modal_save_template->getMainHtml();
 ?>
 
 
@@ -155,6 +165,7 @@
 <div class="btn-group" style="float:right;">
     <button type="button" id="print__Trigger" class="btn btn-success"><span class="bi bi-printer-fill"
             aria-hidden="true"></span></button>
+    <?= $modal_save_template->getTriggerHtml(); ?>
     <?= $modal_edit_settings->getTriggerHtml(); ?>
 </div>
 <h2 class="text-center">

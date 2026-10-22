@@ -41,6 +41,7 @@
 │   ├── placed_clue.php    # Create/update/find/delete placed clues; TomeClue saving
 │   ├── tome_clue.php
 │   ├── tome_entry.php
+│   ├── template.php       # Create (save a crossword's grid as a template) / delete grid templates
 │   └── tome.php
 ├── class/                 # PHP classes (namespaced)
 │   ├── Basic/
@@ -52,7 +53,8 @@
 │   │   ├── Clue.php           # The clue text/answer (no grid context)
 │   │   ├── Crossword.php      # Crossword entity; setClueNumbers(), getExistingSymmetryClues()
 │   │   ├── PlacedClue.php     # Clue placed in a grid (x, y, orientation); getRotatedClue()
-│   │   └── PlacedClue_List.php
+│   │   ├── PlacedClue_List.php
+│   │   └── Template.php       # Reusable blank grid (size, symmetry, clue positions/lengths); checksum(), createCrossword()
 │   ├── Dictionaries/
 │   │   ├── Tome.php           # A user's word list / dictionary
 │   │   ├── TomeEntry.php      # A word entry in a Tome
@@ -69,6 +71,7 @@
 │   ├── crossword_edit.php      # Main editing UI; "This may also affect" warning div here
 │   ├── crossword_solve.php     # Solve/share page (no symmetry warning UI)
 │   ├── crossword_export.php
+│   ├── template_index.php      # Grid templates list; crossword_create.php embeds the same table (inc/template_table.php)
 │   ├── dictionary_*.php
 │   └── ...
 ├── js/
@@ -78,7 +81,7 @@
 │   └── ...
 ├── sql/
 │   ├── create-tables.sql
-│   └── db-updates.sql      # Versioned migration script (currently at version 39)
+│   └── db-updates.sql      # Versioned migration script (currently at version 40)
 └── inc/                    # Shared PHP includes (header, footer, login checks)
 ```
 
@@ -122,9 +125,17 @@ URLs are parsed by `index.php` using `.htaccess` rewriting into `?params=...`:
 ## Database
 
 - MySQL; accessed via PDO in `Basic\db`
-- Key tables: `crosswords`, `placedclues`, `clues`, `tomes`, `tome_entries`, `tome_clues`, `users`, `subscriptions`, `faqs`
+- Key tables: `crosswords`, `placedclues`, `clues`, `templates`, `tomes`, `tome_entries`, `tome_clues`, `users`, `subscriptions`, `faqs`
 - `tome_clues` has unique index `by_entry` on `(tome_id, cryptic, question)` (originally `tomeentry_id`, renamed in v36)
-- Migration script: `sql/db-updates.sql` — versioned with `/* VERSION N */` comments; currently at v39
+- Migration script: `sql/db-updates.sql` — versioned with `/* VERSION N */` comments; currently at v40
+
+---
+
+## Grid Templates
+
+- `templates` table (v40): `user_id` NULL = built-in (seeded in v40, visible to all); otherwise private to that user. The grid is stored as `clues`, a JSON list of `[x, y, 'across'|'down', length]` — no letters
+- "Save as template" (button on `crossword_edit.php`) → `ajax/template.php` `create` → `Template::fromCrossword()`. Create-from-template is `/crossword/create?template=ID` → `Template::createCrossword()` (blank `?` clues, all in one transaction)
+- "Your crosswords" count = `Template::countUserCrosswordsByChecksum()`: one query over the user's crosswords, fingerprinting each by `Template::checksum()` (rows, cols and every clue's x/y/orientation/length — **not** symmetry). So crosswords with an identical clue pattern count whether or not they came from the template. Checksums are computed on the fly, never stored, so there is nothing to keep in sync when clues change
 
 ---
 
