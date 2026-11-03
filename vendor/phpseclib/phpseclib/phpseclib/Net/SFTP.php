@@ -49,21 +49,21 @@ class SFTP extends SSH2
      *
      * \phpseclib3\Net\SSH2::exec() uses 0 and \phpseclib3\Net\SSH2::read() / \phpseclib3\Net\SSH2::write() use 1.
      *
-     * @see \phpseclib3\Net\SSH2::send_channel_packet()
-     * @see \phpseclib3\Net\SSH2::get_channel_packet()
+     * @see SSH2::send_channel_packet()
+     * @see SSH2::get_channel_packet()
      */
     const CHANNEL = 0x100;
 
     /**
      * Reads data from a local file.
      *
-     * @see \phpseclib3\Net\SFTP::put()
+     * @see SFTP::put()
      */
     const SOURCE_LOCAL_FILE = 1;
     /**
      * Reads data from a string.
      *
-     * @see \phpseclib3\Net\SFTP::put()
+     * @see SFTP::put()
      */
     // this value isn't really used anymore but i'm keeping it reserved for historical reasons
     const SOURCE_STRING = 2;
@@ -71,19 +71,19 @@ class SFTP extends SSH2
      * Reads data from callback:
      * function callback($length) returns string to proceed, null for EOF
      *
-     * @see \phpseclib3\Net\SFTP::put()
+     * @see SFTP::put()
      */
     const SOURCE_CALLBACK = 16;
     /**
      * Resumes an upload
      *
-     * @see \phpseclib3\Net\SFTP::put()
+     * @see SFTP::put()
      */
     const RESUME = 4;
     /**
      * Append a local file to an already existing remote file
      *
-     * @see \phpseclib3\Net\SFTP::put()
+     * @see SFTP::put()
      */
     const RESUME_START = 8;
 
@@ -1030,7 +1030,13 @@ class SFTP extends SSH2
                 $result[] = $relativeDir . $value;
                 continue;
             }
-            if (is_array($this->query_stat_cache($this->realpath($dir . '/' . $value)))) {
+            if ($this->use_stat_cache) {
+                $is_directory = is_array($this->query_stat_cache($this->realpath($dir . '/' . $value)));
+            } else {
+                $stat = $this->lstat($dir . '/' . $value);
+                $is_directory = $stat && $stat['type'] === NET_SFTP_TYPE_DIRECTORY;
+            }
+            if ($is_directory) {
                 $temp = $this->nlist_helper($dir . '/' . $value, true, $relativeDir . $value . '/');
                 $temp = is_array($temp) ? $temp : [];
                 $result = array_merge($result, $temp);
@@ -1051,6 +1057,19 @@ class SFTP extends SSH2
      */
     public function rawlist($dir = '.', $recursive = false)
     {
+        return $this->rawlist_helper($dir, $recursive, 0);
+    }
+
+    /**
+     * Helper method for rawlist
+     *
+     * @param string $dir
+     * @param bool $recursive
+     * @param int $depth
+     * @return array|false
+     */
+    private function rawlist_helper($dir, $recursive, $depth)
+    {
         $files = $this->readlist($dir, true);
 
         // If we get an int back, then that is an "unexpected" status.
@@ -1062,8 +1081,6 @@ class SFTP extends SSH2
         if (!$recursive || $files === false) {
             return $files;
         }
-
-        static $depth = 0;
 
         foreach ($files as $key => $value) {
             if ($depth != 0 && $key == '..') {
@@ -1081,9 +1098,7 @@ class SFTP extends SSH2
             }
 
             if ($is_directory) {
-                $depth++;
-                $files[$key] = $this->rawlist($dir . '/' . $key, true);
-                $depth--;
+                $files[$key] = $this->rawlist_helper($dir . '/' . $key, true, $depth + 1);
             } else {
                 $files[$key] = (object) $value;
             }
@@ -3345,7 +3360,7 @@ class SFTP extends SSH2
     {
         // in SSH2.php the timeout is cumulative per function call. eg. exec() will
         // timeout after 10s. but for SFTP.php it's cumulative per packet
-        $this->curTimeout = $this->timeout;
+        $this->curTimeout = $this->timeout ?: false;
         $this->is_timeout = false;
 
         $packet = $this->use_request_id ?
@@ -3408,7 +3423,7 @@ class SFTP extends SSH2
 
         // in SSH2.php the timeout is cumulative per function call. eg. exec() will
         // timeout after 10s. but for SFTP.php it's cumulative per packet
-        $this->curTimeout = $this->timeout;
+        $this->curTimeout = $this->timeout ?: false;
         $this->is_timeout = false;
 
         $start = microtime(true);
